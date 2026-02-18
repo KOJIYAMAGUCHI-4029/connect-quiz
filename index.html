@@ -260,8 +260,15 @@ body {
 /* Nav Footer */
 .nav-footer {
   display: flex; align-items: center; justify-content: space-between; padding: 20px 0;
-  border-top: 1px solid #e8ecf0; margin-top: 12px;
+  border-top: 1px solid #e8ecf0; margin-top: 12px; flex-wrap: wrap; gap: 10px;
 }
+.section-reset-btn {
+  display: flex; align-items: center; gap: 5px;
+  background: none; border: 1.5px solid #fca5a5; border-radius: 8px;
+  padding: 7px 13px; font-size: 12px; font-weight: 700; color: #ef4444;
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.section-reset-btn:hover { background: #fff1f1; border-color: #ef4444; }
 .nav-btn {
   background: #fff; border: 1px solid #d1d5db; border-radius: 10px; padding: 9px 18px;
   font-size: 13px; font-weight: 600; cursor: pointer; color: #5f6368; font-family: inherit;
@@ -791,7 +798,10 @@ function renderQuiz() {
     <button class="nav-btn" data-action="prev" ${state.section===0?'disabled':''}>← 前のセクション</button>
     <span class="nav-info">${state.section+1} / ${quizData.length}</span>
     <button class="nav-btn primary" data-action="next" ${state.section===quizData.length-1?'disabled':''}>次のセクション →</button>
-  </div>`;
+  </div>
+  ${ss.answered > 0 ? `<div style="text-align:center; padding-bottom:8px;">
+    <button class="section-reset-btn" data-action="reset-section">🔄 このセクションをリセット</button>
+  </div>` : ''}\``;
 }
 
 function renderReview() {
@@ -900,6 +910,13 @@ function bindEvents() {
       else if (a==='menu') state.mode='menu';
       else if (a==='review') state.mode='review';
       else if (a==='reset') { state={ mode:'menu', section:0, answered:{} }; }
+      else if (a==='reset-section') {
+        const sName = quizData[state.section].section;
+        if (confirm(`「${sName}」の回答をリセットしますか？`)) {
+          quizData[state.section].questions.forEach(q => delete state.answered[q.id]);
+          render();
+        }
+      }
       else if (a==='go-section') { state.section=+this.dataset.idx; state.mode='quiz'; }
       else if (a==='nav-section') { state.section=+this.dataset.idx; }
       else if (a==='prev' && state.section>0) state.section--;
