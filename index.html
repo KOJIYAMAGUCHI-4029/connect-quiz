@@ -787,6 +787,24 @@ function renderReview() {
   const sc = totalScore();
   const pct = sc.total > 0 ? Math.round((sc.correct/sc.total)*100) : 0;
 
+  // セクションごとの正解率テーブル
+  let sectionRows = quizData.map((s, si) => {
+    const ss = sectionScore(si);
+    const graded = ss.correct + (s.questions.filter(q => state.grades[q.id]==='partial').length) + (s.questions.filter(q => state.grades[q.id]==='incorrect').length);
+    const spct = graded > 0 ? Math.round((ss.correct / graded) * 100) : null;
+    const barColor = spct===null?'#e8ecf0':spct>=90?'linear-gradient(90deg,#f59e0b,#fbbf24,#fde68a)':spct>=80?'#22c55e':spct>=50?'#f59e0b':spct>=30?'#ef4444':'#111827';
+    const textColor = spct===null?'#9aa0a6':spct>=90?'#b45309':spct>=80?'#166534':spct>=50?'#92400e':spct>=30?'#991b1b':'#111827';
+    const medal = spct!==null && spct>=90?'🥇 ':'';
+    const bar = spct !== null ? `<div style="height:6px;background:#e8ecf0;border-radius:3px;margin-top:4px;overflow:hidden;"><div style="height:100%;width:${spct}%;background:${barColor};border-radius:3px;transition:width 0.4s;"></div></div>` : '';
+    const pctLabel = spct !== null ? `<span style="font-weight:700;color:${textColor}">${medal}${spct}%</span>` : '<span style="color:#9aa0a6">未採点</span>';
+    return `<tr>
+      <td style="padding:8px 6px;font-size:12px;font-weight:600;border-bottom:1px solid #f0f0f0;">${s.section}</td>
+      <td style="padding:8px 6px;font-size:12px;text-align:center;border-bottom:1px solid #f0f0f0;">${ss.correct}<span style="color:#9aa0a6">/${s.questions.length}</span></td>
+      <td style="padding:8px 6px;font-size:12px;text-align:right;border-bottom:1px solid #f0f0f0;min-width:80px;">${pctLabel}${bar}</td>
+    </tr>`;
+  }).join('');
+
+  // 不正解・部分正解のレビュー
   let wrongSections = quizData.map((s,si) => {
     const wrongs = s.questions.filter(q => state.grades[q.id]==='incorrect' || state.grades[q.id]==='partial');
     if (!wrongs.length) return '';
@@ -801,14 +819,34 @@ function renderReview() {
 
   return `<div style="padding:24px 0 12px"><button class="back-btn" data-action="menu">← メニューに戻る</button>
     <h2 class="section-select-title">採点結果</h2></div>
+
     <div class="score-board">
       <div class="score-stat"><div class="num green">${sc.correct}</div><div class="lbl">✅ 正解</div></div>
       <div class="score-stat"><div class="num yellow">${sc.partial}</div><div class="lbl">🔶 部分正解</div></div>
       <div class="score-stat"><div class="num red">${sc.incorrect}</div><div class="lbl">❌ 不正解</div></div>
       <div class="score-stat"><div class="num gray">${totalQ - sc.total}</div><div class="lbl">未採点</div></div>
     </div>
-    <div class="score-percent">正解率：${pct}%（採点済み${sc.total}問中）</div>
-    ${wrongSections}
+    <div class="score-percent">
+      総合正解率：<strong style="font-size:22px;color:#1a73e8">${pct}%</strong>
+      <span style="font-size:13px;color:#9aa0a6">（全${totalQ}問中 採点済み${sc.total}問）</span>
+    </div>
+
+    <div style="background:#fff;border-radius:12px;padding:18px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+      <h3 style="font-size:15px;font-weight:800;margin-bottom:12px;">📊 セクション別 正解率</h3>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#f7f8fc;">
+            <th style="padding:8px 6px;font-size:11px;color:#5f6368;text-align:left;border-bottom:2px solid #e8ecf0;">セクション</th>
+            <th style="padding:8px 6px;font-size:11px;color:#5f6368;text-align:center;border-bottom:2px solid #e8ecf0;">正解数</th>
+            <th style="padding:8px 6px;font-size:11px;color:#5f6368;text-align:right;border-bottom:2px solid #e8ecf0;">正解率</th>
+          </tr>
+        </thead>
+        <tbody>${sectionRows}</tbody>
+      </table>
+    </div>
+
+    ${wrongSections ? `<h3 style="font-size:15px;font-weight:800;margin:16px 0 10px;">❌ 要復習リスト</h3>${wrongSections}` : '<div style="text-align:center;padding:20px;color:#22c55e;font-weight:700;font-size:16px;">🎉 不正解・部分正解なし！</div>'}
+
     <div class="review-actions"><button class="primary-btn" data-action="reset">最初からやり直す</button></div>`;
 }
 
