@@ -113,7 +113,48 @@ body { font-family: 'Noto Sans JP', sans-serif; background: #f0f4f8; min-height:
 </head>
 <body>
 <div id="app"></div>
-<script>
+<script type="module">
+
+// ===== Firebase 設定 =====
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDr7cYBMeNcKgt2ZNZfmdtFlMDQwe2_yT4",
+  authDomain: "connect-quiz-fa8d8.firebaseapp.com",
+  projectId: "connect-quiz-fa8d8",
+  storageBucket: "connect-quiz-fa8d8.firebasestorage.app",
+  messagingSenderId: "627111669268",
+  appId: "1:627111669268:web:36b13a9b504ced40a0c101"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
+
+// URLからユーザーIDを取得（例: ?user=yamaguchi）
+const urlParams = new URLSearchParams(window.location.search);
+const userId = urlParams.get('user') || 'default';
+
+// Firestoreから回答データを読み込む
+async function loadFromFirestore() {
+  try {
+    const docRef = doc(db, 'quiz_results', userId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data().answered || {};
+    }
+  } catch(e) { console.log('読込エラー', e); }
+  return {};
+}
+
+// Firestoreに回答データを保存
+async function saveToFirestore() {
+  try {
+    const docRef = doc(db, 'quiz_results', userId);
+    await setDoc(docRef, { answered: state.answered, updatedAt: new Date().toISOString() });
+  } catch(e) { console.log('保存エラー', e); }
+}
+
 const quizData = [
   {
     "section": "1. 医学部について",
@@ -5258,7 +5299,22 @@ const quizData = [
 ];
 
 const totalQ = quizData.reduce((t,s) => t + s.questions.length, 0);
-let state = { mode:'menu', section:0, answered:{} };
+let state = { mode:'menu', section:0, answered: {} };
+
+// 起動時にFirestoreから読み込んでrenderする
+(async () => {
+  state.answered = await loadFromFirestore();
+  // localStorageにも保存しておく（オフライン対応）
+  try { localStorage.setItem('connect_quiz_answered_' + userId, JSON.stringify(state.answered)); } catch(e){}
+  render();
+})();
+
+function saveAnswered() {
+  // Firestoreに保存
+  saveToFirestore();
+  // localStorageにも保存（バックアップ）
+  try { localStorage.setItem('connect_quiz_answered_' + userId, JSON.stringify(state.answered)); } catch(e){}
+}
 
 function totalScore() {
   let correct=0, incorrect=0, total=0;
@@ -5312,6 +5368,7 @@ function renderMenu() {
     + '<div class="hero-badge">🔒 社外秘</div><div class="hero-title">医師紹介/ビジネス知識テスト</div>'
     + scoreBar
     + '<div class="count">全' + totalQ + '問 / ' + quizData.length + 'セクション' + progressInfo + '</div>'
+    + '<div style="font-size:12px;color:#1a73e8;font-weight:700;margin-top:6px;">👤 ' + userId + ' さんの記録</div>'
     + '<div class="hero-copy">© CONNECT All Rights Reserved.</div>'
     + '</div>'
     + '<div class="menu-cards">'
@@ -5477,10 +5534,11 @@ function bindEvents() {
       else if (a==='select')     { state.mode='select'; }
       else if (a==='menu')       { state.mode='menu'; }
       else if (a==='review')     { state.mode='review'; }
-      else if (a==='reset')      { state={ mode:'menu', section:0, answered:{} }; }
+      else if (a==='reset')      { state={ mode:'menu', section:0, answered:{} }; localStorage.removeItem('connect_quiz_answered'); }
       else if (a==='reset-section') {
         const sec = quizData[state.section];
         sec.questions.forEach(q => delete state.answered[q.id]);
+        saveAnswered();
       }
       else if (a==='go-section') { state.section=+this.dataset.idx; state.mode='quiz'; }
       else if (a==='prev' && state.section>0) state.section--;
@@ -5488,7 +5546,10 @@ function bindEvents() {
       else if (a==='answer') {
         const qid = +this.dataset.qid;
         const ci  = +this.dataset.ci;
-        if (state.answered[qid] === undefined) state.answered[qid] = ci;
+        if (state.answered[qid] === undefined) {
+          state.answered[qid] = ci;
+          saveAnswered();
+        }
       }
       render();
       if (['prev','next','go-section','start-all'].includes(a)) window.scrollTo({top:0,behavior:'smooth'});
