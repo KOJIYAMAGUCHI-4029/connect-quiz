@@ -21,11 +21,11 @@
   .header p { font-size: 12px; opacity: 0.8; margin-top: 2px; }
   .header-icon { font-size: 32px; }
 
-  .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
 
   .summary-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 14px;
     margin-bottom: 28px;
   }
@@ -36,7 +36,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     text-align: center;
   }
-  .card .num { font-size: 32px; font-weight: 800; color: #2563eb; }
+  .card .num { font-size: 30px; font-weight: 800; color: #2563eb; }
   .card .label { font-size: 12px; color: #64748b; margin-top: 4px; }
 
   .section-title {
@@ -62,7 +62,7 @@
   tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
   tbody tr:hover { background: #f8faff; }
   tbody tr:last-child { border-bottom: none; }
-  tbody td { padding: 13px 16px; font-size: 13px; }
+  tbody td { padding: 13px 16px; font-size: 13px; vertical-align: middle; }
 
   .user-name { font-weight: 700; color: #1e3a5f; }
   .user-id { font-size: 11px; color: #94a3b8; }
@@ -118,16 +118,10 @@
   }
   .refresh-btn:hover { opacity: 0.9; }
 
-  .loading {
-    text-align: center;
-    padding: 40px;
-    color: #64748b;
-    font-size: 14px;
-  }
+  .loading { text-align: center; padding: 40px; color: #64748b; font-size: 14px; }
   .spinner {
     display: inline-block;
-    width: 28px;
-    height: 28px;
+    width: 28px; height: 28px;
     border: 3px solid #e2e8f0;
     border-top-color: #2563eb;
     border-radius: 50%;
@@ -137,44 +131,28 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .last-updated { font-size: 11px; color: #94a3b8; margin-bottom: 16px; }
+  .no-data { text-align: center; padding: 30px; color: #94a3b8; font-size: 13px; }
 
-  .section-progress-wrap {
+  /* セクション別テーブル */
+  .section-table-wrap {
     background: white;
     border-radius: 16px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    overflow: hidden;
+    overflow: auto;
     margin-bottom: 28px;
   }
-  .section-header {
-    background: linear-gradient(135deg, #0f766e, #14b8a6);
-    color: white;
-    padding: 13px 16px;
-    font-size: 14px;
-    font-weight: 700;
-  }
-  .section-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 0;
-  }
-  .section-item {
-    padding: 10px 16px;
-    border-bottom: 1px solid #f1f5f9;
-    border-right: 1px solid #f1f5f9;
-    font-size: 12px;
-  }
-  .section-item-name { font-weight: 600; color: #1e3a5f; margin-bottom: 5px; }
-  .section-mini-bars { display: flex; gap: 4px; flex-wrap: wrap; }
-  .mini-bar-wrap { display: flex; align-items: center; gap: 4px; }
-  .mini-label { font-size: 10px; color: #64748b; width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .mini-bar { width: 60px; height: 6px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
-  .mini-fill { height: 100%; border-radius: 99px; }
+  .section-table { border-collapse: collapse; min-width: 100%; }
+  .section-table thead tr { background: linear-gradient(135deg, #0f766e, #14b8a6); color: white; }
+  .section-table thead th { padding: 11px 12px; font-size: 11px; font-weight: 600; white-space: nowrap; text-align: center; }
+  .section-table thead th:first-child { text-align: left; min-width: 160px; }
+  .section-table tbody tr { border-bottom: 1px solid #f1f5f9; }
+  .section-table tbody tr:hover { background: #f0fdfa; }
+  .section-table tbody td { padding: 8px 12px; font-size: 12px; text-align: center; }
+  .section-table tbody td:first-child { text-align: left; font-weight: 600; color: #1e3a5f; white-space: nowrap; }
 
-  .no-data { text-align: center; padding: 30px; color: #94a3b8; font-size: 13px; }
-
-  @media (max-width: 600px) {
-    thead th:nth-child(4), thead th:nth-child(5), tbody td:nth-child(4), tbody td:nth-child(5) { display: none; }
-  }
+  .cell-done { background: #dcfce7; color: #16a34a; font-weight: 700; border-radius: 6px; padding: 2px 6px; }
+  .cell-partial { background: #fef9c3; color: #a16207; font-weight: 700; border-radius: 6px; padding: 2px 6px; }
+  .cell-none { color: #cbd5e1; }
 </style>
 </head>
 <body>
@@ -190,19 +168,17 @@
 <div class="container">
   <div id="lastUpdated" class="last-updated">読み込み中...</div>
 
-  <button class="refresh-btn" onclick="loadAllData()">
-    🔄 最新データに更新
-  </button>
+  <button class="refresh-btn" onclick="loadAllData()">🔄 最新データに更新</button>
 
-  <!-- サマリーカード -->
-  <div class="summary-cards" id="summaryCards">
-    <div class="card"><div class="num">-</div><div class="label">登録ユーザー数</div></div>
+  <div class="summary-cards">
+    <div class="card"><div class="num" id="sumUsers">-</div><div class="label">登録ユーザー数</div></div>
     <div class="card"><div class="num">800</div><div class="label">総問題数</div></div>
-    <div class="card"><div class="num" id="avgProgress">-</div><div class="label">平均回答数</div></div>
-    <div class="card"><div class="num" id="avgAccuracy">-</div><div class="label">平均正解率</div></div>
+    <div class="card"><div class="num" id="sumAvgAnswered">-</div><div class="label">平均回答数</div></div>
+    <div class="card"><div class="num" id="sumAvgAccuracy">-</div><div class="label">平均正解率</div></div>
+    <div class="card"><div class="num" id="sumTotalAnswered">-</div><div class="label">総回答数（全員合計）</div></div>
   </div>
 
-  <!-- ユーザー一覧テーブル -->
+  <!-- ユーザー別一覧 -->
   <div class="section-title">👥 ユーザー別進捗一覧</div>
   <div class="table-wrap">
     <table>
@@ -212,23 +188,26 @@
           <th>回答数 / 800問</th>
           <th>進捗率</th>
           <th>正解数</th>
+          <th>不正解数</th>
           <th>正解率</th>
           <th>ステータス</th>
         </tr>
       </thead>
       <tbody id="userTableBody">
-        <tr><td colspan="6" class="loading"><div class="spinner"></div><br>Firebaseからデータ取得中...</td></tr>
+        <tr><td colspan="7" class="loading"><div class="spinner"></div><br>データ取得中...</td></tr>
       </tbody>
     </table>
   </div>
 
-  <!-- セクション別進捗 -->
-  <div class="section-title">📚 セクション別・ユーザー別進捗</div>
-  <div class="section-progress-wrap">
-    <div class="section-header">各セクションの回答状況（色が濃いほど進捗あり）</div>
-    <div class="section-grid" id="sectionGrid">
-      <div class="no-data">データ読み込み中...</div>
-    </div>
+  <!-- セクション別 -->
+  <div class="section-title">📚 セクション別・ユーザー別回答数</div>
+  <div class="section-table-wrap">
+    <table class="section-table">
+      <thead id="sectionTableHead"></thead>
+      <tbody id="sectionTableBody">
+        <tr><td colspan="10" class="loading"><div class="spinner"></div><br>データ取得中...</td></tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -248,17 +227,24 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ユーザー名の日本語マッピング
 const userNames = {
-  'yamaguchi': '山口 孝二',
   'yamaguchi_koji': '山口 孝二',
-  'asami': '浅見',
-  'asami_ryunosuke': '浅見 龍之介',
-  'kato': '加藤',
+  'takeuchi_chihiro': '竹内 ちひろ',
+  'suzuki_hana': '鈴木 花',
+  'adachi_rentaro': '安達 蓮太郎',
+  'asami_ryunosuke': '浅見 隆之介',
+  'izumi_keisuke': '和泉 圭祐',
+  'kato_yuya': '加藤 優哉',
+  'sato_yuji': '佐藤 勇治',
   'kato_airi': '加藤 愛莉',
-  'tanaka': '田中',
-  'sato': '佐藤',
-  'suzuki': '鈴木',
+  'yamada_kazuki': '山田 一樹',
+  'machida_nobuhiro': '町田 信宏',
+  'furukuchi_rina': '古口 里奈',
+  'kase_hirohito': '加瀬 裕仁',
+  'kamimura_tomoki': '上村 智識',
+  'nobe_junko': '野辺 純子',
+  'tanaka_kotaro': '田中 耕太郎',
+  'yamaguchi': '山口',
   'default': 'デフォルト'
 };
 
@@ -266,17 +252,17 @@ function getDisplayName(userId) {
   return userNames[userId] || userId;
 }
 
-// セクションデータ（quizDataから抽出した簡易版）
-const sections = [
+// 80セクションの名前（短縮）
+const sectionNames = [
   "1.医学部","2.臨床研修","3.暗記用語","4.新専門医","5.病院の種類",
   "6.働き方改革","7.消化器内科","8.循環器内科","9.呼吸器科","10.心臓血管外科",
   "11.グループ病院","12.形成外科","13.整形外科","14.精神科","15.放射線科",
   "16.脳神経外科","17.糖尿病内科","18.訪問診療","19.産婦人科","20.救急科",
   "21.小児科","22.リハビリ科","23.診療報酬","24.甲状腺内科","25.泌尿器科",
-  "26.医療法","27.医療法人","28.産業医","29.麻酔科","30.医師プラットフォーム",
+  "26.医療法","27.医療法人","28.産業医","29.麻酔科","30.医師PF",
   "31.製薬会社","32.耳鼻咽喉科","33.透析","34.医師会","35.大学医局",
   "36.商社","37.ドクターヘリ","38.眼科","39.日本の省庁","40.神経内科",
-  "41.ファクトフルネス","42.皮膚科","43.健診","44.美容外科","45.美容皮膚科",
+  "41.ファクトフル","42.皮膚科","43.健診","44.美容外科","45.美容皮膚科",
   "46.美容外科2","47.医療脱毛","48.CREDO","49.IT基礎","50.AI機械学習",
   "51.サイバー","52.DX","53.財閥","54.スタートアップ","55.外資系",
   "56.コンサル","57.金融銀行","58.株式投資","59.会計財務","60.経済指標",
@@ -286,20 +272,42 @@ const sections = [
   "76.マーケ基礎","77.会計基礎","78.フレームワーク","79.世界企業","80.医療DX"
 ];
 
-// 問題IDからセクション番号を推定
-function getSectionFromId(id) {
-  const num = parseInt(id);
-  if (num <= 140) return Math.ceil(num / 10) - 1; // 旧ID
-  // 新ID (90000番台etc)
-  if (num >= 90000 && num <= 90099) return 0;
-  if (num >= 90010 && num <= 90019) return 0;
-  // セクション推定が難しいIDはそのままカウントに含める
+// 問題IDからセクションインデックス(0-79)を返す
+function getSecIdx(idStr) {
+  const id = parseInt(idStr);
+  if (isNaN(id)) return -1;
+
+  // 旧ID: 1〜140（1-10→sec0, 11-20→sec1, ...）
+  if (id >= 1 && id <= 140) return Math.floor((id - 1) / 10);
+
+  // 新ID 90000番台: 90000+secIdx*10+offset
+  if (id >= 90000 && id < 98000) {
+    // セクション0-68相当 (secIdx = floor((id-90000)/10))
+    const si = Math.floor((id - 90000) / 10);
+    if (si >= 0 && si < 80) return si;
+  }
+
+  // 新ID 98000番台: secIdx 72-79相当
+  if (id >= 98000 && id < 99000) {
+    const si = Math.floor((id - 98000) / 10) + 72;
+    if (si >= 0 && si < 80) return si;
+  }
+
+  // 95000番台: sec41-46
+  if (id >= 95000 && id < 95100) return 41 + Math.floor((id - 95000) / 10);
+
+  // 96000番台: sec68-69
+  if (id >= 96000 && id < 96100) return 68 + Math.floor((id - 96000) / 10);
+
+  // 97000番台: sec70-71
+  if (id >= 97000 && id < 97200) return 70 + Math.floor((id - 97000) / 100);
+
   return -1;
 }
 
 window.loadAllData = async function() {
-  const tbody = document.getElementById('userTableBody');
-  tbody.innerHTML = '<tr><td colspan="6" class="loading"><div class="spinner"></div><br>データ取得中...</td></tr>';
+  document.getElementById('userTableBody').innerHTML =
+    '<tr><td colspan="7" class="loading"><div class="spinner"></div><br>データ取得中...</td></tr>';
 
   try {
     const snapshot = await getDocs(collection(db, 'quiz_results'));
@@ -310,40 +318,43 @@ window.loadAllData = async function() {
       const data = docSnap.data();
       const answered = data.answered || {};
 
-      let correct = 0;
-      let wrong = 0;
+      let correct = 0, wrong = 0;
+      // 値: 1=正解, 2=不正解
       Object.values(answered).forEach(v => {
-        if (v === true) correct++;
-        else if (v === false) wrong++;
+        if (v === 1) correct++;
+        else if (v === 2) wrong++;
       });
 
       const total = correct + wrong;
       const accuracy = total > 0 ? Math.round(correct / total * 100) : 0;
 
-      users.push({ userId, answered, correct, wrong, total, accuracy });
+      // セクション別集計
+      const secCounts = new Array(80).fill(0);
+      Object.keys(answered).forEach(k => {
+        const si = getSecIdx(k);
+        if (si >= 0 && si < 80) secCounts[si]++;
+      });
+
+      users.push({ userId, answered, correct, wrong, total, accuracy, secCounts });
     });
 
-    // テーブル描画
+    // ===== ユーザーテーブル =====
+    const tbody = document.getElementById('userTableBody');
     if (users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="no-data">まだ回答データがありません</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="no-data">データなし</td></tr>';
     } else {
       tbody.innerHTML = users.sort((a,b) => b.total - a.total).map(u => {
         const progress = Math.round(u.total / 800 * 100);
         const name = getDisplayName(u.userId);
-        
-        let statusBadge = '';
-        if (u.total === 0) statusBadge = '<span class="badge badge-gray">未開始</span>';
-        else if (progress < 30) statusBadge = '<span class="badge badge-red">開始済</span>';
-        else if (progress < 70) statusBadge = '<span class="badge badge-yellow">進行中</span>';
-        else statusBadge = '<span class="badge badge-green">完了間近</span>';
-
+        let badge = '';
+        if (u.total === 0) badge = '<span class="badge badge-gray">未開始</span>';
+        else if (progress < 30) badge = '<span class="badge badge-red">開始済</span>';
+        else if (progress < 70) badge = '<span class="badge badge-yellow">進行中</span>';
+        else badge = '<span class="badge badge-green">完了間近</span>';
         const accClass = u.accuracy >= 80 ? 'accuracy-high' : u.accuracy >= 60 ? 'accuracy-mid' : 'accuracy-low';
 
         return `<tr>
-          <td>
-            <div class="user-name">${name}</div>
-            <div class="user-id">${u.userId}</div>
-          </td>
+          <td><div class="user-name">${name}</div><div class="user-id">${u.userId}</div></td>
           <td><strong>${u.total}</strong> / 800問</td>
           <td>
             <div class="progress-bar-wrap">
@@ -352,65 +363,54 @@ window.loadAllData = async function() {
             </div>
           </td>
           <td>${u.correct}問</td>
+          <td>${u.wrong}問</td>
           <td class="accuracy-cell ${accClass}">${u.total > 0 ? u.accuracy + '%' : '-'}</td>
-          <td>${statusBadge}</td>
+          <td>${badge}</td>
         </tr>`;
       }).join('');
     }
 
-    // サマリー更新
-    document.querySelector('#summaryCards .card:first-child .num').textContent = users.length;
-    const totalAnswered = users.reduce((s, u) => s + u.total, 0);
-    const avgAnswered = users.length > 0 ? Math.round(totalAnswered / users.length) : 0;
-    const allAccuracies = users.filter(u => u.total > 0).map(u => u.accuracy);
-    const avgAcc = allAccuracies.length > 0 ? Math.round(allAccuracies.reduce((a,b)=>a+b,0)/allAccuracies.length) : 0;
-    document.getElementById('avgProgress').textContent = avgAnswered;
-    document.getElementById('avgAccuracy').textContent = avgAcc + '%';
+    // ===== サマリー =====
+    document.getElementById('sumUsers').textContent = users.length;
+    const totalAns = users.reduce((s,u) => s + u.total, 0);
+    document.getElementById('sumTotalAnswered').textContent = totalAns;
+    document.getElementById('sumAvgAnswered').textContent =
+      users.length > 0 ? Math.round(totalAns / users.length) : 0;
+    const accs = users.filter(u => u.total > 0).map(u => u.accuracy);
+    document.getElementById('sumAvgAccuracy').textContent =
+      accs.length > 0 ? Math.round(accs.reduce((a,b)=>a+b,0)/accs.length) + '%' : '-';
 
-    // セクション別グリッド
-    const sectionGrid = document.getElementById('sectionGrid');
-    if (users.length === 0) {
-      sectionGrid.innerHTML = '<div class="no-data">データなし</div>';
-    } else {
-      sectionGrid.innerHTML = sections.map((sname, idx) => {
-        const qStart = idx * 10 + 1;
-        const qEnd = qStart + 9;
-        
-        const miniBars = users.sort((a,b) => b.total - a.total).slice(0, 4).map(u => {
-          // そのセクションの回答数を推定（IDが連続している想定）
-          const answeredKeys = Object.keys(u.answered);
-          // 回答済みかどうかをざっくり判定
-          const sectionAnswered = answeredKeys.filter(k => {
-            const n = parseInt(k);
-            return n >= qStart && n <= qEnd;
-          }).length;
-          const pct = Math.round(sectionAnswered / 10 * 100);
-          const color = pct >= 70 ? '#3b82f6' : pct >= 30 ? '#93c5fd' : '#e2e8f0';
-          const uname = getDisplayName(u.userId).split(' ')[0];
-          return `<div class="mini-bar-wrap">
-            <span class="mini-label">${uname}</span>
-            <div class="mini-bar"><div class="mini-fill" style="width:${pct}%;background:${color}"></div></div>
-            <span style="font-size:10px;color:#64748b">${sectionAnswered}/10</span>
-          </div>`;
-        }).join('');
+    // ===== セクション別テーブル =====
+    const sortedUsers = users.sort((a,b) => b.total - a.total);
+    const thead = document.getElementById('sectionTableHead');
+    const stbody = document.getElementById('sectionTableBody');
 
-        return `<div class="section-item">
-          <div class="section-item-name">${sname}</div>
-          <div class="section-mini-bars">${miniBars || '<span style="font-size:11px;color:#94a3b8">データなし</span>'}</div>
-        </div>`;
+    thead.innerHTML = `<tr>
+      <th>セクション</th>
+      ${sortedUsers.map(u => `<th>${getDisplayName(u.userId).split(' ')[0]}</th>`).join('')}
+    </tr>`;
+
+    stbody.innerHTML = sectionNames.map((name, si) => {
+      const cells = sortedUsers.map(u => {
+        const cnt = u.secCounts[si];
+        if (cnt === 0) return `<td class="cell-none">-</td>`;
+        if (cnt >= 10) return `<td><span class="cell-done">✓ ${cnt}</span></td>`;
+        return `<td><span class="cell-partial">${cnt}/10</span></td>`;
       }).join('');
-    }
+      return `<tr><td>${name}</td>${cells}</tr>`;
+    }).join('');
 
     const now = new Date();
-    document.getElementById('lastUpdated').textContent = `最終更新: ${now.toLocaleString('ja-JP')}`;
+    document.getElementById('lastUpdated').textContent =
+      `最終更新: ${now.toLocaleString('ja-JP')}`;
 
   } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="6" class="no-data">❌ エラー: ${e.message}</td></tr>`;
+    document.getElementById('userTableBody').innerHTML =
+      `<tr><td colspan="7" class="no-data">❌ エラー: ${e.message}</td></tr>`;
     console.error(e);
   }
 };
 
-// 初回ロード
 loadAllData();
 </script>
 </body>
