@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONNECT クイズ 管理者進捗ダッシュボード</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hiragino Sans', sans-serif; background: #f0f4f8; color: #1e293b; }
+
+  .header {
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+    color: white;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header p { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+  .header-icon { font-size: 32px; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    text-align: center;
+  }
+  .card .num { font-size: 32px; font-weight: 800; color: #2563eb; }
+  .card .label { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .table-wrap {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: linear-gradient(135deg, #1e3a5f, #2563eb); color: white; }
+  thead th { padding: 13px 16px; text-align: left; font-size: 13px; font-weight: 600; }
+  tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+  tbody tr:hover { background: #f8faff; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 13px 16px; font-size: 13px; }
+
+  .user-name { font-weight: 700; color: #1e3a5f; }
+  .user-id { font-size: 11px; color: #94a3b8; }
+
+  .progress-bar-wrap { display: flex; align-items: center; gap: 10px; }
+  .progress-bar {
+    flex: 1;
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 99px;
+    overflow: hidden;
+    min-width: 80px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #3b82f6, #06b6d4);
+    transition: width 0.6s ease;
+  }
+  .progress-text { font-size: 12px; color: #475569; white-space: nowrap; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-green { background: #dcfce7; color: #16a34a; }
+  .badge-yellow { background: #fef9c3; color: #a16207; }
+  .badge-red { background: #fee2e2; color: #dc2626; }
+  .badge-gray { background: #f1f5f9; color: #64748b; }
+
+  .accuracy-cell { font-weight: 700; }
+  .accuracy-high { color: #16a34a; }
+  .accuracy-mid { color: #d97706; }
+  .accuracy-low { color: #dc2626; }
+
+  .refresh-btn {
+    background: linear-gradient(135deg, #2563eb, #06b6d4);
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+  }
+  .refresh-btn:hover { opacity: 0.9; }
+
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+    font-size: 14px;
+  }
+  .spinner {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .last-updated { font-size: 11px; color: #94a3b8; margin-bottom: 16px; }
+
+  .section-progress-wrap {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .section-header {
+    background: linear-gradient(135deg, #0f766e, #14b8a6);
+    color: white;
+    padding: 13px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0;
+  }
+  .section-item {
+    padding: 10px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    border-right: 1px solid #f1f5f9;
+    font-size: 12px;
+  }
+  .section-item-name { font-weight: 600; color: #1e3a5f; margin-bottom: 5px; }
+  .section-mini-bars { display: flex; gap: 4px; flex-wrap: wrap; }
+  .mini-bar-wrap { display: flex; align-items: center; gap: 4px; }
+  .mini-label { font-size: 10px; color: #64748b; width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mini-bar { width: 60px; height: 6px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+  .mini-fill { height: 100%; border-radius: 99px; }
+
+  .no-data { text-align: center; padding: 30px; color: #94a3b8; font-size: 13px; }
+
+  @media (max-width: 600px) {
+    thead th:nth-child(4), thead th:nth-child(5), tbody td:nth-child(4), tbody td:nth-child(5) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">📊</div>
+  <div>
+    <h1>CONNECT クイズ 管理者ダッシュボード</h1>
+    <p>全ユーザーの回答進捗・正解率をリアルタイム確認</p>
+  </div>
+</div>
+
+<div class="container">
+  <div id="lastUpdated" class="last-updated">読み込み中...</div>
+
+  <button class="refresh-btn" onclick="loadAllData()">
+    🔄 最新データに更新
+  </button>
+
+  <!-- サマリーカード -->
+  <div class="summary-cards" id="summaryCards">
+    <div class="card"><div class="num">-</div><div class="label">登録ユーザー数</div></div>
+    <div class="card"><div class="num">800</div><div class="label">総問題数</div></div>
+    <div class="card"><div class="num" id="avgProgress">-</div><div class="label">平均回答数</div></div>
+    <div class="card"><div class="num" id="avgAccuracy">-</div><div class="label">平均正解率</div></div>
+  </div>
+
+  <!-- ユーザー一覧テーブル -->
+  <div class="section-title">👥 ユーザー別進捗一覧</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ユーザー</th>
+          <th>回答数 / 800問</th>
+          <th>進捗率</th>
+          <th>正解数</th>
+          <th>正解率</th>
+          <th>ステータス</th>
+        </tr>
+      </thead>
+      <tbody id="userTableBody">
+        <tr><td colspan="6" class="loading"><div class="spinner"></div><br>Firebaseからデータ取得中...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- セクション別進捗 -->
+  <div class="section-title">📚 セクション別・ユーザー別進捗</div>
+  <div class="section-progress-wrap">
+    <div class="section-header">各セクションの回答状況（色が濃いほど進捗あり）</div>
+    <div class="section-grid" id="sectionGrid">
+      <div class="no-data">データ読み込み中...</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDr7cYBMeNcKgt2ZNZfmdtFlMDQwe2_yT4",
+  authDomain: "connect-quiz-fa8d8.firebaseapp.com",
+  projectId: "connect-quiz-fa8d8",
+  storageBucket: "connect-quiz-fa8d8.firebasestorage.app",
+  messagingSenderId: "627111669268",
+  appId: "1:627111669268:web:36b13a9b504ced40a0c101"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ユーザー名の日本語マッピング
+const userNames = {
+  'yamaguchi': '山口 孝二',
+  'yamaguchi_koji': '山口 孝二',
+  'asami': '浅見',
+  'asami_ryunosuke': '浅見 龍之介',
+  'kato': '加藤',
+  'kato_airi': '加藤 愛莉',
+  'tanaka': '田中',
+  'sato': '佐藤',
+  'suzuki': '鈴木',
+  'default': 'デフォルト'
+};
+
+function getDisplayName(userId) {
+  return userNames[userId] || userId;
+}
+
+// セクションデータ（quizDataから抽出した簡易版）
+const sections = [
+  "1.医学部","2.臨床研修","3.暗記用語","4.新専門医","5.病院の種類",
+  "6.働き方改革","7.消化器内科","8.循環器内科","9.呼吸器科","10.心臓血管外科",
+  "11.グループ病院","12.形成外科","13.整形外科","14.精神科","15.放射線科",
+  "16.脳神経外科","17.糖尿病内科","18.訪問診療","19.産婦人科","20.救急科",
+  "21.小児科","22.リハビリ科","23.診療報酬","24.甲状腺内科","25.泌尿器科",
+  "26.医療法","27.医療法人","28.産業医","29.麻酔科","30.医師プラットフォーム",
+  "31.製薬会社","32.耳鼻咽喉科","33.透析","34.医師会","35.大学医局",
+  "36.商社","37.ドクターヘリ","38.眼科","39.日本の省庁","40.神経内科",
+  "41.ファクトフルネス","42.皮膚科","43.健診","44.美容外科","45.美容皮膚科",
+  "46.美容外科2","47.医療脱毛","48.CREDO","49.IT基礎","50.AI機械学習",
+  "51.サイバー","52.DX","53.財閥","54.スタートアップ","55.外資系",
+  "56.コンサル","57.金融銀行","58.株式投資","59.会計財務","60.経済指標",
+  "61.マーケ","62.営業交渉","63.ロジカル","64.PJ管理","65.人材HR",
+  "66.法律","67.グローバル","68.SDGs","69.偉人世界","70.偉人日本",
+  "71.財閥企業","72.主要企業","73.経済史","74.株式市場","75.ベンチャー用語",
+  "76.マーケ基礎","77.会計基礎","78.フレームワーク","79.世界企業","80.医療DX"
+];
+
+// 問題IDからセクション番号を推定
+function getSectionFromId(id) {
+  const num = parseInt(id);
+  if (num <= 140) return Math.ceil(num / 10) - 1; // 旧ID
+  // 新ID (90000番台etc)
+  if (num >= 90000 && num <= 90099) return 0;
+  if (num >= 90010 && num <= 90019) return 0;
+  // セクション推定が難しいIDはそのままカウントに含める
+  return -1;
+}
+
+window.loadAllData = async function() {
+  const tbody = document.getElementById('userTableBody');
+  tbody.innerHTML = '<tr><td colspan="6" class="loading"><div class="spinner"></div><br>データ取得中...</td></tr>';
+
+  try {
+    const snapshot = await getDocs(collection(db, 'quiz_results'));
+    const users = [];
+
+    snapshot.forEach(docSnap => {
+      const userId = docSnap.id;
+      const data = docSnap.data();
+      const answered = data.answered || {};
+
+      let correct = 0;
+      let wrong = 0;
+      Object.values(answered).forEach(v => {
+        if (v === true) correct++;
+        else if (v === false) wrong++;
+      });
+
+      const total = correct + wrong;
+      const accuracy = total > 0 ? Math.round(correct / total * 100) : 0;
+
+      users.push({ userId, answered, correct, wrong, total, accuracy });
+    });
+
+    // テーブル描画
+    if (users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="no-data">まだ回答データがありません</td></tr>';
+    } else {
+      tbody.innerHTML = users.sort((a,b) => b.total - a.total).map(u => {
+        const progress = Math.round(u.total / 800 * 100);
+        const name = getDisplayName(u.userId);
+        
+        let statusBadge = '';
+        if (u.total === 0) statusBadge = '<span class="badge badge-gray">未開始</span>';
+        else if (progress < 30) statusBadge = '<span class="badge badge-red">開始済</span>';
+        else if (progress < 70) statusBadge = '<span class="badge badge-yellow">進行中</span>';
+        else statusBadge = '<span class="badge badge-green">完了間近</span>';
+
+        const accClass = u.accuracy >= 80 ? 'accuracy-high' : u.accuracy >= 60 ? 'accuracy-mid' : 'accuracy-low';
+
+        return `<tr>
+          <td>
+            <div class="user-name">${name}</div>
+            <div class="user-id">${u.userId}</div>
+          </td>
+          <td><strong>${u.total}</strong> / 800問</td>
+          <td>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+              <span class="progress-text">${progress}%</span>
+            </div>
+          </td>
+          <td>${u.correct}問</td>
+          <td class="accuracy-cell ${accClass}">${u.total > 0 ? u.accuracy + '%' : '-'}</td>
+          <td>${statusBadge}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // サマリー更新
+    document.querySelector('#summaryCards .card:first-child .num').textContent = users.length;
+    const totalAnswered = users.reduce((s, u) => s + u.total, 0);
+    const avgAnswered = users.length > 0 ? Math.round(totalAnswered / users.length) : 0;
+    const allAccuracies = users.filter(u => u.total > 0).map(u => u.accuracy);
+    const avgAcc = allAccuracies.length > 0 ? Math.round(allAccuracies.reduce((a,b)=>a+b,0)/allAccuracies.length) : 0;
+    document.getElementById('avgProgress').textContent = avgAnswered;
+    document.getElementById('avgAccuracy').textContent = avgAcc + '%';
+
+    // セクション別グリッド
+    const sectionGrid = document.getElementById('sectionGrid');
+    if (users.length === 0) {
+      sectionGrid.innerHTML = '<div class="no-data">データなし</div>';
+    } else {
+      sectionGrid.innerHTML = sections.map((sname, idx) => {
+        const qStart = idx * 10 + 1;
+        const qEnd = qStart + 9;
+        
+        const miniBars = users.sort((a,b) => b.total - a.total).slice(0, 4).map(u => {
+          // そのセクションの回答数を推定（IDが連続している想定）
+          const answeredKeys = Object.keys(u.answered);
+          // 回答済みかどうかをざっくり判定
+          const sectionAnswered = answeredKeys.filter(k => {
+            const n = parseInt(k);
+            return n >= qStart && n <= qEnd;
+          }).length;
+          const pct = Math.round(sectionAnswered / 10 * 100);
+          const color = pct >= 70 ? '#3b82f6' : pct >= 30 ? '#93c5fd' : '#e2e8f0';
+          const uname = getDisplayName(u.userId).split(' ')[0];
+          return `<div class="mini-bar-wrap">
+            <span class="mini-label">${uname}</span>
+            <div class="mini-bar"><div class="mini-fill" style="width:${pct}%;background:${color}"></div></div>
+            <span style="font-size:10px;color:#64748b">${sectionAnswered}/10</span>
+          </div>`;
+        }).join('');
+
+        return `<div class="section-item">
+          <div class="section-item-name">${sname}</div>
+          <div class="section-mini-bars">${miniBars || '<span style="font-size:11px;color:#94a3b8">データなし</span>'}</div>
+        </div>`;
+      }).join('');
+    }
+
+    const now = new Date();
+    document.getElementById('lastUpdated').textContent = `最終更新: ${now.toLocaleString('ja-JP')}`;
+
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="6" class="no-data">❌ エラー: ${e.message}</td></tr>`;
+    console.error(e);
+  }
+};
+
+// 初回ロード
+loadAllData();
+</script>
+</body>
+</html>
