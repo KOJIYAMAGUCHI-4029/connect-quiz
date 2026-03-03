@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>医師紹介 実力テスト | CONNECT</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f0f1a;--card:#1a1a2e;--card2:#16213e;--accent:#e94560;--gold:#ffd700;--text:#e0e0e0;--muted:#7a7a9a}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;min-height:100vh;padding:0 0 60px}
+.hero{background:linear-gradient(135deg,#0f3460 0%,#1a1a2e 60%,#0a0a15 100%);padding:40px 20px 30px;text-align:center;border-bottom:2px solid var(--accent);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(233,69,96,0.08) 0%,transparent 60%);pointer-events:none}
+.hero-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:4px;color:var(--accent);margin-bottom:8px}
+.hero-title{font-size:26px;font-weight:900;color:#fff;margin-bottom:6px;line-height:1.3}
+.hero-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.hero-badges{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.badge{background:rgba(233,69,96,0.12);border:1px solid rgba(233,69,96,0.3);color:var(--text);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px}
+
+.selector{max-width:480px;margin:36px auto 0;padding:0 16px}
+.selector-title{font-size:12px;color:var(--muted);text-align:center;margin-bottom:14px;letter-spacing:2px}
+.player-btns{display:flex;gap:10px}
+.player-btn{flex:1;background:var(--card2);border:2px solid #2a2a3e;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;padding:18px 8px;border-radius:14px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px}
+.player-btn .emoji{font-size:28px}
+.player-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff;transform:translateY(-3px);box-shadow:0 8px 24px rgba(233,69,96,0.3)}
+
+#quiz-area{display:none;max-width:640px;margin:0 auto;padding:24px 16px}
+.progress-wrap{margin-bottom:20px}
+.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.progress-label{font-size:12px;color:var(--muted)}
+.progress-count{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);letter-spacing:2px}
+.progress-bar{height:4px;background:#2a2a3e;border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:2px;transition:width .4s}
+.dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
+.dot{width:10px;height:10px;border-radius:50%;background:#2a2a3e;transition:.2s}
+.dot.done{background:var(--accent)}
+
+.q-card{background:var(--card);border-radius:20px;padding:24px;border:1px solid #2a2a3e;position:relative;overflow:hidden;margin-bottom:16px}
+.q-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--accent)}
+.q-section{font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:1px}
+.q-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);line-height:1;margin-bottom:6px}
+.q-text{font-size:16px;font-weight:700;color:#fff;line-height:1.7}
+.choices{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.choice-btn{background:#1e1e32;border:2px solid #2a2a3e;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:600;padding:14px 18px;border-radius:12px;cursor:pointer;text-align:left;transition:all .2s;display:flex;align-items:center;gap:12px;width:100%}
+.choice-label{width:28px;height:28px;border-radius:50%;background:#2a2a3e;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;flex-shrink:0;color:var(--muted)}
+.choice-btn:not(:disabled):hover{border-color:var(--accent);background:rgba(233,69,96,0.08);transform:translateX(4px)}
+.choice-btn.selected{border-color:var(--gold);background:rgba(255,215,0,0.08);color:var(--gold)}
+.choice-btn.selected .choice-label{background:var(--gold);color:#000}
+
+.nav-row{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
+.nav-btn{background:var(--accent);color:#fff;border:none;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;padding:14px 28px;border-radius:12px;cursor:pointer;transition:all .2s}
+.nav-btn:hover:not(:disabled){background:#c73652;transform:translateY(-1px)}
+.nav-btn:disabled{background:#2a2a3e;color:var(--muted);cursor:default}
+.nav-btn.ghost{background:transparent;border:2px solid #2a2a3e;color:var(--muted)}
+.nav-btn.ghost:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:transparent;transform:none}
+
+#result-area{display:none;max-width:480px;margin:60px auto 0;padding:0 16px;text-align:center}
+.sending-emoji{font-size:56px;margin-bottom:16px;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.submit-btn{display:inline-block;background:linear-gradient(135deg,var(--accent),#c73652);color:#fff;text-decoration:none;font-weight:700;font-size:16px;padding:18px 36px;border-radius:14px;transition:all .2s;box-shadow:0 4px 20px rgba(233,69,96,0.3)}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(233,69,96,0.5)}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-label">CONNECT MEDICAL KNOWLEDGE TEST</div>
+  <div class="hero-title">🏥 医師紹介<br>実力テスト</div>
+  <div class="hero-sub">医師紹介基礎知識 全10問・一発勝負</div>
+  <div class="hero-badges">
+    <span class="badge">🏆 7問以上 → クリア</span>
+    <span class="badge">😅 5〜6問 → 居残り</span>
+    <span class="badge">🚨 4問以下 → 赤点</span>
+  </div>
+</div>
+
+<div class="selector" id="selector">
+  <div class="selector-title">▼ 受験者を選んでください</div>
+  <div class="player-btns">
+    <button class="player-btn" onclick="startQuiz('izumi')"><span class="emoji">🧑</span>和泉</button>
+    <button class="player-btn" onclick="startQuiz('yamada')"><span class="emoji">👩</span>山田</button>
+    <button class="player-btn" onclick="startQuiz('kase')"><span class="emoji">👨</span>加瀬</button>
+  </div>
+</div>
+
+<div id="quiz-area"></div>
+<div id="result-area"></div>
+
+<script>
+const QUIZ_DATA = {"izumi": {"name": "和泉", "questions": [{"id": 95015, "section": "43. 健診・人間ドック", "q": "健診業務のメリットとして医師から多く挙げられるものはどれか？", "c": ["緊急対応が多い", "研究に集中できる", "高度手術を多く経験できる", "当直なし・日勤のみ・ワークライフバランスが整いやすい"]}, {"id": 135, "section": "28. 産業医", "q": "産業医資格の認定機関はどれか？", "c": ["厚生労働省", "日本医師会", "日本産業医師会", "都道府県医師会"]}, {"id": 3, "section": "1. 医学部について", "q": "医師国家試験はいつ実施されるか？", "c": ["4年の10月", "6年の2月", "5年の6月", "6年の12月"]}, {"id": 140, "section": "30. 医師プラットフォーム", "q": "m3.comの創業者と出身はどれか？", "c": ["孫正義・ソフトバンク創業", "谷村格・マッキンゼー出身・2000年設立", "三木谷浩史・楽天創業", "藤田晋・サイバーエージェント創業"]}, {"id": 346, "section": "19. 産婦人科・不妊治療", "q": "OHSSとは何か？", "c": ["卵巣過剰刺激症候群", "オーバーヒートサージャリーシステム", "卵子凍結保存術", "卵管閉塞症候群"]}, {"id": 90010, "section": "2. 医師の臨床研修制度", "q": "初期臨床研修の期間は何年間か？", "c": ["1年間", "2年間", "3年間", "4年間"]}, {"id": 2, "section": "1. 医学部について", "q": "医学部4〜5年進級時に受ける試験は？", "c": ["医師国家試験", "TOEFL・IELTS", "CBTとOSCE", "MATとGRE"]}, {"id": 93030, "section": "24. 甲状腺内科", "q": "バセドウ病の主な症状として正しいものはどれか？", "c": ["体重増加・むくみ・倦怠感", "動悸・発汗・体重減少・眼球突出", "関節痛・皮疹・発熱", "高血圧・頭痛・視力障害"]}, {"id": 94017, "section": "32. 耳鼻咽喉科", "q": "補聴器の適合（フィッティング）を行うのは主に誰か？", "c": ["医師のみ", "言語聴覚士・認定補聴器技能者", "看護師", "臨床工学技士"]}, {"id": 188, "section": "41. ファクトフルネス", "q": "収入レベル4（1日32ドル以上）にいる人は世界で約何人か？", "c": ["約10億人", "約1億人", "約40億人", "約70億人"]}]}, "yamada": {"name": "山田", "questions": [{"id": 94057, "section": "37. ドクターヘリ", "q": "ドクターヘリが特に有効な場面はどれか？", "c": ["市街地の軽症搬送", "へき地・離島・交通渋滞地域での重症患者の迅速搬送", "定期的な外来診察", "長距離の患者転院搬送"]}, {"id": 197202, "section": "41. ファクトフルネス", "q": "ファクトフルネスが指摘する人間の思い込みの傾向はどれか？", "c": ["世界は実際より良い状態だと過大評価する", "世界は実際より悪い状態だと過大評価する", "世界は実際より悪い状態だと過小評価する", "データより感覚の方が正確だと信じる"]}, {"id": 73, "section": "17. 糖尿病内科", "q": "糖尿病の3大合併症として正しい組み合わせはどれか？", "c": ["神経障害・網膜症・腎症", "心筋梗塞・脳梗塞・壊疽", "肝硬変・腎不全・失明", "高血圧・高脂血症・肥満"]}, {"id": 344, "section": "19. 産婦人科・不妊治療", "q": "ARTとは何の略か？", "c": ["人工授精技術", "高度生殖補助医療", "抗生物質投与療法", "アレルギー反応試験"]}, {"id": 92016, "section": "12. 形成外科", "q": "ケロイドと肥厚性瘢痕の違いとして正しいものはどれか？", "c": ["全く同じ疾患の別名", "ケロイドは傷の範囲を超えて増殖・肥厚性瘢痕は傷の範囲内に留まる", "肥厚性瘢痕の方が重症", "ケロイドは自然治癒する"]}, {"id": 95013, "section": "43. 健診・人間ドック", "q": "健診医のスキルチェックで最も重要な項目はどれか？", "c": ["手術件数", "内視鏡・エコー・健診読影の経験・資格", "当直回数", "病棟管理経験"]}, {"id": 93075, "section": "28. 産業医", "q": "「安全衛生委員会」における産業医の役割はどれか？", "c": ["委員会の議長を務める", "産業医として意見を述べる専門的助言者", "議事録の作成のみ", "委員会への出席は任意"]}, {"id": 132, "section": "28. 産業医", "q": "専属産業医が義務付けられる事業所の規模はどれか？", "c": ["常時30人以上", "常時50人以上", "常時500人・1000人以上", "常時100人以上"]}, {"id": 178, "section": "37. ドクターヘリ", "q": "全国のドクターヘリの設置数はおおよそ何機か？", "c": ["約20機", "約35機", "約57機", "約100機"]}, {"id": 93085, "section": "29. 麻酔科", "q": "ペインクリニックで主に行われる治療はどれか？", "c": ["がんの化学療法", "神経ブロック・薬物療法などの疼痛管理", "骨折の手術", "精神科的治療"]}]}, "kase": {"name": "加瀬", "questions": [{"id": 94034, "section": "34. 医師会", "q": "郡市区医師会の主な役割はどれか？", "c": ["全国の医療政策を立案する", "地域の救急当番・休日診療・健診などの地域医療活動を担う", "医師免許の更新を管理する", "製薬会社との契約を管理する"]}, {"id": 92046, "section": "15. 放射線科", "q": "ガンマナイフとは何か？", "c": ["外科用メス", "脳腫瘍・脳動静脈奇形などへの放射線定位照射治療装置", "レーザー手術装置", "MRI誘導手術ロボット"]}, {"id": 93055, "section": "26. 医療法・医療計画・医療圏", "q": "病院の管理者（院長）になれる資格として正しいものはどれか？", "c": ["医師免許を持つ者であれば誰でも", "都道府県知事が認定した医師", "原則として医師または歯科医師", "看護師でも可能"]}, {"id": 127, "section": "26. 医療法・医療計画・医療圏", "q": "5事業として含まれないものはどれか？", "c": ["救急医療", "災害医療", "へき地医療", "美容医療"]}, {"id": 357, "section": "25. 泌尿器科", "q": "泌尿器科でのダ・ヴィンチ手術で最多の術式はどれか？", "c": ["腎移植", "前立腺全摘術", "膀胱鏡検査", "精管結紮術"]}, {"id": 94054, "section": "37. ドクターヘリ", "q": "ドクターヘリの拠点病院に求められる条件はどれか？", "c": ["一般のクリニックでも可能", "救命救急センター等の高度救急医療機関であること", "200床以上の病院", "都道府県庁所在地にあること"]}, {"id": 49, "section": "10. 心臓血管外科", "q": "上皇さまの冠動脈バイパス手術を執刀した医師は誰か？", "c": ["福島孝徳医師", "小林純人医師", "渡辺剛医師", "天野篤医師"]}, {"id": 155, "section": "33. 透析", "q": "透析患者1人あたりの年間医療費の目安はどれか？", "c": ["約100万円", "約200万円", "約500万円", "約1000万円"]}, {"id": 361, "section": "33. 透析", "q": "透析スキルチェックで確認する種別として含まれないものはどれか？", "c": ["血液透析", "腹膜透析", "光線療法", "持続的血液濾過透析"]}, {"id": 93033, "section": "24. 甲状腺内科", "q": "甲状腺がんの最も多い組織型はどれか？", "c": ["未分化がん", "髄様がん", "乳頭がん", "濾胞がん"]}]}};
+const ANSWER_BASE = 'https://kojiyamaguchi-4029.github.io/connect-quiz/test_answers.html';
+
+let player=null, currentQ=0, userAnswers={};
+
+function startQuiz(p){
+  player=p; currentQ=0; userAnswers={};
+  document.getElementById('selector').style.display='none';
+  document.getElementById('quiz-area').style.display='block';
+  renderQ();
+}
+
+function renderQ(){
+  const d=QUIZ_DATA[player], q=d.questions[currentQ], labels=['A','B','C','D'];
+  const dots=d.questions.map((_,i)=>`<div class="dot ${userAnswers[i]!==undefined?'done':''}"></div>`).join('');
+  const choices=q.c.map((c,i)=>{
+    const sel=userAnswers[currentQ]===i?'selected':'';
+    const dis=userAnswers[currentQ]!==undefined&&userAnswers[currentQ]!==i?'disabled':'';
+    return `<button class="choice-btn ${sel}" onclick="select(${i})" ${dis}>
+      <div class="choice-label">${labels[i]}</div><span>${c}</span></button>`;
+  }).join('');
+  const answered=userAnswers[currentQ]!==undefined;
+  const isLast=currentQ===d.questions.length-1;
+
+  document.getElementById('quiz-area').innerHTML=`
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label">${d.name}さんのテスト</span>
+        <span class="progress-count">${currentQ+1} / ${d.questions.length}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${((currentQ+1)/d.questions.length)*100}%"></div></div>
+    </div>
+    <div class="dots">${dots}</div>
+    <div class="q-card">
+      <div class="q-section">📂 ${q.section}</div>
+      <div class="q-num">Q${currentQ+1}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="choices">${choices}</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn ghost" onclick="prevQ()" ${currentQ===0?'disabled':''}>← 前へ</button>
+      ${isLast
+        ?`<button class="nav-btn" onclick="goResult()" ${!answered?'disabled':''}>採点する 🎯</button>`
+        :`<button class="nav-btn" onclick="nextQ()" ${!answered?'disabled':''}>次へ →</button>`
+      }
+    </div>`;
+}
+
+function select(i){userAnswers[currentQ]=i;renderQ();}
+function nextQ(){if(currentQ<QUIZ_DATA[player].questions.length-1){currentQ++;renderQ();}}
+function prevQ(){if(currentQ>0){currentQ--;renderQ();}}
+
+function goResult(){
+  document.getElementById('quiz-area').style.display='none';
+  document.getElementById('result-area').style.display='block';
+  const ansStr=QUIZ_DATA[player].questions.map((_,i)=>userAnswers[i]??-1).join(',');
+  const url=ANSWER_BASE+'?player='+player+'&answers='+ansStr;
+  document.getElementById('result-area').innerHTML=`
+    <div class="sending-emoji">⚡</div>
+    <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:8px">採点中...</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:28px">結果が出ました！</div>
+    <a href="${url}" class="submit-btn">📊 結果を見る →</a>`;
+}
+</script>
+</body>
+</html>
