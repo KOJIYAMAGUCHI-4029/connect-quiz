@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>採点結果 | CONNECT 実力テスト</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f1a;--card:#1a1a2e;--accent:#e94560;--gold:#ffd700;
+  --green:#22c55e;--text:#e0e0e0;--muted:#7a7a9a;
+}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;min-height:100vh;padding:0 0 60px}
+
+.hero{background:linear-gradient(135deg,#0f3460 0%,#1a1a2e 60%,#0a0a15 100%);padding:36px 20px 28px;text-align:center;border-bottom:2px solid var(--accent)}
+.hero-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:4px;color:var(--accent);margin-bottom:6px}
+.hero-title{font-size:22px;font-weight:900;color:#fff}
+
+/* スコアカード */
+.score-wrap{max-width:480px;margin:28px auto 0;padding:0 16px}
+.score-card{background:var(--card);border-radius:24px;padding:32px 24px;text-align:center;border:1px solid #2a2a3e;margin-bottom:24px;position:relative;overflow:hidden}
+.score-card.clear{border-color:var(--gold);box-shadow:0 0 40px rgba(255,215,0,0.12)}
+.score-card.zanzan{border-color:#ff9944;box-shadow:0 0 40px rgba(255,153,68,0.12)}
+.score-card.red{border-color:var(--accent);box-shadow:0 0 40px rgba(233,69,96,0.15)}
+.result-emoji{font-size:60px;margin-bottom:12px;display:block}
+.result-name{font-size:13px;color:var(--muted);margin-bottom:2px}
+.score-num{font-family:'Bebas Neue',sans-serif;font-size:80px;line-height:1;margin-bottom:2px}
+.score-num.clear{color:var(--gold)}
+.score-num.zanzan{color:#ff9944}
+.score-num.red{color:var(--accent)}
+.score-denom{font-size:16px;color:var(--muted);margin-bottom:16px}
+.verdict{font-size:22px;font-weight:900;margin-bottom:8px}
+.verdict.clear{color:var(--gold)}
+.verdict.zanzan{color:#ff9944}
+.verdict.red{color:var(--accent)}
+.verdict-msg{font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:20px}
+.ribbon{display:inline-block;padding:5px 18px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:16px}
+.ribbon.clear{background:rgba(255,215,0,0.15);border:1px solid var(--gold);color:var(--gold)}
+.ribbon.zanzan{background:rgba(255,153,68,0.15);border:1px solid #ff9944;color:#ff9944}
+.ribbon.red{background:rgba(233,69,96,0.15);border:1px solid var(--accent);color:var(--accent)}
+
+/* 解説リスト */
+.review-title{font-size:13px;color:var(--muted);letter-spacing:2px;margin:28px 0 12px;text-align:center}
+.q-item{background:var(--card);border-radius:16px;padding:18px;margin-bottom:12px;border:1px solid #2a2a3e;max-width:480px;margin-left:auto;margin-right:auto}
+.q-item.correct{border-left:4px solid var(--green)}
+.q-item.wrong{border-left:4px solid var(--accent)}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.q-badge{font-size:11px;font-weight:700;padding:2px 10px;border-radius:10px}
+.q-badge.correct{background:rgba(34,197,94,0.15);color:var(--green)}
+.q-badge.wrong{background:rgba(233,69,96,0.15);color:var(--accent)}
+.q-sec{font-size:11px;color:var(--muted)}
+.q-text{font-size:14px;font-weight:700;color:#fff;margin-bottom:10px;line-height:1.6}
+.choices-mini{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.choice-mini{display:flex;align-items:center;gap:8px;font-size:13px;padding:6px 10px;border-radius:8px;color:var(--muted)}
+.choice-mini.correct-ans{background:rgba(34,197,94,0.1);color:var(--green);font-weight:700}
+.choice-mini.user-wrong{background:rgba(233,69,96,0.1);color:var(--accent);font-weight:700}
+.choice-mini-label{width:22px;height:22px;border-radius:50%;background:#2a2a3e;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0}
+.choice-mini.correct-ans .choice-mini-label{background:var(--green);color:#000}
+.choice-mini.user-wrong .choice-mini-label{background:var(--accent);color:#fff}
+.expl{background:#12122a;border-left:3px solid #0f3460;border-radius:0 8px 8px 0;padding:10px 12px;font-size:12px;color:#9090b0;line-height:1.7}
+
+.back-btn{display:block;text-align:center;margin:28px auto 0;background:transparent;border:2px solid #2a2a3e;color:var(--muted);font-size:13px;padding:12px 28px;border-radius:10px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;max-width:200px;transition:all .2s;text-decoration:none}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.score-card{animation:fadeUp .5s ease both}
+.q-item{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-label">CONNECT MEDICAL KNOWLEDGE TEST</div>
+  <div class="hero-title">📊 採点結果</div>
+</div>
+
+<div id="app"><div style="text-align:center;padding:60px;color:var(--muted)">読み込み中...</div></div>
+
+<script>
+const ANSWERS = {"izumi": {"name": "和泉", "questions": [{"id": 95015, "section": "43. 健診・人間ドック", "q": "健診業務のメリットとして医師から多く挙げられるものはどれか？", "c": ["緊急対応が多い", "研究に集中できる", "高度手術を多く経験できる", "当直なし・日勤のみ・ワークライフバランスが整いやすい"], "a": 3, "e": "健診業務は当直なし・日勤のみが多く、ワークライフバランスを重視する医師に人気が高い。"}, {"id": 135, "section": "28. 産業医", "q": "産業医資格の認定機関はどれか？", "c": ["厚生労働省", "日本医師会", "日本産業医師会", "都道府県医師会"], "a": 1, "e": "日本医師会の産業医学基礎研修（50単位以上）を修了することで認定される。"}, {"id": 3, "section": "1. 医学部について", "q": "医師国家試験はいつ実施されるか？", "c": ["4年の10月", "6年の2月", "5年の6月", "6年の12月"], "a": 1, "e": "医学部6年の2月に毎年実施される。"}, {"id": 140, "section": "30. 医師プラットフォーム", "q": "m3.comの創業者と出身はどれか？", "c": ["孫正義・ソフトバンク創業", "谷村格・マッキンゼー出身・2000年設立", "三木谷浩史・楽天創業", "藤田晋・サイバーエージェント創業"], "a": 1, "e": "谷村格氏がマッキンゼーを経て2000年設立。医師専門ポータルサイトとして急成長。"}, {"id": 346, "section": "19. 産婦人科・不妊治療", "q": "OHSSとは何か？", "c": ["卵巣過剰刺激症候群", "オーバーヒートサージャリーシステム", "卵子凍結保存術", "卵管閉塞症候群"], "a": 0, "e": "Ovarian Hyperstimulation Syndrome（卵巣過剰刺激症候群）。排卵誘発剤の副作用。"}, {"id": 90010, "section": "2. 医師の臨床研修制度", "q": "初期臨床研修の期間は何年間か？", "c": ["1年間", "2年間", "3年間", "4年間"], "a": 1, "e": "初期臨床研修は2年間。その後、後期研修（専攻医）に進む。"}, {"id": 2, "section": "1. 医学部について", "q": "医学部4〜5年進級時に受ける試験は？", "c": ["医師国家試験", "TOEFL・IELTS", "CBTとOSCE", "MATとGRE"], "a": 2, "e": "CBT（Computer Based Testing）とOSCE（客観的臨床能力試験）の2つ。"}, {"id": 93030, "section": "24. 甲状腺内科", "q": "バセドウ病の主な症状として正しいものはどれか？", "c": ["体重増加・むくみ・倦怠感", "動悸・発汗・体重減少・眼球突出", "関節痛・皮疹・発熱", "高血圧・頭痛・視力障害"], "a": 1, "e": "バセドウ病は甲状腺機能亢進症。甲状腺ホルモン過剰により動悸・発汗・体重減少・眼球突出が起こる。"}, {"id": 94017, "section": "32. 耳鼻咽喉科", "q": "補聴器の適合（フィッティング）を行うのは主に誰か？", "c": ["医師のみ", "言語聴覚士・認定補聴器技能者", "看護師", "臨床工学技士"], "a": 1, "e": "補聴器フィッティングは言語聴覚士や認定補聴器技能者が担う。医師は診断・処方を行う。"}, {"id": 188, "section": "41. ファクトフルネス", "q": "収入レベル4（1日32ドル以上）にいる人は世界で約何人か？", "c": ["約10億人", "約1億人", "約40億人", "約70億人"], "a": 0, "e": "ハンス・ロスリング著「ファクトフルネス」より。約10億人がレベル4。"}]}, "yamada": {"name": "山田", "questions": [{"id": 94057, "section": "37. ドクターヘリ", "q": "ドクターヘリが特に有効な場面はどれか？", "c": ["市街地の軽症搬送", "へき地・離島・交通渋滞地域での重症患者の迅速搬送", "定期的な外来診察", "長距離の患者転院搬送"], "a": 1, "e": "ドクターヘリは交通渋滞・へき地・離島など陸路での搬送が困難な場合に特に威力を発揮する。"}, {"id": 197202, "section": "41. ファクトフルネス", "q": "ファクトフルネスが指摘する人間の思い込みの傾向はどれか？", "c": ["世界は実際より良い状態だと過大評価する", "世界は実際より悪い状態だと過大評価する", "世界は実際より悪い状態だと過小評価する", "データより感覚の方が正確だと信じる"], "a": 1, "e": "人間はネガティブ本能により、世界を実際より悪く見がち。データで見ると世界は改善されている。"}, {"id": 73, "section": "17. 糖尿病内科", "q": "糖尿病の3大合併症として正しい組み合わせはどれか？", "c": ["神経障害・網膜症・腎症", "心筋梗塞・脳梗塞・壊疽", "肝硬変・腎不全・失明", "高血圧・高脂血症・肥満"], "a": 0, "e": "糖尿病の3大合併症は神経障害・網膜症・腎症。いずれも高血糖による細小血管障害が原因で進行する。"}, {"id": 344, "section": "19. 産婦人科・不妊治療", "q": "ARTとは何の略か？", "c": ["人工授精技術", "高度生殖補助医療", "抗生物質投与療法", "アレルギー反応試験"], "a": 1, "e": "Assisted Reproductive Technology（生殖補助医療）。体外受精・顕微授精などの総称。"}, {"id": 92016, "section": "12. 形成外科", "q": "ケロイドと肥厚性瘢痕の違いとして正しいものはどれか？", "c": ["全く同じ疾患の別名", "ケロイドは傷の範囲を超えて増殖・肥厚性瘢痕は傷の範囲内に留まる", "肥厚性瘢痕の方が重症", "ケロイドは自然治癒する"], "a": 1, "e": "ケロイドは傷の範囲を超えて増殖し自然消退しにくい。肥厚性瘢痕は傷の範囲内で自然改善することがある。"}, {"id": 95013, "section": "43. 健診・人間ドック", "q": "健診医のスキルチェックで最も重要な項目はどれか？", "c": ["手術件数", "内視鏡・エコー・健診読影の経験・資格", "当直回数", "病棟管理経験"], "a": 1, "e": "健診医求人では上部内視鏡・腹部エコー・健診読影（心電図・X線）の経験・資格が最重要確認項目。"}, {"id": 93075, "section": "28. 産業医", "q": "「安全衛生委員会」における産業医の役割はどれか？", "c": ["委員会の議長を務める", "産業医として意見を述べる専門的助言者", "議事録の作成のみ", "委員会への出席は任意"], "a": 1, "e": "産業医は安全衛生委員会に出席し、健康管理・職場環境改善について専門的見地から助言する役割を担う。"}, {"id": 132, "section": "28. 産業医", "q": "専属産業医が義務付けられる事業所の規模はどれか？", "c": ["常時30人以上", "常時50人以上", "常時500人・1000人以上", "常時100人以上"], "a": 2, "e": "専属産業医＝常時1,000人以上（有害業務は500人以上）。嘱託は50人以上。"}, {"id": 178, "section": "37. ドクターヘリ", "q": "全国のドクターヘリの設置数はおおよそ何機か？", "c": ["約20機", "約35機", "約57機", "約100機"], "a": 2, "e": "2023年時点で全国に約57機が配備されている。"}, {"id": 93085, "section": "29. 麻酔科", "q": "ペインクリニックで主に行われる治療はどれか？", "c": ["がんの化学療法", "神経ブロック・薬物療法などの疼痛管理", "骨折の手術", "精神科的治療"], "a": 1, "e": "ペインクリニックは神経ブロック・薬物療法・物理療法などで慢性疼痛・神経痛を管理する専門外来。"}]}, "kase": {"name": "加瀬", "questions": [{"id": 94034, "section": "34. 医師会", "q": "郡市区医師会の主な役割はどれか？", "c": ["全国の医療政策を立案する", "地域の救急当番・休日診療・健診などの地域医療活動を担う", "医師免許の更新を管理する", "製薬会社との契約を管理する"], "a": 1, "e": "郡市区医師会は地域密着の医師会。救急当番・休日診療・学校医・産業医など地域医療活動の中核。"}, {"id": 92046, "section": "15. 放射線科", "q": "ガンマナイフとは何か？", "c": ["外科用メス", "脳腫瘍・脳動静脈奇形などへの放射線定位照射治療装置", "レーザー手術装置", "MRI誘導手術ロボット"], "a": 1, "e": "ガンマナイフは多方向からガンマ線を集中照射する定位放射線治療装置。脳腫瘍・転移性脳腫瘍に使用。"}, {"id": 93055, "section": "26. 医療法・医療計画・医療圏", "q": "病院の管理者（院長）になれる資格として正しいものはどれか？", "c": ["医師免許を持つ者であれば誰でも", "都道府県知事が認定した医師", "原則として医師または歯科医師", "看護師でも可能"], "a": 2, "e": "医療法上、病院の管理者は原則として医師または歯科医師でなければならない。"}, {"id": 127, "section": "26. 医療法・医療計画・医療圏", "q": "5事業として含まれないものはどれか？", "c": ["救急医療", "災害医療", "へき地医療", "美容医療"], "a": 3, "e": "5事業は救急・災害・へき地・周産期・小児（＋新興感染症対策が追加）。"}, {"id": 357, "section": "25. 泌尿器科", "q": "泌尿器科でのダ・ヴィンチ手術で最多の術式はどれか？", "c": ["腎移植", "前立腺全摘術", "膀胱鏡検査", "精管結紮術"], "a": 1, "e": "RARP（ロボット支援腹腔鏡下前立腺全摘術）が泌尿器科での最多ロボット手術。"}, {"id": 94054, "section": "37. ドクターヘリ", "q": "ドクターヘリの拠点病院に求められる条件はどれか？", "c": ["一般のクリニックでも可能", "救命救急センター等の高度救急医療機関であること", "200床以上の病院", "都道府県庁所在地にあること"], "a": 1, "e": "ドクターヘリ拠点病院は救命救急センター等の高度救急医療を提供できる医療機関が要件。"}, {"id": 49, "section": "10. 心臓血管外科", "q": "上皇さまの冠動脈バイパス手術を執刀した医師は誰か？", "c": ["福島孝徳医師", "小林純人医師", "渡辺剛医師", "天野篤医師"], "a": 3, "e": "天野篤医師。順天堂大学教授。2012年に上皇さまの手術を執刀。"}, {"id": 155, "section": "33. 透析", "q": "透析患者1人あたりの年間医療費の目安はどれか？", "c": ["約100万円", "約200万円", "約500万円", "約1000万円"], "a": 2, "e": "約500万円（月約40〜42万円）。日本の医療費の中でも大きな割合を占める。"}, {"id": 361, "section": "33. 透析", "q": "透析スキルチェックで確認する種別として含まれないものはどれか？", "c": ["血液透析", "腹膜透析", "光線療法", "持続的血液濾過透析"], "a": 2, "e": "光線療法は皮膚科・新生児黄疸などに使用。透析の種別ではない。"}, {"id": 93033, "section": "24. 甲状腺内科", "q": "甲状腺がんの最も多い組織型はどれか？", "c": ["未分化がん", "髄様がん", "乳頭がん", "濾胞がん"], "a": 2, "e": "甲状腺がんの約90%が乳頭がん。進行が遅く予後良好なものが多い。"}]}};
+
+function getParams(){
+  const p = new URLSearchParams(location.search);
+  return {player: p.get('player'), answers: p.get('answers')};
+}
+
+function render(){
+  const {player, answers} = getParams();
+  if(!player || !answers || !ANSWERS[player]){
+    document.getElementById('app').innerHTML = '<div style="text-align:center;padding:60px;color:#7a7a9a">URLが正しくありません。<br>テストページから回答してください。</div>';
+    return;
+  }
+
+  const data = ANSWERS[player];
+  const userAns = answers.split(',').map(Number);
+  const labels = ['A','B','C','D'];
+
+  let score = 0;
+  userAns.forEach((ua, i) => {
+    if(ua === data.questions[i].a) score++;
+  });
+
+  // 判定
+  let grade, emoji, verdict, msg, cls;
+  if(score >= 7){
+    grade='clear'; emoji='🏆'; verdict='クリア！おめでとう！';
+    cls='clear';
+    msg = `${data.name}さん、${score}問正解で見事クリア！🎉<br>医師紹介のプロへの道、着実に歩んでいます。<br>この調子で全セクション制覇を目指しましょう！`;
+  } else if(score >= 5){
+    grade='zanzan'; emoji='😅'; verdict='居残り確定...';
+    cls='zanzan';
+    msg = `${data.name}さん、${score}問正解。惜しい！<br>あと少しでクリアでした。😤<br>間違えた問題をしっかり復習して<br>リベンジを狙ってください！`;
+  } else {
+    grade='red'; emoji='🚨'; verdict='赤点！！！緊急特訓が必要です';
+    cls='red';
+    msg = `${data.name}さん、${score}問正解。<br>これは...かなり厳しい結果です。😱<br>医師紹介の基礎からじっくり学び直して<br>必ずリベンジしてください！！`;
+  }
+
+  const qItems = data.questions.map((q, i) => {
+    const ua = userAns[i];
+    const correct = ua === q.a;
+    const choicesHtml = q.c.map((c, ci) => {
+      let cls2 = '';
+      if(ci === q.a) cls2 = 'correct-ans';
+      else if(ci === ua && !correct) cls2 = 'user-wrong';
+      const icon = ci === q.a ? '✓' : (ci === ua && !correct ? '✗' : '');
+      return `<div class="choice-mini ${cls2}">
+        <div class="choice-mini-label">${labels[ci]}</div>
+        <span>${icon ? icon+' ' : ''}${c}</span>
+      </div>`;
+    }).join('');
+
+    return `<div class="q-item ${correct?'correct':'wrong'}" style="animation-delay:${i*0.06}s">
+      <div class="q-meta">
+        <span class="q-badge ${correct?'correct':'wrong'}">${correct?'✓ 正解':'✗ 不正解'}</span>
+        <span class="q-sec">📂 ${q.section}</span>
+      </div>
+      <div class="q-text">Q${i+1}. ${q.q}</div>
+      <div class="choices-mini">${choicesHtml}</div>
+      <div class="expl">💡 ${q.e}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('app').innerHTML = `
+    <div class="score-wrap">
+      <div class="score-card ${cls}">
+        <span class="result-emoji">${emoji}</span>
+        <div class="result-name">${data.name}さんの結果</div>
+        <div class="score-num ${cls}">${score}</div>
+        <div class="score-denom">/ 10問</div>
+        <div class="ribbon ${cls}">${grade==='clear'?'🏆 CLEAR！':grade==='zanzan'?'😅 居残り':'🚨 赤点'}</div>
+        <div class="verdict ${cls}">${verdict}</div>
+        <div class="verdict-msg">${msg}</div>
+      </div>
+    </div>
+    <div class="review-title">▼ 全問解説</div>
+    ${qItems}
+    <div style="max-width:480px;margin:0 auto;padding:0 16px">
+      <a href="https://kojiyamaguchi-4029.github.io/connect-quiz/quiz_test.html" class="back-btn">← テストに戻る</a>
+    </div>
+  `;
+}
+
+render();
+</script>
+</body>
+</html>
