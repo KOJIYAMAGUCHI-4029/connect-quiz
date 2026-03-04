@@ -1,0 +1,33 @@
+name: Daily Medical Quiz to Slack
+
+on:
+  schedule:
+    - cron: '0 0 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  send-quiz:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Send daily quiz to Slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: 'C0144FZUBDK'
+        run: node .github/scripts/send-quiz.js
+
+      - name: Commit progress update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/quiz-progress.json
+          git diff --staged --quiet || git commit -m "Update quiz progress [skip ci]"
+          git push
