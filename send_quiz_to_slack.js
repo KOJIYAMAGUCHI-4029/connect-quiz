@@ -55,7 +55,7 @@ selected.forEach((q, idx) => {
 });
 
 message += `━━━━━━━━━━━━━━━━━━━━━\n`;
-message += `<${QUIZ_URL}|📱 今日の回答・解説を見る>`;
+const QUIZ_URL = 'https://kojiyamaguchi-4029.github.io/connect-quiz/select.html';
 
 // ============================================================
 // Slack送信（Claude Slack コネクタ経由）
