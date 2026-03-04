@@ -26,8 +26,16 @@
   --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 12px; color: var(--text); }
-#app { width: 100%; max-width: 640px; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 16px; color: var(--text); }
+#app { width: 100%; max-width: 680px; }
+
+/* PC: 2カラム */
+@media (min-width: 900px) {
+  body { padding: 24px 16px; background: #e8edf2; }
+  #app { max-width: 720px; }
+  .menu-cards { display: grid; grid-template-columns: 1fr 1fr; }
+  .menu-card.ranking-card-wrap { grid-column: 1 / -1; }
+}
 
 /* ===== HERO ===== */
 .hero { background: var(--white); border-radius: var(--radius); padding: 24px 20px 20px; text-align: center; margin-bottom: 12px; box-shadow: var(--shadow); }
@@ -48,11 +56,17 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); min-heigh
 
 /* ===== MENU CARDS ===== */
 .menu-cards { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-.menu-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.15s; font-family: inherit; text-align: left; width: 100%; box-shadow: var(--shadow); }
-.menu-card:hover { border-color: var(--primary); background: var(--primary-light); box-shadow: var(--shadow-md); }
-.menu-card .icon { font-size: 22px; flex-shrink: 0; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--primary-light); border-radius: 10px; }
+.menu-card { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.15s; font-family: inherit; text-align: left; width: 100%; box-shadow: var(--shadow); }
+.menu-card:hover { filter: brightness(0.97); box-shadow: var(--shadow-md); transform: translateX(2px); }
+.menu-card.card-select { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-color: #93c5fd; }
+.menu-card.card-select .icon { background: #2563eb; }
+.menu-card.card-daily { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #6ee7b7; }
+.menu-card.card-daily .icon { background: #059669; }
+.menu-card.card-review { background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); border-color: #fdba74; }
+.menu-card.card-review .icon { background: #ea580c; }
+.menu-card .icon { font-size: 22px; flex-shrink: 0; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
 .menu-card .title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
-.menu-card .desc { font-size: 11px; color: var(--text-muted); }
+.menu-card .desc { font-size: 11px; color: var(--text-sub); }
 .menu-card-text { flex: 1; }
 .menu-card-arrow { color: var(--text-muted); font-size: 20px; flex-shrink: 0; font-weight: 300; }
 
@@ -490,7 +504,7 @@ function renderMenu() {
   const pct = sc.total > 0 ? Math.round((sc.correct/sc.total)*100) : 0;
   const progressInfo = sc.total > 0 ? ' | 進捗: ' + sc.total + '問回答済み (正解率 ' + pct + '%)' : '';
   const reviewCard = sc.total > 0
-    ? '<div class="menu-card" data-action="review"><div class="icon">📊</div><div class="menu-card-text"><div class="title">結果を見る</div><div class="desc">正解率・セクション別成績</div></div><span class="menu-card-arrow">›</span></div>'
+    ? '<div class="menu-card card-review" data-action="review"><div class="icon">📊</div><div class="menu-card-text"><div class="title">結果を見る</div><div class="desc">正解率・セクション別成績</div></div><span class="menu-card-arrow">›</span></div>'
     : '';
   const scoreBar = sc.total > 0
     ? '<div class="hero-score-bar">'
@@ -509,9 +523,9 @@ function renderMenu() {
     + '<div class="hero-copy">© CONNECT All Rights Reserved.</div>'
     + '</div>'
     + '<div class="menu-cards">'
-    + '<div class="menu-card ranking-card-wrap"><div id="ranking-card"><div style="color:#9aa0a6;font-size:13px;text-align:center;padding:16px">ランキング読み込み中...</div></div></div>'
-    + '<div class="menu-card" data-action="select"><div class="icon">📚</div><div class="menu-card-text"><div class="title">セクション選択</div><div class="desc">分野を選んで学習</div></div><span class="menu-card-arrow">›</span></div>'
-    + '<div class="menu-card" data-action="daily-answer"><div class="icon">📅</div><div class="menu-card-text"><div class="title">今日の回答</div><div class="desc">今日の3問の正解・解説</div></div><span class="menu-card-arrow">›</span></div>'
+    + '<div class="menu-card ranking-card-wrap"><div id="ranking-card"><div style="color:#9ca3af;font-size:13px;text-align:center;padding:16px">ランキング読み込み中...</div></div></div>'
+    + '<div class="menu-card card-select" data-action="select"><div class="icon">📚</div><div class="menu-card-text"><div class="title">セクション選択</div><div class="desc">分野を選んで学習</div></div><span class="menu-card-arrow">›</span></div>'
+    + '<div class="menu-card card-daily" data-action="daily-answer"><div class="icon">📅</div><div class="menu-card-text"><div class="title">今日の回答</div><div class="desc">今日の3問の正解・解説</div></div><span class="menu-card-arrow">›</span></div>'
     + reviewCard
     + '</div>';
 }
