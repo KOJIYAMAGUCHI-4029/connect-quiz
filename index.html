@@ -410,6 +410,8 @@ let state = { mode:'menu', section:0, answered: {}, reviewLater: {} };
   state.answered = await loadFromFirestore();
   // localStorageにも保存しておく（オフライン対応）
   try { localStorage.setItem('connect_quiz_answered_' + userId, JSON.stringify(state.answered)); } catch(e){}
+  // mode=daily-answer パラメータがあれば自動遷移（Firestore完了後に実行）
+  if (initMode === 'daily-answer') { state.mode = 'daily-answer'; }
   render();
 })();
 
@@ -797,8 +799,7 @@ function bindEvents() {
   });
 }
 
-if (initMode === 'daily-answer') { state.mode = 'daily-answer'; }
-render();
+// 初期render・initModeはFirestore読み込み後に実行済み
 </script>
 </body>
 </html>
