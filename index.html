@@ -368,26 +368,28 @@ function renderQuiz() {
     const isAnswered = ans !== undefined;
     const isReviewOnly = ans === -99;
     const isCorrect  = isAnswered && !isReviewOnly && ans === q.a;
-    const badge = isAnswered
-      ? (isReviewOnly
-          ? '<span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:12px;background:#eff6ff;color:#1a73e8">🔖 復習確認</span>'
-          : '<span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:12px;background:' + (isCorrect?'#f0fdf4':'#fff1f1') + ';color:' + (isCorrect?'#15803d':'#dc2626') + '">' + (isCorrect?'✅ 正解':'❌ 不正解') + '</span>')
+    const badge = (isAnswered && !isReviewOnly)
+      ? '<span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:12px;background:' + (isCorrect?'#f0fdf4':'#fff1f1') + ';color:' + (isCorrect?'#15803d':'#dc2626') + '">' + (isCorrect?'✅ 正解':'❌ 不正解') + '</span>'
       : '';
     const btns = q.c.map((choice, ci) => {
       let cls = 'choice-btn';
       const isReviewMode = ans === -99;
-      if (isAnswered) {
+      if (isAnswered && !isReviewMode) {
         if (ci === q.a) cls += ' correct';
-        if (!isReviewMode && ci === ans && ans !== q.a) cls += ' wrong';
+        if (ci === ans && ans !== q.a) cls += ' wrong';
       }
-      // 復習モード(-99)はボタンを無効化するが選択済みスタイルは付けない
-      const btnDisabled = isAnswered ? 'disabled' : '';
+      // 復習モードはボタン色付けなし・無効化なし（回答していない状態のまま）
+      const btnDisabled = (isAnswered && !isReviewMode) ? 'disabled' : '';
       return '<button class="' + cls + '" ' + btnDisabled + ' data-action="answer" data-qid="' + q.id + '" data-ci="' + ci + '">'
         + '<span class="choice-label">' + labels[ci] + '</span>'
         + '<span class="choice-text">' + choice + '</span>'
         + '</button>';
     }).join('');
-    const expl = isAnswered ? '<div class="explanation">💡 ' + q.e + '</div>' : '';
+    const expl = isAnswered
+      ? (isReviewOnly
+          ? '<div style="margin-top:12px;padding:10px 14px;background:#f8faff;border-left:4px solid #1a73e8;border-radius:0 8px 8px 0;font-size:13px;color:#3c4043;">📌 正解は <strong>' + labels[q.a] + '. ' + q.c[q.a] + '</strong></div>'
+          : '<div class="explanation">💡 ' + q.e + '</div>')
+      : '';
     const isMarked = !!state.reviewLater[q.id];
     const isAnswered2 = state.answered[q.id] !== undefined;
     const laterBtn = isAnswered2
