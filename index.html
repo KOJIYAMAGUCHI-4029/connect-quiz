@@ -479,12 +479,12 @@ function renderDailyAnswer() {
       .map(([k, v]) => ({ id: k, name: v }));
 
     const btns = members.map(function(m) {
-      var url = BASE + '?user=' + m.id + '&mode=daily-answer';
-      return '<a href="' + url + '" style="display:flex;align-items:center;gap:12px;width:100%;padding:14px 18px;margin-bottom:8px;background:#fff;border:1.5px solid #e5e9f0;border-radius:12px;font-size:14px;font-weight:700;color:#111827;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,0.06);">'
+      var url = BASE + '?user=' + m.id;
+      return '<button onclick="window.location.href=\'' + url + '\'" style="display:flex;align-items:center;gap:12px;width:100%;padding:14px 18px;margin-bottom:8px;background:#fff;border:1.5px solid #e5e9f0;border-radius:12px;font-size:14px;font-weight:700;color:#111827;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.06);font-family:inherit;">'
         + '<span style="font-size:20px;width:36px;height:36px;background:#eff6ff;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;">👤</span>'
-        + '<span style="flex:1">' + m.name + '</span>'
+        + '<span style="flex:1;text-align:left">' + m.name + '</span>'
         + '<span style="color:#9ca3af;font-size:18px;">›</span>'
-        + '</a>';
+        + '</button>';
     }).join('')
 
     return '<div style="padding:20px 0 12px">'
