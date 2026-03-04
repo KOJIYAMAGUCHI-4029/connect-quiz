@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONNECT Quiz - ユーザー選択</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #f4f6f9;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px 16px;
+}
+.container { max-width: 480px; width: 100%; }
+.hero {
+    background: #fff;
+    border-radius: 14px;
+    padding: 28px 20px 20px;
+    text-align: center;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.hero h1 {
+    font-size: 32px;
+    font-weight: 900;
+    color: #2563eb;
+    letter-spacing: 0.1em;
+}
+.hero p {
+    font-size: 14px;
+    color: #6b7280;
+    margin-top: 6px;
+    font-weight: 600;
+}
+.hero .sub {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 8px;
+}
+.user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.user-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border: 1.5px solid #e5e9f0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    color: #111827;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.user-btn:hover {
+    border-color: #2563eb;
+    background: #eff6ff;
+    transform: translateX(3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.user-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 900;
+    flex-shrink: 0;
+}
+.user-name {
+    font-size: 15px;
+    font-weight: 700;
+    flex: 1;
+}
+.user-arrow {
+    color: #9ca3af;
+    font-size: 18px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <h1>CONNECT</h1>
+        <p>医師紹介/ビジネス知識テスト</p>
+        <div class="sub">自分の名前を選んでクイズを始めよう</div>
+    </div>
+    <div class="user-list" id="userList"></div>
+</div>
+
+<script>
+const users = [
+    { id: 'yamaguchi_koji', name: '山口 孝二' },
+    { id: 'takeuchi_chihiro', name: '竹内 ちひろ' },
+    { id: 'suzuki_hana', name: '鈴木 花' },
+    { id: 'adachi_rentaro', name: '安達 蓮太郎' },
+    { id: 'asami_ryunosuke', name: '浅見 隆之介' },
+    { id: 'izumi_keisuke', name: '和泉 圭祐' },
+    { id: 'kato_yuya', name: '加藤 優哉' },
+    { id: 'sato_yuji', name: '佐藤 勇治' },
+    { id: 'kato_airi', name: '加藤 愛莉' },
+    { id: 'yamada_kazuki', name: '山田 一樹' },
+    { id: 'machida_nobuhiro', name: '町田 信宏' },
+    { id: 'furukuchi_rina', name: '古口 里奈' },
+    { id: 'kase_hirohito', name: '加瀬 裕仁' },
+    { id: 'kamimura_tomoki', name: '上村 智識' },
+    { id: 'nobe_junko', name: '野辺 純子' },
+    { id: 'tanaka_kotaro', name: '田中 耕太郎' },
+];
+
+const listEl = document.getElementById('userList');
+
+users.forEach(u => {
+    const initial = u.name.charAt(0);
+    const link = document.createElement('a');
+    link.href = `index.html?user=${u.id}`;
+    link.className = 'user-btn';
+    link.innerHTML = `
+        <div class="user-icon">${initial}</div>
+        <div class="user-name">${u.name}</div>
+        <div class="user-arrow">›</div>
+    `;
+    listEl.appendChild(link);
+});
+</script>
+</body>
+</html>
