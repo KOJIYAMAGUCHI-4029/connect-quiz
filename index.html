@@ -470,7 +470,7 @@ function renderDailyAnswer() {
   const labels = ['A','B','C','D'];
 
   // URLパラメータなし（user=なし or default）で開いた場合 → 名前選択画面
-  if (!userId || userId === 'default') {
+  if (initMode === 'daily-answer') {
     const BASE = 'https://kojiyamaguchi-4029.github.io/connect-quiz/index.html';
     const members = Object.entries(USER_NAMES)
       .filter(([k]) => k !== 'default' && k !== 'yamaguchi')
