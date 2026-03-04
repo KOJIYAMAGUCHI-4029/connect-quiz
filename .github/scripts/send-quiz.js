@@ -200,7 +200,7 @@ async function main() {
     }
 
     // クイズアプリへのリンク
-    answerText += `\n:arrow_right: もっと挑戦する → https://kojiyamaguchi-4029.github.io/connect-quiz/select.html/`;
+    answerText += `\n:arrow_right: もっと挑戦する → https://kojiyamaguchi-4029.github.io/connect-quiz/select.html`;
 
     // ============================================================
     // Slack送信
