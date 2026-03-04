@@ -225,6 +225,8 @@ const db = getFirestore(firebaseApp);
 // URLからユーザーIDを取得（例: ?user=yamaguchi）
 const urlParams = new URLSearchParams(window.location.search);
 const userId = urlParams.get('user') || 'default';
+// mode=daily-answer パラメータがあれば自動遷移
+const initMode = urlParams.get('mode');
 
 // Firestoreから回答データを読み込む
 async function loadFromFirestore() {
@@ -465,13 +467,45 @@ function renderDailyAnswer() {
   const displayDate = y + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日（' + weekdays[now.getDay()] + '）';
   const labels = ['A','B','C','D'];
 
+  // URLパラメータなし（user=なし or default）で開いた場合 → 名前選択画面
+  if (!userId || userId === 'default') {
+    const BASE = 'https://kojiyamaguchi-4029.github.io/connect-quiz/index.html';
+    const members = Object.entries(USER_NAMES)
+      .filter(([k]) => k !== 'default' && k !== 'yamaguchi')
+      .map(([k, v]) => ({ id: k, name: v }));
+
+    const btns = members.map(m =>
+      '<a href="' + BASE + '?user=' + m.id + '&mode=daily-answer" style="'
+      + 'display:block;width:100%;padding:14px 18px;margin-bottom:8px;'
+      + 'background:#fff;border:1.5px solid #e5e9f0;border-radius:12px;'
+      + 'font-size:14px;font-weight:700;color:#111827;text-decoration:none;'
+      + 'display:flex;align-items:center;gap:12px;'
+      + 'box-shadow:0 1px 3px rgba(0,0,0,0.06);transition:all 0.15s;"'
+      + ' onmouseover="this.style.borderColor='#2563eb';this.style.background='#eff6ff'"'
+      + ' onmouseout="this.style.borderColor='#e5e9f0';this.style.background='#fff'">'
+      + '<span style="font-size:20px;width:36px;height:36px;background:#eff6ff;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;">👤</span>'
+      + '<span>' + m.name + '</span>'
+      + '<span style="margin-left:auto;color:#9ca3af;font-size:18px;">›</span>'
+      + '</a>'
+    ).join('');
+
+    return '<div style="padding:20px 0 12px">'
+      + '<h2 class="section-select-title">📅 今日のクイズ 回答・解説</h2>'
+      + '<div style="font-size:13px;color:#6b7280;margin-bottom:20px;">' + displayDate + '</div>'
+      + '</div>'
+      + '<div style="background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-bottom:12px;">'
+      + '<div style="font-size:13px;font-weight:700;color:#6b7280;margin-bottom:14px;letter-spacing:0.05em;">▼ あなたの名前を選んでください</div>'
+      + btns
+      + '</div>';
+  }
+
   const ids = DAILY_SCHEDULE[todayKey];
   if (!ids) {
     return '<div style="padding:24px 0 12px"><button class="back-btn" data-action="menu">← メニューに戻る</button></div>'
-      + '<div style="background:#fff;border-radius:20px;padding:40px 24px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.06);">'
+      + '<div style="background:#fff;border-radius:14px;padding:40px 24px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.08);">'
       + '<div style="font-size:40px;margin-bottom:16px;">📅</div>'
-      + '<div style="font-size:16px;font-weight:700;color:#1a1a2e;margin-bottom:8px;">' + displayDate + 'の問題はお休みです</div>'
-      + '<div style="font-size:13px;color:#9aa0a6;">土日・祝日はクイズをお休みしています</div>'
+      + '<div style="font-size:16px;font-weight:700;color:#111827;margin-bottom:8px;">' + displayDate + 'の問題はお休みです</div>'
+      + '<div style="font-size:13px;color:#9ca3af;">土日・祝日はクイズをお休みしています</div>'
       + '</div>';
   }
 
@@ -493,9 +527,9 @@ function renderDailyAnswer() {
       + '</div>';
   }).join('');
 
-  return '<div style="padding:24px 0 12px"><button class="back-btn" data-action="menu">← メニューに戻る</button>'
+  return '<div style="padding:20px 0 12px"><button class="back-btn" data-action="menu">← メニューに戻る</button>'
     + '<h2 class="section-select-title">今日のクイズ 回答・解説</h2>'
-    + '<div style="font-size:13px;color:#5f6368;margin-bottom:16px;">' + displayDate + '</div></div>'
+    + '<div style="font-size:13px;color:#6b7280;margin-bottom:16px;">' + displayDate + '</div></div>'
     + cards;
 }
 
@@ -763,6 +797,7 @@ function bindEvents() {
   });
 }
 
+if (initMode === 'daily-answer') { state.mode = 'daily-answer'; }
 render();
 </script>
 </body>
