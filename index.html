@@ -406,12 +406,14 @@ const totalQ = quizData.reduce((t,s) => t + s.questions.length, 0);
 let state = { mode:'menu', section:0, answered: {}, reviewLater: {} };
 
 // 起動時にFirestoreから読み込んでrenderする
+// まず即座に初期描画（Firestore待たずに表示）
+if (initMode === 'daily-answer') { state.mode = 'daily-answer'; }
+render();
+
+// Firestore読み込み完了後に再描画
 (async () => {
   state.answered = await loadFromFirestore();
-  // localStorageにも保存しておく（オフライン対応）
   try { localStorage.setItem('connect_quiz_answered_' + userId, JSON.stringify(state.answered)); } catch(e){}
-  // mode=daily-answer パラメータがあれば自動遷移（Firestore完了後に実行）
-  if (initMode === 'daily-answer') { state.mode = 'daily-answer'; }
   render();
 })();
 
@@ -476,20 +478,14 @@ function renderDailyAnswer() {
       .filter(([k]) => k !== 'default' && k !== 'yamaguchi')
       .map(([k, v]) => ({ id: k, name: v }));
 
-    const btns = members.map(m =>
-      '<a href="' + BASE + '?user=' + m.id + '&mode=daily-answer" style="'
-      + 'display:block;width:100%;padding:14px 18px;margin-bottom:8px;'
-      + 'background:#fff;border:1.5px solid #e5e9f0;border-radius:12px;'
-      + 'font-size:14px;font-weight:700;color:#111827;text-decoration:none;'
-      + 'display:flex;align-items:center;gap:12px;'
-      + 'box-shadow:0 1px 3px rgba(0,0,0,0.06);transition:all 0.15s;"'
-      + ' onmouseover="this.style.borderColor='#2563eb';this.style.background='#eff6ff'"'
-      + ' onmouseout="this.style.borderColor='#e5e9f0';this.style.background='#fff'">'
-      + '<span style="font-size:20px;width:36px;height:36px;background:#eff6ff;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;">👤</span>'
-      + '<span>' + m.name + '</span>'
-      + '<span style="margin-left:auto;color:#9ca3af;font-size:18px;">›</span>'
-      + '</a>'
-    ).join('');
+    const btns = members.map(function(m) {
+      var url = BASE + '?user=' + m.id + '&mode=daily-answer';
+      return '<a href="' + url + '" style="display:flex;align-items:center;gap:12px;width:100%;padding:14px 18px;margin-bottom:8px;background:#fff;border:1.5px solid #e5e9f0;border-radius:12px;font-size:14px;font-weight:700;color:#111827;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,0.06);">'
+        + '<span style="font-size:20px;width:36px;height:36px;background:#eff6ff;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;">👤</span>'
+        + '<span style="flex:1">' + m.name + '</span>'
+        + '<span style="color:#9ca3af;font-size:18px;">›</span>'
+        + '</a>';
+    }).join('')
 
     return '<div style="padding:20px 0 12px">'
       + '<h2 class="section-select-title">📅 今日のクイズ 回答・解説</h2>'
