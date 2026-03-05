@@ -417,7 +417,7 @@ body {
 <div class="container">
     <!-- Header -->
     <div class="header">
-        <a href="index.html" class="back-btn">←</a>
+        <a id="backBtn" class="back-btn">←</a>
         <div class="header-text">
             <h1>🎬 AI動画で学ぶ <span class="video-count-badge" id="videoCount">0本</span></h1>
             <p>AI生成動画で医療・ビジネス知識を効率的に学習</p>
@@ -502,6 +502,10 @@ function renderCatFilter() {
             activeCategory = chip.dataset.cat;
             renderCatFilter();
             renderGrid();
+            // ユーザーパラメータを引き継いで戻る
+const urlParams = new URLSearchParams(window.location.search);
+const userId = urlParams.get('user') || 'default';
+document.getElementById('backBtn').href = 'index.html?user=' + userId;
         });
     });
 }
