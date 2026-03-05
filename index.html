@@ -74,7 +74,8 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); min-heigh
 .ranking-card-wrap { cursor: default !important; padding: 0 !important; overflow: hidden; }
 .ranking-card-wrap:hover { border-color: var(--border) !important; background: var(--white) !important; box-shadow: var(--shadow) !important; }
 #ranking-card { width: 100%; }
-.rank-header { display: flex; align-items: center; gap: 12px; padding: 16px 18px 12px; border-bottom: 1px solid var(--border); }
+.rank-header { display: flex; align-items: center; gap: 12px; padding: 16px 18px 12px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
+.rank-header-bg { position: absolute; inset: 0; opacity: 0.04; background: radial-gradient(circle at 10% 50%, var(--primary) 0%, transparent 60%); pointer-events: none; }
 .rank-my-pos { text-align: center; min-width: 64px; }
 .rank-my-num { font-size: 48px; font-weight: 900; line-height: 1; }
 .rank-my-denom { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
@@ -82,23 +83,32 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); min-heigh
 .rank-my-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.08em; font-weight: 600; margin-bottom: 3px; }
 .rank-my-count { font-size: 13px; color: var(--text-sub); margin-top: 2px; }
 .rank-my-msg { font-size: 13px; font-weight: 700; }
-.rank-list { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 6px; }
+.rank-list { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 4px; }
 .rank-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; background: var(--bg); border: 1px solid transparent; }
-.rank-row.me { background: var(--primary-light); border-color: #bfdbfe; }
+.rank-row.me { background: var(--primary-light); border-color: #bfdbfe; box-shadow: 0 2px 8px rgba(37,99,235,0.10); }
 .rank-row.chase { background: #fff7ed; border-color: #fed7aa; }
+.rank-row.below-me { background: #f0fdf4; border-color: #bbf7d0; }
 .rank-row-medal { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
 .rank-row-num { font-size: 12px; font-weight: 700; color: var(--text-muted); width: 24px; text-align: center; flex-shrink: 0; }
 .rank-row-name { font-size: 13px; font-weight: 700; flex: 1; color: var(--text); }
 .rank-row-name.me { color: var(--primary); }
 .rank-row-bar-wrap { width: 80px; }
 .rank-row-bar { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
-.rank-row-bar-fill { height: 100%; border-radius: 4px; background: var(--primary); transition: width 0.4s; }
+.rank-row-bar-fill { height: 100%; border-radius: 4px; background: var(--primary); transition: width 0.6s ease; }
 .rank-row.me .rank-row-bar-fill { background: var(--primary); }
 .rank-row.chase .rank-row-bar-fill { background: #f97316; }
+.rank-row.below-me .rank-row-bar-fill { background: #22c55e; }
 .rank-row-count { font-size: 12px; font-weight: 700; color: var(--text); min-width: 40px; text-align: right; }
 .rank-diff { font-size: 11px; font-weight: 700; color: #f97316; padding: 2px 8px; background: #fff7ed; border-radius: 20px; margin-left: 4px; white-space: nowrap; }
 .rank-diff.above { color: var(--primary); background: var(--primary-light); }
 .rank-section-label { font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.08em; padding: 0 14px 6px; }
+/* 差分バナー */
+.rank-gap-banner { margin: 3px 0; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.rank-gap-banner.up { background: linear-gradient(90deg, #fff7ed, #fff); border-left: 3px solid #f97316; color: #c2410c; }
+.rank-gap-banner.down { background: linear-gradient(90deg, #f0fdf4, #fff); border-left: 3px solid #22c55e; color: #15803d; }
+.rank-gap-banner.top-gap { background: linear-gradient(90deg, #eff6ff, #fff); border-left: 3px solid var(--primary); color: #1d4ed8; }
+/* 省略行 */
+.rank-ellipsis { text-align: center; font-size: 11px; color: var(--text-muted); padding: 2px 0; letter-spacing: 0.05em; }
 
 /* ===== CATEGORY BLOCKS ===== */
 .section-select-title { font-size: 18px; font-weight: 900; color: var(--text); margin-bottom: 14px; }
@@ -317,26 +327,33 @@ async function renderRankingCard() {
   } else if (myRank === 1) {
     rankColor = '#d97706'; rankMsg = '現在トップ！'; rankEmoji = '🥇';
   } else if (myRank === 2) {
-    rankColor = '#6b7280'; rankMsg = 'あと1人でトップ！'; rankEmoji = '🥈';
+    rankColor = '#6b7280'; rankMsg = 'あと1問で首位奪取！'; rankEmoji = '🥈';
   } else if (myRank === 3) {
-    rankColor = '#92400e'; rankMsg = 'TOP3キープ中！'; rankEmoji = '🥉';
+    rankColor = '#92400e'; rankMsg = 'TOP3！表彰台キープ中'; rankEmoji = '🥉';
+  } else if (myRank <= 5) {
+    rankColor = '#7c3aed'; rankMsg = 'TOP5入り！あと一息！'; rankEmoji = '🔥';
   } else {
-    rankColor = '#dc2626'; rankMsg = '差がついてるぞ！追い上げよう！'; rankEmoji = '🔥';
+    rankColor = '#dc2626'; rankMsg = '差がついてるぞ！追い上げよう！'; rankEmoji = '💪';
   }
 
   // ランク行生成
   function makeRow(rank, r, type) {
     const medals = {1:'🥇',2:'🥈',3:'🥉'};
     const medal = medals[rank] ? medals[rank] : '';
-    const rankNum = medal ? '' : '#' + rank;
     const pct = Math.min(100, Math.round((r.count / total) * 100));
     const isMe = type === 'me';
     const isChase = type === 'chase';
-    const rowClass = isMe ? 'rank-row me' : (isChase ? 'rank-row chase' : 'rank-row');
+    const isBelow = type === 'below';
+    let rowClass = 'rank-row';
+    if (isMe) rowClass = 'rank-row me';
+    else if (isChase) rowClass = 'rank-row chase';
+    else if (isBelow) rowClass = 'rank-row below-me';
     const nameClass = isMe ? 'rank-row-name me' : 'rank-row-name';
-    const barColor = isMe ? '#2563eb' : (isChase ? '#f97316' : '#94a3b8');
+    let barColor = '#94a3b8';
+    if (isMe) barColor = '#2563eb';
+    else if (isChase) barColor = '#f97316';
+    else if (isBelow) barColor = '#22c55e';
     const meTag = isMe ? ' <span style="font-size:10px;background:#dbeafe;color:#1d4ed8;padding:1px 6px;border-radius:10px;font-weight:700">あなた</span>' : '';
-
     return '<div class="' + rowClass + '">'
       + '<span class="rank-row-medal">' + (medal || '<span class="rank-row-num">' + rank + '</span>') + '</span>'
       + '<span class="' + nameClass + '">' + displayName(r.user) + meTag + '</span>'
@@ -345,46 +362,98 @@ async function renderRankingCard() {
       + '</div>';
   }
 
-  // 表示リスト組み立て
+  // 差分バナー生成
+  function gapBannerUp(diff, aboveRank) {
+    let msg = '';
+    if (diff <= 3) msg = '🔥 あと<strong>' + diff + '問</strong>で' + aboveRank + '位を抜ける！今すぐやろう！';
+    else if (diff <= 10) msg = '⚡ あと<strong>' + diff + '問</strong>で追い抜き可能！';
+    else if (diff <= 30) msg = '📈 あと<strong>' + diff + '問</strong>で上の順位へ！';
+    else msg = '💡 上との差は<strong>' + diff + '問</strong>。コツコツ積み上げよう！';
+    return '<div class="rank-gap-banner up">▲ ' + msg + '</div>';
+  }
+
+  function gapBannerDown(diff, belowRank) {
+    let msg = '';
+    if (diff <= 3) msg = '⚠️ <strong>' + belowRank + '位</strong>が<strong>' + diff + '問差</strong>まで迫ってる！';
+    else if (diff <= 10) msg = '👀 <strong>' + diff + '問差</strong>で追われてる。差を広げよう！';
+    else msg = '✅ <strong>' + diff + '問差</strong>でリード中。この調子！';
+    return '<div class="rank-gap-banner down">▼ ' + msg + '</div>';
+  }
+
+  // 表示リスト組み立て（前後2名ずつ）
   let listHtml = '';
 
   if (myIdx < 0 || myCount === 0) {
     listHtml += '<div class="rank-section-label">RANKING</div>';
     ranks.slice(0, 4).forEach((r, i) => { listHtml += makeRow(i+1, r, ''); });
-  } else if (myRank === 1) {
-    listHtml += '<div class="rank-section-label">RANKING</div>';
-    listHtml += makeRow(1, ranks[0], 'me');
-    if (ranks[1]) listHtml += makeRow(2, ranks[1], 'chase');
-    if (ranks[2]) listHtml += makeRow(3, ranks[2], '');
   } else {
-    // 1位（差分バッジ付き）
-    const topDiff = ranks[0].count - myCount;
-    listHtml += '<div class="rank-section-label">TOP との差：<strong style="color:#2563eb">' + topDiff + '問</strong></div>';
-    listHtml += makeRow(1, ranks[0], '');
+    // 1位との差（自分が1位でない場合）
+    if (myRank > 1) {
+      const topDiff = ranks[0].count - myCount;
+      listHtml += '<div class="rank-gap-banner top-gap">🏆 1位との差：<strong>' + topDiff + '問</strong>' + (topDiff <= 20 ? '　射程圏内！' : '') + '</div>';
+    }
 
-    // 直前（抜ける相手）
-    if (myIdx > 0) {
-      const above = ranks[myIdx - 1];
-      const diff = above.count - myCount;
-      listHtml += makeRow(myIdx, above, 'chase');
-      listHtml += '<div style="text-align:center;font-size:11px;font-weight:700;color:#f97316;padding:3px 0">▲ あと' + diff + '問で抜ける！</div>';
+    // 自分より上2名
+    const above2Start = Math.max(0, myIdx - 2);
+    for (let i = above2Start; i < myIdx; i++) {
+      const r = ranks[i];
+      const rank = i + 1;
+      const diff = r.count - myCount;
+      // 直上1人目だけバナー
+      if (i === myIdx - 1) {
+        listHtml += makeRow(rank, r, 'chase');
+        listHtml += gapBannerUp(diff, rank);
+      } else {
+        listHtml += makeRow(rank, r, '');
+      }
+    }
+    // 1位と直上の間に省略がある場合
+    if (above2Start > 1) {
+      listHtml = '<div class="rank-gap-banner top-gap">🏆 1位との差：<strong>' + (ranks[0].count - myCount) + '問</strong>' + (ranks[0].count - myCount <= 20 ? '　射程圏内！' : '') + '</div>'
+        + makeRow(1, ranks[0], '')
+        + '<div class="rank-ellipsis">・・・</div>'
+        + listHtml.replace(/<div class="rank-gap-banner top-gap">.*?<\/div>/, '');
+    } else if (above2Start === 1) {
+      listHtml = '<div class="rank-gap-banner top-gap">🏆 1位との差：<strong>' + (ranks[0].count - myCount) + '問</strong>' + (ranks[0].count - myCount <= 20 ? '　射程圏内！' : '') + '</div>'
+        + makeRow(1, ranks[0], '')
+        + listHtml.replace(/<div class="rank-gap-banner top-gap">.*?<\/div>/, '');
     }
 
     // 自分
     listHtml += makeRow(myRank, ranks[myIdx], 'me');
 
-    // 直後（追ってくる相手）
-    if (ranks[myIdx + 1]) {
-      const below = ranks[myIdx + 1];
-      const diff2 = myCount - below.count;
-      listHtml += '<div style="text-align:center;font-size:11px;color:#9ca3af;padding:3px 0">▼ ' + diff2 + '問差</div>';
-      listHtml += makeRow(myRank + 1, below, '');
+    // 自分より下2名
+    for (let i = myIdx + 1; i <= Math.min(myIdx + 2, ranks.length - 1); i++) {
+      const r = ranks[i];
+      const rank = i + 1;
+      const diff = myCount - r.count;
+      if (i === myIdx + 1) {
+        listHtml += gapBannerDown(diff, rank);
+        listHtml += makeRow(rank, r, 'below');
+      } else {
+        listHtml += makeRow(rank, r, '');
+      }
+    }
+
+    // 1位の場合はシンプルに下2名
+    if (myRank === 1) {
+      listHtml = '<div class="rank-section-label">🏆 RANKING</div>';
+      listHtml += makeRow(1, ranks[0], 'me');
+      if (ranks[1]) {
+        const diff1 = myCount - ranks[1].count;
+        listHtml += gapBannerDown(diff1, 2);
+        listHtml += makeRow(2, ranks[1], 'below');
+      }
+      if (ranks[2]) {
+        const diff2 = myCount - ranks[2].count;
+        listHtml += makeRow(3, ranks[2], '');
+      }
     }
   }
 
   el.innerHTML =
-    // ヘッダー：自分の順位大きく
     '<div class="rank-header">'
+    + '<div class="rank-header-bg"></div>'
     + '<div class="rank-my-pos">'
     + '<div class="rank-my-num" style="color:' + rankColor + '">' + (myRank || '−') + '</div>'
     + '<div class="rank-my-denom">/ ' + rankCount + '位</div>'
