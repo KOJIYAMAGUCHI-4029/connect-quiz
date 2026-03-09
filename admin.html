@@ -172,7 +172,7 @@
 
   <div class="summary-cards">
     <div class="card"><div class="num" id="sumUsers">-</div><div class="label">登録ユーザー数</div></div>
-    <div class="card"><div class="num">800</div><div class="label">総問題数</div></div>
+    <div class="card"><div class="num">1000</div><div class="label">総問題数</div></div>
     <div class="card"><div class="num" id="sumAvgAnswered">-</div><div class="label">平均回答数</div></div>
     <div class="card"><div class="num" id="sumAvgAccuracy">-</div><div class="label">平均正解率</div></div>
     <div class="card"><div class="num" id="sumTotalAnswered">-</div><div class="label">総回答数（全員合計）</div></div>
@@ -185,7 +185,7 @@
       <thead>
         <tr>
           <th>ユーザー</th>
-          <th>回答数 / 800問</th>
+          <th>回答数 / 1000問</th>
           <th>進捗率</th>
           <th>正解数</th>
           <th>不正解数</th>
@@ -1939,7 +1939,7 @@ window.loadAllData = async function() {
       tbody.innerHTML = '<tr><td colspan="7" class="no-data">データなし</td></tr>';
     } else {
       tbody.innerHTML = users.sort((a,b) => b.total - a.total).map(u => {
-        const progress = Math.round(u.total / 800 * 100);
+        const progress = Math.round(u.total / 1000 * 100);
         const name = getDisplayName(u.userId);
         let badge = '';
         if (u.total === 0) badge = '<span class="badge badge-gray">未開始</span>';
@@ -1950,7 +1950,7 @@ window.loadAllData = async function() {
 
         return `<tr>
           <td><div class="user-name">${name}</div><div class="user-id">${u.userId}</div></td>
-          <td><strong>${u.total}</strong> / 800問</td>
+          <td><strong>${u.total}</strong> / 1000問</td>
           <td>
             <div class="progress-bar-wrap">
               <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
