@@ -54,10 +54,7 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); min-heigh
 .hero-copy { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
 .count { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
-/* ===== MENU CARDS ===== */
-.menu-cards { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-.menu-card { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.15s; font-family: inherit; text-align: left; width: 100%; box-shadow: var(--shadow); }
-.menu-card:hover { filter: brightness(0.97); box-shadow: var(--shadow-md); transform: translateX(2px); }
+(2px); }
 .menu-card.card-select { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-color: #93c5fd; }
 .menu-card.card-select .icon { background: #2563eb; }
 .menu-card.card-daily { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #6ee7b7; }
@@ -112,11 +109,15 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); min-heigh
 
 /* ===== CATEGORY BLOCKS ===== */
 .section-select-title { font-size: 18px; font-weight: 900; color: var(--text); margin-bottom: 14px; }
-.cat-block { border-radius: var(--radius); padding: 18px 16px 14px; margin-bottom: 16px; border-left-width: 4px; border-left-style: solid; }
-.cat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.cat-label { font-size: 15px; font-weight: 900; }
-.cat-stat { font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.7); padding: 3px 10px; border-radius: 20px; }
-.cat-prog { height: 5px; background: rgba(0,0,0,0.08); border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+.cat-block { border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; border: 1.5px solid rgba(0,0,0,0.07); box-shadow: var(--shadow); }
+.cat-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 12px; }
+.cat-header-left { display: flex; align-items: center; gap: 10px; }
+.cat-icon-big { font-size: 28px; line-height: 1; }
+.cat-label { font-size: 16px; font-weight: 900; }
+.cat-subtitle { font-size: 11px; font-weight: 600; opacity: 0.75; margin-top: 1px; }
+.cat-stat { font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.85); padding: 4px 12px; border-radius: 20px; white-space: nowrap; }
+.cat-body { padding: 12px 14px 14px; }
+.cat-prog { height: 6px; background: rgba(0,0,0,0.08); border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
 .cat-prog-inner { height: 100%; border-radius: 10px; transition: width 0.4s; }
 
 /* ===== SECTION GRID ===== */
@@ -635,17 +636,17 @@ function renderSelect() {
   const bizKeys = ["商社","日本の省庁","ファクトフルネス","IT基礎知識","AI・機械学習","サイバーセキュリティ","DX（デジタルトランスフォーメーション）","財閥・大企業グループ","スタートアップ・ベンチャー","外資系企業","コンサルティング","金融・銀行","株式・投資","会計・財務","経済指標","マーケティング","営業・交渉術","ロジカルシンキング","プロジェクト管理","人材・HR業界","法律・コンプライアンス","グローバルビジネス","SDGs・ESG","現代の偉人（世界）","現代の偉人（日本）","日本の財閥企業","日本の主要企業・時価総額","日本の経済史","世界の株式市場","ベンチャー・スタートアップ用語","マーケティング基礎","会計・財務の基礎","ビジネスフレームワーク","世界の主要企業・ビジネス","医療DX・ヘルステック","地政学","宗教","米中AIの覇権争い","半導体","世界の大手コンサル"];
   const newsKeys = ["中東・エネルギー","米中対立","経済安保","ベネズエラ","中南米","ウクライナ","ロシアと安全保障","世界経済と日本"];
   const categories = [
-    { id:'credo',    label:'🏅 CREDO',              color:'#7c3aed', bg:'linear-gradient(135deg,#ede9fe,#f5f3ff)',
+    { id:'credo',    label:'CREDO',            icon:'🏅', subtitle:'企業理念・行動指針', color:'#7c3aed', bg:'linear-gradient(135deg,#7c3aed,#a855f7)', bgBody:'#faf5ff',
       check: name => name.includes('CREDO') },
-    { id:'news',     label:'🌏 世界情勢ニュース',    color:'#dc2626', bg:'linear-gradient(135deg,#fff1f1,#fff5f5)',
+    { id:'news',     label:'世界情勢ニュース',  icon:'🌏', subtitle:'国際・地政学・経済安保', color:'#dc2626', bg:'linear-gradient(135deg,#dc2626,#f97316)', bgBody:'#fff8f8',
       check: name => newsKeys.some(k=>name.includes(k)) },
-    { id:'medical',  label:'🏥 医師紹介基礎知識',   color:'#1a73e8', bg:'linear-gradient(135deg,#eef4ff,#f0f9ff)',
+    { id:'medical',  label:'医師紹介基礎知識', icon:'🏥', subtitle:'医療・クリニック・診療科', color:'#1a73e8', bg:'linear-gradient(135deg,#1a73e8,#06b6d4)', bgBody:'#f0f7ff',
       check: name => !name.includes('CREDO') && !newsKeys.some(k=>name.includes(k)) && !bizKeys.some(k=>name.includes(k)) && !name.startsWith('🗾') && !name.startsWith('🎮') },
-    { id:'business', label:'💼 ビジネス',            color:'#0f766e', bg:'linear-gradient(135deg,#f0fdfa,#ecfdf5)',
+    { id:'business', label:'ビジネス教養',      icon:'💼', subtitle:'経営・金融・マーケティング', color:'#0f766e', bg:'linear-gradient(135deg,#0f766e,#059669)', bgBody:'#f0fdf9',
       check: name => bizKeys.some(k=>name.includes(k)) },
-    { id:'local',    label:'🗾 地域・ご当地',        color:'#b45309', bg:'linear-gradient(135deg,#fffbeb,#fef3c7)',
+    { id:'local',    label:'地域・ご当地',      icon:'🗾', subtitle:'日本各地の知識・文化', color:'#b45309', bg:'linear-gradient(135deg,#b45309,#d97706)', bgBody:'#fffbf0',
       check: name => name.startsWith('🗾') },
-    { id:'entertainment', label:'🎮 遊び・エンタメ',   color:'#db2777', bg:'linear-gradient(135deg,#fdf2f8,#fce7f3)',
+    { id:'entertainment', label:'遊び・エンタメ', icon:'🎮', subtitle:'ゲーム・映画・エンタメ', color:'#db2777', bg:'linear-gradient(135deg,#db2777,#9333ea)', bgBody:'#fdf4ff',
       check: name => name.startsWith('🎮') }
   ];
 
@@ -677,13 +678,18 @@ function renderSelect() {
         + pb
         + '</div>';
     }).join('');
-    html += '<div class="cat-block" style="border-left:4px solid ' + cat.color + ';background:' + cat.bg + ';">'
-      + '<div class="cat-header">'
-      + '<span class="cat-label" style="color:' + cat.color + '">' + cat.label + '</span>'
+    html += '<div class="cat-block">'
+      + '<div class="cat-header" style="background:' + cat.bg + ';color:#fff;">'
+      + '<div class="cat-header-left">'
+      + '<span class="cat-icon-big">' + cat.icon + '</span>'
+      + '<div><div class="cat-label">' + cat.label + '</div><div class="cat-subtitle">' + cat.subtitle + '</div></div>'
+      + '</div>'
       + '<span class="cat-stat" style="color:' + cat.color + '">' + statStr + '</span>'
       + '</div>'
+      + '<div class="cat-body" style="background:' + cat.bgBody + ';">'
       + progBar
       + '<div class="section-grid">' + cards + '</div>'
+      + '</div>'
       + '</div>';
   });
   return html;
