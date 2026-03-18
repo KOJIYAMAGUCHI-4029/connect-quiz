@@ -29,11 +29,13 @@
 body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 16px; color: var(--text); }
 #app { width: 100%; max-width: 680px; }
 
+/* ===== MENU CARDS ===== */
+.menu-cards { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 /* PC: 2カラム */
 @media (min-width: 900px) {
   body { padding: 24px 16px; background: #e8edf2; }
   #app { max-width: 720px; }
-  .menu-cards { display: grid; grid-template-columns: 1fr 1fr; }
+  .menu-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .menu-card.ranking-card-wrap { grid-column: 1 / -1; }
   .menu-card.card-video { grid-column: 1 / -1; }
 }
@@ -55,7 +57,8 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); min-heigh
 .hero-copy { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
 .count { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
-(2px); }
+.menu-card { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.15s; font-family: inherit; text-align: left; width: 100%; box-shadow: var(--shadow); }
+.menu-card:hover { filter: brightness(0.97); box-shadow: var(--shadow-md); transform: translateX(2px); }
 .menu-card.card-select { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-color: #93c5fd; }
 .menu-card.card-select .icon { background: #2563eb; }
 .menu-card.card-daily { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #6ee7b7; }
