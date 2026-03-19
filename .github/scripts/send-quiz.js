@@ -5,6 +5,10 @@
  * index.html 内の quizData を読み取り、3問ずつ送信
  * 平日のみ（cron側で制御）
  * ※ 日付ベースのシードでシャッフルし、毎日違う問題を出題
+ * 
+ * 【修正履歴】
+ * - セクション絞り込みを番号ベース→絵文字マークベースに変更
+ *   対象: 🩺🏥💊👨‍⚕️ マークのセクション（医療系）
  */
 
 const fs = require('fs');
@@ -15,6 +19,15 @@ const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
 const CHANNEL_ID = process.env.SLACK_CHANNEL_ID || 'C0144FZUBDK';
 const DAILY_QUESTION_COUNT = 3;
 const PROGRESS_FILE = path.join(__dirname, '..', 'quiz-progress.json');
+
+// ============================================================
+// 医療系セクションの絵文字マーク（出題対象）
+// ============================================================
+const MEDICAL_EMOJIS = ['🩺', '🏥', '💊', '👨‍⚕️'];
+
+function isMedicalSection(sectionName) {
+    return MEDICAL_EMOJIS.some(emoji => sectionName.startsWith(emoji));
+}
 
 function seededRandom(seed) {
     let s = seed;
@@ -50,9 +63,8 @@ function extractQuizData() {
 function getAllQuestions(quizData) {
     const allQ = [];
     for (const section of quizData) {
-        const secNumMatch = section.section.match(/^(\d+)/);
-        const secNum = secNumMatch ? parseInt(secNumMatch[1]) : 999;
-        if (secNum > 47) continue;
+        // 🩺🏥💊👨‍⚕️ マークのセクションのみ対象
+        if (!isMedicalSection(section.section)) continue;
         for (const q of section.questions) {
             allQ.push({
                 section: section.section,
@@ -131,7 +143,12 @@ async function main() {
     const quizData = extractQuizData();
     const allQuestions = getAllQuestions(quizData);
     const total = allQuestions.length;
-    console.log(`[INFO] 全${total}問（セクション1〜47）から出題`);
+    console.log(`[INFO] 全${total}問（医療系セクション: 🩺🏥💊👨‍⚕️）から出題`);
+
+    if (total === 0) {
+        console.error('[ERROR] 出題対象の問題が0問です。セクション設定を確認してください');
+        process.exit(1);
+    }
 
     let usedIds = progress.usedIds || [];
     const unusedQuestions = allQuestions.filter(q => !usedIds.includes(q.id));
