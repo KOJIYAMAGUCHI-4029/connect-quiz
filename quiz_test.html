@@ -17,10 +17,10 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 .hero-badges{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
 .badge{background:rgba(233,69,96,0.12);border:1px solid rgba(233,69,96,0.3);color:var(--text);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px}
 
-.selector{max-width:480px;margin:36px auto 0;padding:0 16px}
+.selector{max-width:600px;margin:36px auto 0;padding:0 16px}
 .selector-title{font-size:12px;color:var(--muted);text-align:center;margin-bottom:14px;letter-spacing:2px}
-.player-btns{display:flex;gap:10px}
-.player-btn{flex:1;background:var(--card2);border:2px solid #2a2a3e;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;padding:18px 8px;border-radius:14px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px}
+.player-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.player-btn{background:var(--card2);border:2px solid #2a2a3e;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;padding:18px 8px;border-radius:14px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px}
 .player-btn .emoji{font-size:28px}
 .player-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff;transform:translateY(-3px);box-shadow:0 8px 24px rgba(233,69,96,0.3)}
 
@@ -55,10 +55,25 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 .nav-btn.ghost:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:transparent;transform:none}
 
 #result-area{display:none;max-width:480px;margin:60px auto 0;padding:0 16px;text-align:center}
-.sending-emoji{font-size:56px;margin-bottom:16px;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.submit-btn{display:inline-block;background:linear-gradient(135deg,var(--accent),#c73652);color:#fff;text-decoration:none;font-weight:700;font-size:16px;padding:18px 36px;border-radius:14px;transition:all .2s;box-shadow:0 4px 20px rgba(233,69,96,0.3)}
-.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(233,69,96,0.5)}
+.result-card{background:var(--card);border-radius:20px;padding:32px 24px;border:1px solid #2a2a3e;margin-bottom:20px}
+.result-name{font-size:13px;color:var(--muted);margin-bottom:8px}
+.result-score{font-family:'Bebas Neue',sans-serif;font-size:72px;color:var(--accent);line-height:1}
+.result-total{font-size:14px;color:var(--muted);margin-bottom:16px}
+.result-rank{font-size:20px;font-weight:900;margin-bottom:20px}
+.result-rank.clear{color:var(--gold)}
+.result-rank.warn{color:#ff9f43}
+.result-rank.fail{color:var(--accent)}
+.answer-list{text-align:left;margin-top:16px}
+.answer-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #2a2a3e;font-size:13px}
+.answer-row:last-child{border-bottom:none}
+.ans-num{font-family:'Bebas Neue',sans-serif;color:var(--muted);min-width:24px}
+.ans-icon{font-size:16px;min-width:20px}
+.ans-detail{flex:1;line-height:1.6}
+.ans-q{color:#fff;font-weight:600;margin-bottom:4px}
+.ans-your{color:var(--muted)}
+.ans-correct{color:#2ecc71}
+.retry-btn{display:inline-block;background:linear-gradient(135deg,var(--accent),#c73652);color:#fff;text-decoration:none;font-weight:700;font-size:16px;padding:18px 36px;border-radius:14px;transition:all .2s;box-shadow:0 4px 20px rgba(233,69,96,0.3);cursor:pointer;border:none;font-family:'Noto Sans JP',sans-serif;width:100%;margin-top:16px}
+.retry-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(233,69,96,0.5)}
 </style>
 </head>
 <body>
@@ -77,8 +92,9 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
   <div class="selector-title">▼ 受験者を選んでください</div>
   <div class="player-btns">
     <button class="player-btn" onclick="startQuiz('izumi')"><span class="emoji">🧑</span>和泉</button>
-    <button class="player-btn" onclick="startQuiz('yamada')"><span class="emoji">👩</span>山田</button>
-    <button class="player-btn" onclick="startQuiz('kase')"><span class="emoji">👨</span>加瀬</button>
+    <button class="player-btn" onclick="startQuiz('adachi')"><span class="emoji">👩</span>安達</button>
+    <button class="player-btn" onclick="startQuiz('yamada')"><span class="emoji">👨</span>山田</button>
+    <button class="player-btn" onclick="startQuiz('kase')"><span class="emoji">👨‍💼</span>加瀬</button>
   </div>
 </div>
 
@@ -86,8 +102,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 <div id="result-area"></div>
 
 <script>
-const QUIZ_DATA = {"izumi": {"name": "和泉", "questions": [{"id": 95015, "section": "43. 健診・人間ドック", "q": "健診業務のメリットとして医師から多く挙げられるものはどれか？", "c": ["緊急対応が多い", "研究に集中できる", "高度手術を多く経験できる", "当直なし・日勤のみ・ワークライフバランスが整いやすい"]}, {"id": 135, "section": "28. 産業医", "q": "産業医資格の認定機関はどれか？", "c": ["厚生労働省", "日本医師会", "日本産業医師会", "都道府県医師会"]}, {"id": 3, "section": "1. 医学部について", "q": "医師国家試験はいつ実施されるか？", "c": ["4年の10月", "6年の2月", "5年の6月", "6年の12月"]}, {"id": 140, "section": "30. 医師プラットフォーム", "q": "m3.comの創業者と出身はどれか？", "c": ["孫正義・ソフトバンク創業", "谷村格・マッキンゼー出身・2000年設立", "三木谷浩史・楽天創業", "藤田晋・サイバーエージェント創業"]}, {"id": 346, "section": "19. 産婦人科・不妊治療", "q": "OHSSとは何か？", "c": ["卵巣過剰刺激症候群", "オーバーヒートサージャリーシステム", "卵子凍結保存術", "卵管閉塞症候群"]}, {"id": 90010, "section": "2. 医師の臨床研修制度", "q": "初期臨床研修の期間は何年間か？", "c": ["1年間", "2年間", "3年間", "4年間"]}, {"id": 2, "section": "1. 医学部について", "q": "医学部4〜5年進級時に受ける試験は？", "c": ["医師国家試験", "TOEFL・IELTS", "CBTとOSCE", "MATとGRE"]}, {"id": 93030, "section": "24. 甲状腺内科", "q": "バセドウ病の主な症状として正しいものはどれか？", "c": ["体重増加・むくみ・倦怠感", "動悸・発汗・体重減少・眼球突出", "関節痛・皮疹・発熱", "高血圧・頭痛・視力障害"]}, {"id": 94017, "section": "32. 耳鼻咽喉科", "q": "補聴器の適合（フィッティング）を行うのは主に誰か？", "c": ["医師のみ", "言語聴覚士・認定補聴器技能者", "看護師", "臨床工学技士"]}, {"id": 188, "section": "41. ファクトフルネス", "q": "収入レベル4（1日32ドル以上）にいる人は世界で約何人か？", "c": ["約10億人", "約1億人", "約40億人", "約70億人"]}]}, "yamada": {"name": "山田", "questions": [{"id": 94057, "section": "37. ドクターヘリ", "q": "ドクターヘリが特に有効な場面はどれか？", "c": ["市街地の軽症搬送", "へき地・離島・交通渋滞地域での重症患者の迅速搬送", "定期的な外来診察", "長距離の患者転院搬送"]}, {"id": 197202, "section": "41. ファクトフルネス", "q": "ファクトフルネスが指摘する人間の思い込みの傾向はどれか？", "c": ["世界は実際より良い状態だと過大評価する", "世界は実際より悪い状態だと過大評価する", "世界は実際より悪い状態だと過小評価する", "データより感覚の方が正確だと信じる"]}, {"id": 73, "section": "17. 糖尿病内科", "q": "糖尿病の3大合併症として正しい組み合わせはどれか？", "c": ["神経障害・網膜症・腎症", "心筋梗塞・脳梗塞・壊疽", "肝硬変・腎不全・失明", "高血圧・高脂血症・肥満"]}, {"id": 344, "section": "19. 産婦人科・不妊治療", "q": "ARTとは何の略か？", "c": ["人工授精技術", "高度生殖補助医療", "抗生物質投与療法", "アレルギー反応試験"]}, {"id": 92016, "section": "12. 形成外科", "q": "ケロイドと肥厚性瘢痕の違いとして正しいものはどれか？", "c": ["全く同じ疾患の別名", "ケロイドは傷の範囲を超えて増殖・肥厚性瘢痕は傷の範囲内に留まる", "肥厚性瘢痕の方が重症", "ケロイドは自然治癒する"]}, {"id": 95013, "section": "43. 健診・人間ドック", "q": "健診医のスキルチェックで最も重要な項目はどれか？", "c": ["手術件数", "内視鏡・エコー・健診読影の経験・資格", "当直回数", "病棟管理経験"]}, {"id": 93075, "section": "28. 産業医", "q": "「安全衛生委員会」における産業医の役割はどれか？", "c": ["委員会の議長を務める", "産業医として意見を述べる専門的助言者", "議事録の作成のみ", "委員会への出席は任意"]}, {"id": 132, "section": "28. 産業医", "q": "専属産業医が義務付けられる事業所の規模はどれか？", "c": ["常時30人以上", "常時50人以上", "常時500人・1000人以上", "常時100人以上"]}, {"id": 178, "section": "37. ドクターヘリ", "q": "全国のドクターヘリの設置数はおおよそ何機か？", "c": ["約20機", "約35機", "約57機", "約100機"]}, {"id": 93085, "section": "29. 麻酔科", "q": "ペインクリニックで主に行われる治療はどれか？", "c": ["がんの化学療法", "神経ブロック・薬物療法などの疼痛管理", "骨折の手術", "精神科的治療"]}]}, "kase": {"name": "加瀬", "questions": [{"id": 94034, "section": "34. 医師会", "q": "郡市区医師会の主な役割はどれか？", "c": ["全国の医療政策を立案する", "地域の救急当番・休日診療・健診などの地域医療活動を担う", "医師免許の更新を管理する", "製薬会社との契約を管理する"]}, {"id": 92046, "section": "15. 放射線科", "q": "ガンマナイフとは何か？", "c": ["外科用メス", "脳腫瘍・脳動静脈奇形などへの放射線定位照射治療装置", "レーザー手術装置", "MRI誘導手術ロボット"]}, {"id": 93055, "section": "26. 医療法・医療計画・医療圏", "q": "病院の管理者（院長）になれる資格として正しいものはどれか？", "c": ["医師免許を持つ者であれば誰でも", "都道府県知事が認定した医師", "原則として医師または歯科医師", "看護師でも可能"]}, {"id": 127, "section": "26. 医療法・医療計画・医療圏", "q": "5事業として含まれないものはどれか？", "c": ["救急医療", "災害医療", "へき地医療", "美容医療"]}, {"id": 357, "section": "25. 泌尿器科", "q": "泌尿器科でのダ・ヴィンチ手術で最多の術式はどれか？", "c": ["腎移植", "前立腺全摘術", "膀胱鏡検査", "精管結紮術"]}, {"id": 94054, "section": "37. ドクターヘリ", "q": "ドクターヘリの拠点病院に求められる条件はどれか？", "c": ["一般のクリニックでも可能", "救命救急センター等の高度救急医療機関であること", "200床以上の病院", "都道府県庁所在地にあること"]}, {"id": 49, "section": "10. 心臓血管外科", "q": "上皇さまの冠動脈バイパス手術を執刀した医師は誰か？", "c": ["福島孝徳医師", "小林純人医師", "渡辺剛医師", "天野篤医師"]}, {"id": 155, "section": "33. 透析", "q": "透析患者1人あたりの年間医療費の目安はどれか？", "c": ["約100万円", "約200万円", "約500万円", "約1000万円"]}, {"id": 361, "section": "33. 透析", "q": "透析スキルチェックで確認する種別として含まれないものはどれか？", "c": ["血液透析", "腹膜透析", "光線療法", "持続的血液濾過透析"]}, {"id": 93033, "section": "24. 甲状腺内科", "q": "甲状腺がんの最も多い組織型はどれか？", "c": ["未分化がん", "髄様がん", "乳頭がん", "濾胞がん"]}]}};
-const ANSWER_BASE = 'https://kojiyamaguchi-4029.github.io/connect-quiz/test_answers.html';
+const QUIZ_DATA = {"izumi":{"name":"和泉","questions":[{"section":"1. 医学部について","q":"医師国家試験はいつ実施されるか？","c":["6年の2月頃","4年の10月頃","5年の6月頃","6年の12月頃"],"ans":0},{"section":"2. 医師の臨床研修制度","q":"初期臨床研修の期間は何年間か？","c":["1年間","2年間","3年間","4年間"],"ans":1},{"section":"17. 糖尿病内科","q":"糖尿病の3大合併症として正しい組み合わせはどれか？","c":["高血圧・高脂血症・内臓脂肪症","心筋梗塞・脳梗塞・慢性壊疽病変","神経障害・網膜症・腎症","肝硬変・慢性腎不全・失明"],"ans":2},{"section":"28. 産業医","q":"専属産業医が義務付けられる事業所の規模はどれか？","c":["常時30人以上が対象となる事業所","常時50人以上が対象となる事業所","常時100人以上が対象の事業所","常時500人または1000人以上"],"ans":3},{"section":"26. 医療法","q":"医療法の5事業に含まれないものはどれか？","c":["美容医療","救急医療","災害医療","へき地医療"],"ans":0},{"section":"30. 医師プラットフォーム","q":"m3.comの創業者と経歴として正しいものはどれか？","c":["三木谷浩史・楽天グループ創業者・1997年設立","谷村格・マッキンゼー出身・2000年設立","孫正義・ソフトバンク創業者・1981年設立","藤田晋・サイバーエージェント・1998年設立"],"ans":1},{"section":"24. 甲状腺内科","q":"バセドウ病の主な症状として正しいものはどれか？","c":["高血圧・頭痛・視力障害・むくみ","体重増加・むくみ・倦怠感・徐脈感","動悸・発汗・体重減少・眼球突出","関節痛・皮疹・発熱・リンパ節腫脹"],"ans":2},{"section":"33. 透析","q":"透析患者1人あたりの年間医療費の目安はどれか？","c":["年間約100〜150万円程度","年間約200〜250万円程度","年間約300〜350万円程度","年間約500〜550万円程度"],"ans":3},{"section":"43. 健診・人間ドック","q":"健診業務で医師から多く挙げられるメリットはどれか？","c":["当直なし・日勤のみで働きやすい","緊急対応・急患が非常に多くある","高度な外科手術を多く経験できる","基礎研究や論文作成に専念できる"],"ans":0},{"section":"41. ファクトフルネス","q":"収入レベル4（1日32ドル以上）に該当する人は世界で約何人か？","c":["約1億人","約10億人","約40億人","約70億人"],"ans":1}]},"adachi":{"name":"安達","questions":[{"section":"1. 医学部について","q":"医学部4〜5年進級時に受ける試験はどれか？","c":["CBTとOSCE","MATとGRE","TOEFLとIELTS","センター試験と二次試験"],"ans":0},{"section":"10. 心臓血管外科","q":"上皇さまの冠動脈バイパス手術を執刀した医師はどれか？","c":["渡辺剛医師","天野篤医師","小林純人医師","福島孝徳医師"],"ans":1},{"section":"25. 泌尿器科","q":"泌尿器科のダ・ヴィンチ手術で最多の術式はどれか？","c":["生体腎移植手術","膀胱部分切除術","前立腺全摘術","尿管形成再建術"],"ans":2},{"section":"15. 放射線科","q":"ガンマナイフとは何か？","c":["外科手術用の高精度メス","MRI誘導型の手術支援ロボット","高出力医療用レーザー装置","脳疾患への放射線定位照射装置"],"ans":3},{"section":"19. 産婦人科・不妊治療","q":"ARTとは何の略か？","c":["高度生殖補助医療","人工授精技術手法","抗生物質投与療法","アレルギー反応試験"],"ans":0},{"section":"34. 医師会","q":"郡市区医師会の主な役割はどれか？","c":["全国の医療政策を立案すること","地域の救急・休日診療・健診を推進","医師免許の更新を一括管理すること","製薬会社との契約を一元管理すること"],"ans":1},{"section":"32. 耳鼻咽喉科","q":"補聴器の適合（フィッティング）を行うのは主に誰か？","c":["臨床工学技士や医療機器担当者","医師のみが実施できる専門行為","言語聴覚士・認定補聴器技能者","看護師が補助的に関わる業務"],"ans":2},{"section":"37. ドクターヘリ","q":"全国のドクターヘリの設置数はおおよそ何機か？","c":["約20機","約35機","約100機","約57機"],"ans":3},{"section":"28. 産業医","q":"産業医資格の認定機関はどれか？","c":["日本医師会","日本産業医師会","厚生労働省","都道府県医師会"],"ans":0},{"section":"12. 形成外科","q":"ケロイドと肥厚性瘢痕の違いとして正しいものはどれか？","c":["肥厚性瘢痕の方が炎症強く重症である","ケロイドは傷の範囲を超えて増殖する","両者は全く同一の疾患の別名である","ケロイドは時間経過で自然治癒する"],"ans":1}]},"yamada":{"name":"山田","questions":[{"section":"2. 医師の臨床研修制度","q":"後期研修（専攻医）の標準的な期間はどれか？","c":["おおよそ1年間程度","おおよそ2〜3年間","おおよそ5年間程度","おおよそ7年間程度"],"ans":1},{"section":"19. 産婦人科・不妊治療","q":"OHSSとは何か？","c":["卵管閉塞症候群の略","卵子凍結保存技術の略","卵巣過剰刺激症候群","卵管吻合再建術の略"],"ans":2},{"section":"26. 医療法","q":"病院の管理者（院長）になれる資格として正しいものはどれか？","c":["認定された看護師も管理者になれる","都道府県知事が認定した特定の者","医師免許保有者であれば誰でも可能","原則として医師または歯科医師"],"ans":3},{"section":"37. ドクターヘリ","q":"ドクターヘリが特に有効な場面はどれか？","c":["へき地・離島での重症患者の搬送","市街地での軽症患者の後送搬送","安定した患者の一般的な転院搬送","定期的な外来診察業務の補助作業"],"ans":0},{"section":"41. ファクトフルネス","q":"ファクトフルネスが指摘する人間の思い込みはどれか？","c":["感覚の方がデータより正確だと信じる","世界は実際より悪いと過大評価する","世界は実際より良いと過大評価する","世界の現状を常に正確に把握できる"],"ans":1},{"section":"43. 健診・人間ドック","q":"健診医のスキルチェックで最も重要な項目はどれか？","c":["年間の当直回数と所属施設での実績","病棟での患者管理の年数と経験実績","内視鏡・エコー・読影の経験と資格","外科手術の年間件数と症例数の実績"],"ans":2},{"section":"29. 麻酔科","q":"ペインクリニックで主に行われる治療はどれか？","c":["骨折整復などの外科的手術処置対応","悪性腫瘍への抗がん剤による化学療法","精神科医が中心となる精神科的治療","神経ブロック・薬物療法の疼痛管理"],"ans":3},{"section":"28. 産業医","q":"安全衛生委員会における産業医の役割はどれか？","c":["専門的助言者として意見を述べる","委員会の議長として全体統括する","議事録の作成と長期保管を担当する","委員会への出席義務はない"],"ans":0},{"section":"33. 透析","q":"透析スキルチェックに含まれないものはどれか？","c":["腹膜透析","光線療法","血液透析","持続血液濾過透析"],"ans":1},{"section":"24. 甲状腺内科","q":"甲状腺がんの最も多い組織型はどれか？","c":["未分化がん","濾胞がん","乳頭がん","髄様がん"],"ans":2}]},"kase":{"name":"加瀬","questions":[{"section":"17. 糖尿病内科","q":"HbA1cが示すものとして正しいものはどれか？","c":["過去1〜2ヶ月の平均血糖値","その日の空腹時血糖値のみ反映","膵臓のインスリン分泌能力指標","尿中ケトン体の産生量の指標"],"ans":0},{"section":"10. 心臓血管外科","q":"大動脈解離スタンフォード分類A型の特徴はどれか？","c":["下行大動脈のみが解離している","上行大動脈を含む解離である","腹部大動脈のみが解離している","冠動脈のみが解離している"],"ans":1},{"section":"34. 医師会","q":"日本医師会の最高議決機関はどれか？","c":["理事会","常任理事会","代議員会","倫理委員会"],"ans":2},{"section":"15. 放射線科","q":"PET検査で主に使用されるトレーサーはどれか？","c":["ヨード系の水溶性静脈内造影剤製剤","ガドリニウム系のMRI専用造影剤製剤","消化管撮影用の硫酸バリウム懸濁製剤","FDG（フルオロデオキシグルコース）"],"ans":3},{"section":"12. 形成外科","q":"遊離皮弁移植術の特徴として正しいものはどれか？","c":["皮弁を血管ごと切離し血管吻合する","隣接する皮膚を伸展させ縫合のみする","人工真皮や人工皮膚のみを使用する","分層植皮と全く同一の外科的手技"],"ans":0},{"section":"25. 泌尿器科","q":"PSA検査は何の腫瘍マーカーか？","c":["膀胱がん","前立腺がん","腎細胞がん","精巣がん"],"ans":1},{"section":"37. ドクターヘリ","q":"ドクターヘリの拠点病院に求められる条件はどれか？","c":["一般の200床以上の中規模病院施設","都道府県庁所在地に立地する医療施設","救命救急センター等の高度救急施設","地域のクリニックや診療所でも対応可"],"ans":2},{"section":"32. 耳鼻咽喉科","q":"慢性副鼻腔炎の一般的な手術術式はどれか？","c":["外耳道に対する鼓室形成術施行","口蓋扁桃に対する扁桃摘出術施行","穿孔した鼓膜への鼓膜形成術施行","内視鏡下鼻副鼻腔手術（ESS）"],"ans":3},{"section":"29. 麻酔科","q":"全身麻酔の導入に一般的に使用される薬剤はどれか？","c":["プロポフォール","ブピバカイン塩","塩酸リドカイン","塩酸モルヒネ注"],"ans":0},{"section":"19. 産婦人科・不妊治療","q":"体外受精（IVF）の手順として正しい順序はどれか？","c":["排卵誘発→採卵→受精→凍結胚の保存","受精確認→採卵→排卵誘発→胚移植","採卵→排卵誘発→体外受精→胚移植","排卵誘発→採卵→体外受精→胚移植"],"ans":3}]}};
 
 let player=null, currentQ=0, userAnswers={};
 
@@ -141,13 +156,53 @@ function prevQ(){if(currentQ>0){currentQ--;renderQ();}}
 function goResult(){
   document.getElementById('quiz-area').style.display='none';
   document.getElementById('result-area').style.display='block';
-  const ansStr=QUIZ_DATA[player].questions.map((_,i)=>userAnswers[i]??-1).join(',');
-  const url=ANSWER_BASE+'?player='+player+'&answers='+ansStr;
+  
+  const d=QUIZ_DATA[player];
+  const labels=['A','B','C','D'];
+  let score=0;
+  const rows=d.questions.map((q,i)=>{
+    const ua=userAnswers[i]??-1;
+    const correct=q.ans;
+    const ok=(ua===correct);
+    if(ok) score++;
+    const icon=ok?'✅':'❌';
+    const yourLabel=ua>=0?labels[ua]:'未回答';
+    const yourText=ua>=0?q.c[ua]:'未回答';
+    const correctText=q.c[correct];
+    return `<div class="answer-row">
+      <span class="ans-num">Q${i+1}</span>
+      <span class="ans-icon">${icon}</span>
+      <div class="ans-detail">
+        <div class="ans-q">${q.q}</div>
+        ${ok
+          ?`<div class="ans-correct">✓ ${labels[correct]}: ${correctText}</div>`
+          :`<div class="ans-your">あなた: ${yourLabel}${ua>=0?': '+yourText:''}</div>
+           <div class="ans-correct">正解: ${labels[correct]}: ${correctText}</div>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+
+  let rankClass,rankText;
+  if(score>=7){rankClass='clear';rankText='🏆 クリア！お見事です！';}
+  else if(score>=5){rankClass='warn';rankText='😅 もう少し！居残り勉強';}
+  else{rankClass='fail';rankText='🚨 赤点！要復習';}
+
   document.getElementById('result-area').innerHTML=`
-    <div class="sending-emoji">⚡</div>
-    <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:8px">採点中...</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:28px">結果が出ました！</div>
-    <a href="${url}" class="submit-btn">📊 結果を見る →</a>`;
+    <div class="result-card">
+      <div class="result-name">${d.name}さんの結果</div>
+      <div class="result-score">${score}</div>
+      <div class="result-total">/ 10問</div>
+      <div class="result-rank ${rankClass}">${rankText}</div>
+      <div class="answer-list">${rows}</div>
+    </div>
+    <button class="retry-btn" onclick="backToTop()">🔄 TOPに戻る</button>`;
+}
+
+function backToTop(){
+  document.getElementById('result-area').style.display='none';
+  document.getElementById('selector').style.display='block';
+  document.getElementById('selector').scrollIntoView({behavior:'smooth'});
 }
 </script>
 </body>
