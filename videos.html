@@ -19,6 +19,18 @@
     --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
     --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
     --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+
+    /* カテゴリカラー：診療科 */
+    --cat-shinryo-main: #0ea5e9;
+    --cat-shinryo-light: #e0f2fe;
+    --cat-shinryo-dark: #0369a1;
+    --cat-shinryo-badge: #bae6fd;
+
+    /* カテゴリカラー：医療制度 */
+    --cat-seido-main: #10b981;
+    --cat-seido-light: #d1fae5;
+    --cat-seido-dark: #047857;
+    --cat-seido-badge: #a7f3d0;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -134,7 +146,7 @@ body {
     gap: 6px;
     overflow-x: auto;
     padding-bottom: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
 }
@@ -166,12 +178,96 @@ body {
     color: #fff;
 }
 
+/* カテゴリ固有チップカラー */
+.cat-chip[data-cat="診療科"]:hover,
+.cat-chip[data-cat="診療科"].active {
+    background: var(--cat-shinryo-main);
+    border-color: var(--cat-shinryo-main);
+    color: #fff;
+}
+
+.cat-chip[data-cat="医療制度"]:hover,
+.cat-chip[data-cat="医療制度"].active {
+    background: var(--cat-seido-main);
+    border-color: var(--cat-seido-main);
+    color: #fff;
+}
+
+/* ===== セクションヘッダー（カテゴリ区分け表示） ===== */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    margin-top: 8px;
+}
+
+.section-header:first-child {
+    margin-top: 0;
+}
+
+.section-header.shinryo {
+    background: var(--cat-shinryo-light);
+    border-left: 4px solid var(--cat-shinryo-main);
+}
+
+.section-header.seido {
+    background: var(--cat-seido-light);
+    border-left: 4px solid var(--cat-seido-main);
+}
+
+.section-header-icon {
+    font-size: 20px;
+}
+
+.section-header-info {
+    flex: 1;
+}
+
+.section-header-title {
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.section-header.shinryo .section-header-title {
+    color: var(--cat-shinryo-dark);
+}
+
+.section-header.seido .section-header-title {
+    color: var(--cat-seido-dark);
+}
+
+.section-header-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+.section-count-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.shinryo .section-count-badge {
+    background: var(--cat-shinryo-badge);
+    color: var(--cat-shinryo-dark);
+}
+
+.seido .section-count-badge {
+    background: var(--cat-seido-badge);
+    color: var(--cat-seido-dark);
+}
+
 /* ===== Video Grid ===== */
 .video-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 @media (max-width: 480px) {
@@ -194,10 +290,27 @@ body {
     display: block;
 }
 
-.video-card:hover {
+/* カテゴリ別ボーダーアクセント */
+.video-card.cat-shinryo {
+    border-bottom: 3px solid var(--cat-shinryo-badge);
+}
+
+.video-card.cat-seido {
+    border-bottom: 3px solid var(--cat-seido-badge);
+}
+
+.video-card.cat-shinryo:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
-    border-color: var(--primary);
+    border-color: var(--cat-shinryo-main);
+    border-bottom-color: var(--cat-shinryo-main);
+}
+
+.video-card.cat-seido:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--cat-seido-main);
+    border-bottom-color: var(--cat-seido-main);
 }
 
 .thumb-wrap {
@@ -268,6 +381,28 @@ body {
     gap: 3px;
 }
 
+/* カテゴリバッジ（サムネイル右上） */
+.cat-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.03em;
+}
+
+.cat-badge.shinryo {
+    background: var(--cat-shinryo-main);
+    color: #fff;
+}
+
+.cat-badge.seido {
+    background: var(--cat-seido-main);
+    color: #fff;
+}
+
 .card-body {
     padding: 12px;
 }
@@ -275,19 +410,33 @@ body {
 .card-cat {
     font-size: 10px;
     font-weight: 700;
-    color: var(--primary);
     margin-bottom: 4px;
     display: flex;
     align-items: center;
     gap: 4px;
 }
 
+.card-cat.shinryo {
+    color: var(--cat-shinryo-dark);
+}
+
+.card-cat.seido {
+    color: var(--cat-seido-dark);
+}
+
 .card-cat-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--primary);
     flex-shrink: 0;
+}
+
+.card-cat-dot.shinryo {
+    background: var(--cat-shinryo-main);
+}
+
+.card-cat-dot.seido {
+    background: var(--cat-seido-main);
 }
 
 .card-title {
@@ -374,9 +523,11 @@ body {
 .modal-cat {
     font-size: 11px;
     font-weight: 700;
-    color: var(--primary);
     margin-bottom: 4px;
 }
+
+.modal-cat.shinryo { color: var(--cat-shinryo-dark); }
+.modal-cat.seido { color: var(--cat-seido-dark); }
 
 .modal-title {
     font-size: 16px;
@@ -410,6 +561,46 @@ body {
     font-size: 11px;
     color: var(--text-muted);
 }
+
+/* ===== 凡例（カテゴリ説明） ===== */
+.legend {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.legend-item.shinryo {
+    background: var(--cat-shinryo-light);
+    color: var(--cat-shinryo-dark);
+    border: 1.5px solid var(--cat-shinryo-badge);
+}
+
+.legend-item.seido {
+    background: var(--cat-seido-light);
+    color: var(--cat-seido-dark);
+    border: 1.5px solid var(--cat-seido-badge);
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legend-item.shinryo .legend-dot { background: var(--cat-shinryo-main); }
+.legend-item.seido .legend-dot { background: var(--cat-seido-main); }
 </style>
 </head>
 <body>
@@ -433,8 +624,14 @@ body {
     <!-- Category Filter -->
     <div class="cat-filter" id="catFilter"></div>
 
-    <!-- Video Grid -->
-    <div class="video-grid" id="videoGrid"></div>
+    <!-- カテゴリ凡例 -->
+    <div class="legend" id="legend">
+        <div class="legend-item shinryo"><span class="legend-dot"></span>🩺 診療科 — 各専門科の解説</div>
+        <div class="legend-item seido"><span class="legend-dot"></span>🏥 医療制度 — 制度・仕組みの解説</div>
+    </div>
+
+    <!-- Video Content -->
+    <div id="videoContent"></div>
 
     <!-- Empty State -->
     <div class="empty-state" id="emptyState" style="display:none">
@@ -466,9 +663,9 @@ const videos = [
     // ---------- 診療科 ----------
     { id: 'SH8i8laiiaY', title: '耳鼻咽喉科', cat: '診療科' },
     { id: '0HMjiYNagHo', title: '透析について', cat: '診療科' },
-    { id: 'ruGDqr38QA4', title: 'ドクターヘリ', cat: '医療制度' },
 
     // ---------- 医療制度 ----------
+    { id: 'ruGDqr38QA4', title: 'ドクターヘリ', cat: '医療制度' },
     { id: 'JhetNdsKN3c', title: '医師会とは', cat: '医療制度' },
     { id: 'mFiEVT-NByg', title: '大学医局', cat: '医療制度' },
     { id: 'Smy2uY0lC68', title: '機能特化型医療機関', cat: '医療制度' },
@@ -487,15 +684,17 @@ const videos = [
     { id: 'bms4rD033nA', title: '訪問診療科', cat: '診療科' },
     { id: 'GIROYfhH_xM', title: '産婦人科', cat: '診療科' },
 
-    // ---------- 追加分 ----------
+    // ---------- 医療制度（追加分）----------
     { id: 'Bnvfw0qctY0', title: '診療報酬について', cat: '医療制度' },
+
+    // ---------- 診療科（追加分2）----------
     { id: '2mgtkSVoMpc', title: '甲状腺内科', cat: '診療科' },
     { id: 'vj4EnhboL1s', title: '泌尿器科', cat: '診療科' },
     { id: 'ajZtdx2pAiY', title: '救急科', cat: '診療科' },
     { id: 'l9rNkIyJgqA', title: '小児科', cat: '診療科' },
     { id: 'a3XmmhO31Zg', title: 'リハビリテーション科', cat: '診療科' },
 
-    // ---------- 医療制度（追加分）----------
+    // ---------- 医療制度（追加分2）----------
     { id: 'nJq3IhsQOlk', title: '医学部について', cat: '医療制度' },
     { id: 'CofzG1hrRTY', title: '医師の臨床研修制度', cat: '医療制度' },
     { id: 'OEwRC7OcB0c', title: '暗記用語集', cat: '医療制度' },
@@ -504,6 +703,18 @@ const videos = [
     // ---------- 今後追加する動画はここに ----------
     // { id: 'YouTubeのID', title: 'タイトル', cat: 'カテゴリ名' },
 ];
+
+// ============================================================
+// カテゴリ設定（表示名・アイコン・スタイルクラス）
+// ============================================================
+const catConfig = {
+    '診療科':  { icon: '🩺', cls: 'shinryo', label: '診療科' },
+    '医療制度': { icon: '🏥', cls: 'seido',   label: '医療制度' },
+};
+
+function getCls(cat) {
+    return catConfig[cat]?.cls || 'shinryo';
+}
 
 // ============================================================
 // YouTubeサムネイルURL取得
@@ -522,38 +733,55 @@ let searchQuery = '';
 function renderCatFilter() {
     const el = document.getElementById('catFilter');
     el.innerHTML = categories.map(c =>
-        `<div class="cat-chip ${c === activeCategory ? 'active' : ''}" data-cat="${c}">${c}</div>`
+        `<div class="cat-chip ${c === activeCategory ? 'active' : ''}" data-cat="${c}">${c === 'すべて' ? 'すべて' : (catConfig[c]?.icon || '') + ' ' + c}</div>`
     ).join('');
 
     el.querySelectorAll('.cat-chip').forEach(chip => {
         chip.addEventListener('click', () => {
             activeCategory = chip.dataset.cat;
             renderCatFilter();
-            renderGrid();
-            // ユーザーパラメータを引き継いで戻る
-const urlParams = new URLSearchParams(window.location.search);
-const userId = urlParams.get('user') || 'default';
-document.getElementById('backBtn').href = 'index.html?user=' + userId;
+            renderContent();
         });
     });
 }
 
 // ============================================================
-// 動画グリッド描画
+// 動画カード生成
 // ============================================================
-function renderGrid() {
-    const grid = document.getElementById('videoGrid');
+function makeCard(v) {
+    const cls = getCls(v.cat);
+    const cfg = catConfig[v.cat] || {};
+    return `
+        <a class="video-card cat-${cls}" data-id="${v.id}" data-title="${v.title}" data-cat="${v.cat}">
+            <div class="thumb-wrap">
+                <img src="${getThumb(v.id)}" alt="${v.title}" loading="lazy">
+                <div class="play-overlay"></div>
+                <div class="ai-badge">✨ AI生成</div>
+                <div class="cat-badge ${cls}">${cfg.icon || ''} ${v.cat}</div>
+            </div>
+            <div class="card-body">
+                <div class="card-cat ${cls}"><span class="card-cat-dot ${cls}"></span>${v.title}</div>
+                <div class="card-title">${v.title}</div>
+            </div>
+        </a>
+    `;
+}
+
+// ============================================================
+// コンテンツ描画（カテゴリ別セクション or フラット）
+// ============================================================
+function renderContent() {
+    const contentEl = document.getElementById('videoContent');
     const empty = document.getElementById('emptyState');
     const countEl = document.getElementById('videoCount');
+    const legendEl = document.getElementById('legend');
 
     let filtered = videos;
 
-    // カテゴリフィルター
     if (activeCategory !== 'すべて') {
         filtered = filtered.filter(v => v.cat === activeCategory);
     }
 
-    // 検索フィルター
     if (searchQuery) {
         const q = searchQuery.toLowerCase();
         filtered = filtered.filter(v =>
@@ -564,29 +792,55 @@ function renderGrid() {
     countEl.textContent = filtered.length + '本';
 
     if (filtered.length === 0) {
-        grid.innerHTML = '';
+        contentEl.innerHTML = '';
         empty.style.display = 'block';
+        legendEl.style.display = 'none';
         return;
     }
 
     empty.style.display = 'none';
 
-    grid.innerHTML = filtered.map(v => `
-        <a class="video-card" data-id="${v.id}" data-title="${v.title}" data-cat="${v.cat}">
-            <div class="thumb-wrap">
-                <img src="${getThumb(v.id)}" alt="${v.title}" loading="lazy">
-                <div class="play-overlay"></div>
-                <div class="ai-badge">✨ AI生成</div>
-            </div>
-            <div class="card-body">
-                <div class="card-cat"><span class="card-cat-dot"></span>${v.cat}</div>
-                <div class="card-title">${v.title}</div>
-            </div>
-        </a>
-    `).join('');
+    // 検索中 or カテゴリ絞り込み中はセクションヘッダーなしフラット表示
+    if (activeCategory !== 'すべて' || searchQuery) {
+        legendEl.style.display = 'none';
+        contentEl.innerHTML = `<div class="video-grid">${filtered.map(makeCard).join('')}</div>`;
+    } else {
+        // すべて表示時：カテゴリ別にセクション分け
+        legendEl.style.display = 'flex';
+        const grouped = {};
+        filtered.forEach(v => {
+            if (!grouped[v.cat]) grouped[v.cat] = [];
+            grouped[v.cat].push(v);
+        });
+
+        const catOrder = ['診療科', '医療制度'];
+        let html = '';
+
+        catOrder.forEach(cat => {
+            if (!grouped[cat] || grouped[cat].length === 0) return;
+            const cfg = catConfig[cat] || { icon: '', cls: 'shinryo', label: cat };
+            const subtitles = {
+                '診療科': '各専門科の特徴・役割を動画で解説',
+                '医療制度': '医療の仕組み・制度を動画で学ぶ',
+            };
+            html += `
+                <div class="section-header ${cfg.cls}">
+                    <span class="section-header-icon">${cfg.icon}</span>
+                    <div class="section-header-info">
+                        <div class="section-header-title">${cat}</div>
+                        <div class="section-header-sub">${subtitles[cat] || ''}</div>
+                    </div>
+                    <span class="section-count-badge">${grouped[cat].length}本</span>
+                </div>
+                <div class="video-grid">${grouped[cat].map(makeCard).join('')}</div>
+            `;
+        });
+
+        contentEl.innerHTML = html;
+    }
 
     // カードクリックイベント
-    grid.querySelectorAll('.video-card').forEach(card => {
+    contentEl.querySelectorAll('.video-card').forEach(card => {
         card.addEventListener('click', (e) => {
             e.preventDefault();
             openModal(card.dataset.id, card.dataset.title, card.dataset.cat);
@@ -602,10 +856,12 @@ function openModal(videoId, title, cat) {
     const modalVideo = document.getElementById('modalVideo');
     const modalTitle = document.getElementById('modalTitle');
     const modalCat = document.getElementById('modalCat');
+    const cfg = catConfig[cat] || {};
 
     modalVideo.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
     modalTitle.textContent = title;
-    modalCat.textContent = cat;
+    modalCat.textContent = (cfg.icon || '') + ' ' + cat;
+    modalCat.className = 'modal-cat ' + (cfg.cls || '');
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -628,14 +884,21 @@ document.getElementById('modal').addEventListener('click', (e) => {
 // ============================================================
 document.getElementById('searchInput').addEventListener('input', (e) => {
     searchQuery = e.target.value.trim();
-    renderGrid();
+    renderContent();
 });
+
+// ============================================================
+// 戻るボタン
+// ============================================================
+const urlParams = new URLSearchParams(window.location.search);
+const userId = urlParams.get('user') || 'default';
+document.getElementById('backBtn').href = 'index.html?user=' + userId;
 
 // ============================================================
 // 初期描画
 // ============================================================
 renderCatFilter();
-renderGrid();
+renderContent();
 </script>
 </body>
 </html>
