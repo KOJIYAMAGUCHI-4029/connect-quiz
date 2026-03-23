@@ -126,6 +126,21 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); min-heigh
 
 /* ===== SECTION GRID ===== */
 .section-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 8px; }
+
+/* ===== SUBGROUP (医師紹介基礎知識の中のサブカテゴリ) ===== */
+.subgroup { margin-bottom: 10px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); }
+.subgroup-header {
+  padding: 9px 14px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.subgroup-body {
+  padding: 8px 0 4px;
+}
 .section-card { background: var(--white); border-radius: 10px; padding: 12px 10px 10px; cursor: pointer; border: 1px solid var(--border); transition: all 0.15s; }
 .section-card:hover { border-color: var(--primary); transform: translateY(-1px); box-shadow: var(--shadow-md); }
 .section-card .num { font-size: 10px; font-weight: 700; color: var(--primary); margin-bottom: 3px; }
@@ -663,7 +678,31 @@ function renderSelect() {
     const progBar = answered > 0
       ? '<div class="cat-prog"><div class="cat-prog-inner" style="width:' + Math.round(answered/total*100) + '%;background:' + cat.color + '"></div></div>'
       : '';
-    const cards = idxList.map(i => {
+    // サブグループ定義 (medicalカテゴリのみ適用)
+    const medSubgroups = [
+      {
+        label: '🩺 医療制度・基礎知識',
+        color: '#1a73e8', bg: '#e8f0fe',
+        check: n => n.includes('医学部') || n.includes('臨床研修') || n.includes('専門医') || n.includes('働き方改革') || n.includes('病院の種類') || n.includes('暗記用語集') || n.includes('医師免許') || n.includes('医療安全') || n.includes('感染症') || n.includes('急性期')
+      },
+      {
+        label: '🏥 診療科・臨床スキル',
+        color: '#0891b2', bg: '#e0f7fa',
+        check: n => n.startsWith('🏥')
+      },
+      {
+        label: '💊 クリニック・経営・業界',
+        color: '#7c3aed', bg: '#f3e8ff',
+        check: n => n.startsWith('💊') || n.includes('医師プラットフォーム') || n.startsWith('🩺 医療法') || n.includes('医療法人') || n.includes('診療報酬') || n.includes('医療DX') || n.includes('医療機器') || n.includes('クリニック') || n.includes('健診') || n.includes('地域医療') || n.includes('在宅医療') || n.includes('医療と介護') || n.includes('透析') || n.includes('ドクターヘリ') || n.includes('医療脱毛')
+      },
+      {
+        label: '👨‍⚕️ 医師キャリア・転職',
+        color: '#059669', bg: '#ecfdf5',
+        check: n => n.startsWith('👨') || n.includes('医師会') || n.includes('大学医局') || n.includes('産業医') || n.includes('精神科医療')
+      },
+    ];
+
+    function makeCard(i) {
       const s  = quizData[i];
       const ss = sectionScore(i);
       const p  = ss.answered > 0 ? Math.round(ss.correct/ss.answered*100) : 0;
@@ -671,13 +710,31 @@ function renderSelect() {
         ? '<div class="prog"><div class="prog-inner" style="width:' + Math.round(ss.answered/ss.total*100) + '%"></div></div>'
         : '';
       const cntStr = ss.answered > 0 ? ss.correct + '/' + ss.total + '問正解 (' + p + '%)' : '未挑戦';
-      return '<div class="section-card" data-action="go-section" data-idx="' + i + '"' + '>'
-        + '<div class="num" style="' + '">Q' + ss.total + '</div>'
+      return '<div class="section-card" data-action="go-section" data-idx="' + i + '">'
+        + '<div class="num">Q' + ss.total + '</div>'
         + '<div class="name">' + s.section + '</div>'
         + '<div class="cnt">' + cntStr + '</div>'
         + pb
         + '</div>';
-    }).join('');
+    }
+
+    let innerHtml = '';
+    if (cat.id === 'medical') {
+      medSubgroups.forEach(sg => {
+        const sgIdxList = idxList.filter(i => sg.check(quizData[i].section));
+        if (sgIdxList.length === 0) return;
+        const sgCards = sgIdxList.map(i => makeCard(i)).join('');
+        innerHtml += '<div class="subgroup">'
+          + '<div class="subgroup-header" style="background:' + sg.bg + ';color:' + sg.color + ';border-left:4px solid ' + sg.color + ';">'
+          + sg.label
+          + '</div>'
+          + '<div class="subgroup-body"><div class="section-grid">' + sgCards + '</div></div>'
+          + '</div>';
+      });
+    } else {
+      innerHtml = '<div class="section-grid">' + idxList.map(i => makeCard(i)).join('') + '</div>';
+    }
+
     html += '<div class="cat-block">'
       + '<div class="cat-header" style="background:' + cat.bg + ';color:#fff;">'
       + '<div class="cat-header-left">'
@@ -688,7 +745,7 @@ function renderSelect() {
       + '</div>'
       + '<div class="cat-body" style="background:' + cat.bgBody + ';">'
       + progBar
-      + '<div class="section-grid">' + cards + '</div>'
+      + innerHtml
       + '</div>'
       + '</div>';
   });
