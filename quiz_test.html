@@ -1,1104 +1,418 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>医師紹介 実力テスト Vol.4 | CONNECT</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f0f1a;--card:#1a1a2e;--card2:#16213e;--accent:#e94560;--gold:#ffd700;--text:#e0e0e0;--muted:#7a7a9a}
-body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;min-height:100vh;padding:0 0 60px}
-.hero{background:linear-gradient(135deg,#0f3460 0%,#1a1a2e 60%,#0a0a15 100%);padding:40px 20px 30px;text-align:center;border-bottom:2px solid var(--accent);position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(233,69,96,0.08) 0%,transparent 60%);pointer-events:none}
-.hero-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:4px;color:var(--accent);margin-bottom:8px}
-.hero-title{font-size:26px;font-weight:900;color:#fff;margin-bottom:6px;line-height:1.3}
-.hero-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
-.hero-badges{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-.badge{background:rgba(233,69,96,0.12);border:1px solid rgba(233,69,96,0.3);color:var(--text);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px}
+"""
+CONNECT 医師履歴書変換ツール
+起動: python app.py
+アクセス: http://localhost:5000 または Render公開URL
+"""
 
-.selector{max-width:600px;margin:36px auto 0;padding:0 16px}
-.selector-title{font-size:12px;color:var(--muted);text-align:center;margin-bottom:14px;letter-spacing:2px}
-.player-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.player-btn{background:var(--card2);border:2px solid #2a2a3e;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;padding:18px 8px;border-radius:14px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px}
-.player-btn .emoji{font-size:28px}
-.player-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff;transform:translateY(-3px);box-shadow:0 8px 24px rgba(233,69,96,0.3)}
+import os, json, shutil, uuid
+from pathlib import Path
+from functools import wraps
+from flask import (Flask, request, jsonify, send_file,
+                   session, redirect, url_for)
 
-#quiz-area{display:none;max-width:640px;margin:0 auto;padding:24px 16px}
-.progress-wrap{margin-bottom:20px}
-.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.progress-label{font-size:12px;color:var(--muted)}
-.progress-count{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);letter-spacing:2px}
-.progress-bar{height:4px;background:#2a2a3e;border-radius:2px;overflow:hidden}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:2px;transition:width .4s}
-.dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
-.dot{width:9px;height:9px;border-radius:50%;background:#2a2a3e;transition:.2s}
-.dot.done{background:var(--accent)}
+app = Flask(__name__, template_folder="templates")
+app.secret_key = os.environ.get("SECRET_KEY", "connect-resume-secret-2024")
 
-.q-card{background:var(--card);border-radius:20px;padding:24px;border:1px solid #2a2a3e;position:relative;overflow:hidden;margin-bottom:16px}
-.q-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--accent)}
-.q-section{font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:1px}
-.q-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);line-height:1;margin-bottom:6px}
-.q-text{font-size:16px;font-weight:700;color:#fff;line-height:1.7}
-.choices{display:flex;flex-direction:column;gap:10px;margin-top:20px}
-.choice-btn{background:#1e1e32;border:2px solid #2a2a3e;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:600;padding:14px 18px;border-radius:12px;cursor:pointer;text-align:left;transition:all .2s;display:flex;align-items:center;gap:12px;width:100%}
-.choice-label{width:28px;height:28px;border-radius:50%;background:#2a2a3e;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;flex-shrink:0;color:var(--muted)}
-.choice-btn:not(:disabled):hover{border-color:var(--accent);background:rgba(233,69,96,0.08);transform:translateX(4px)}
-.choice-btn.selected{border-color:var(--gold);background:rgba(255,215,0,0.08);color:var(--gold)}
-.choice-btn.selected .choice-label{background:var(--gold);color:#000}
+APP_PASSWORD  = os.environ.get("APP_PASSWORD",  "connect2024")
+ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 
-.nav-row{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
-.nav-btn{background:var(--accent);color:#fff;border:none;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;padding:14px 28px;border-radius:12px;cursor:pointer;transition:all .2s}
-.nav-btn:hover:not(:disabled){background:#c73652;transform:translateY(-1px)}
-.nav-btn:disabled{background:#2a2a3e;color:var(--muted);cursor:default}
-.nav-btn.ghost{background:transparent;border:2px solid #2a2a3e;color:var(--muted)}
-.nav-btn.ghost:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:transparent;transform:none}
+TEMPLATE_PATH = Path(__file__).parent / "template.xlsx"
+UPLOAD_DIR    = Path(__file__).parent / "uploads"
+OUTPUT_DIR    = Path(__file__).parent / "outputs"
+UPLOAD_DIR.mkdir(exist_ok=True)
+OUTPUT_DIR.mkdir(exist_ok=True)
 
-#result-area{display:none;max-width:480px;margin:60px auto 0;padding:0 16px;text-align:center}
-.result-card{background:var(--card);border-radius:20px;padding:32px 24px;border:1px solid #2a2a3e;margin-bottom:20px}
-.result-name{font-size:13px;color:var(--muted);margin-bottom:8px}
-.result-score{font-family:'Bebas Neue',sans-serif;font-size:72px;color:var(--accent);line-height:1}
-.result-total{font-size:14px;color:var(--muted);margin-bottom:16px}
-.result-rank{font-size:20px;font-weight:900;margin-bottom:20px}
-.result-rank.clear{color:var(--gold)}
-.result-rank.warn{color:#ff9f43}
-.result-rank.fail{color:var(--accent)}
-.answer-list{text-align:left;margin-top:16px}
-.answer-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #2a2a3e;font-size:13px}
-.answer-row:last-child{border-bottom:none}
-.ans-num{font-family:'Bebas Neue',sans-serif;color:var(--muted);min-width:28px}
-.ans-icon{font-size:16px;min-width:20px}
-.ans-detail{flex:1;line-height:1.6}
-.ans-q{color:#fff;font-weight:600;margin-bottom:4px}
-.ans-your{color:var(--muted)}
-.ans-correct{color:#2ecc71}
-.retry-btn{display:inline-block;background:linear-gradient(135deg,var(--accent),#c73652);color:#fff;text-decoration:none;font-weight:700;font-size:16px;padding:18px 36px;border-radius:14px;transition:all .2s;box-shadow:0 4px 20px rgba(233,69,96,0.3);cursor:pointer;border:none;font-family:'Noto Sans JP',sans-serif;width:100%;margin-top:16px}
-.retry-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(233,69,96,0.5)}
-</style>
-</head>
-<body>
-<div class="hero">
-  <div class="hero-label">CONNECT MEDICAL KNOWLEDGE TEST</div>
-  <div class="hero-title">🏥 医師紹介<br>実力テスト Vol.4</div>
-  <div class="hero-sub">医師紹介基礎知識 全20問・一発勝負</div>
-  <div class="hero-badges">
-    <span class="badge">🏆 15問以上 → クリア</span>
-    <span class="badge">😅 11〜14問 → 居残り</span>
-    <span class="badge">🚨 10問以下 → 赤点</span>
-  </div>
-</div>
+# ─── 認証 ───────────────────────────────────────────────
 
-<div class="selector" id="selector">
-  <div class="selector-title">▼ 受験者を選んでください</div>
-  <div class="player-btns">
-    <button class="player-btn" onclick="startQuiz('izumi')"><span class="emoji">🧑</span>和泉</button>
-    <button class="player-btn" onclick="startQuiz('adachi')"><span class="emoji">👩</span>安達</button>
-    <button class="player-btn" onclick="startQuiz('yamada')"><span class="emoji">👨</span>山田</button>
-    <button class="player-btn" onclick="startQuiz('kase')"><span class="emoji">👨‍💼</span>加瀬</button>
-  </div>
-</div>
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("logged_in"):
+            return redirect(url_for("login_page"))
+        return f(*args, **kwargs)
+    return decorated
 
-<div id="quiz-area"></div>
-<div id="result-area"></div>
+@app.route("/login", methods=["GET","POST"])
+def login_page():
+    error = ""
+    if request.method == "POST":
+        if request.form.get("password") == APP_PASSWORD:
+            session["logged_in"] = True
+            return redirect(url_for("index"))
+        error = "パスワードが違います"
+    from flask import render_template
+    return render_template("login.html", error=error)
 
-<script>
-const QUIZ_DATA = {
-  "izumi": {
-    "name": "和泉",
-    "questions": [
-      {
-        "section": "3. 医師の働き方改革",
-        "q": "医師の面接指導（長時間労働面接）において、産業医が面接を実施すべき時間外労働の目安はどれか？",
-        "c": [
-          "月45時間超",
-          "月80時間超",
-          "月100時間超",
-          "月60時間超"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "5. 専門医制度",
-        "q": "日本専門医機構が定める「基本領域専門医」の数として正しいものはどれか？",
-        "c": [
-          "10領域",
-          "15領域",
-          "19領域",
-          "25領域"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "10. 心臓血管外科",
-        "q": "大動脈弁置換術においてTAVI（経カテーテル大動脈弁植込み術）が適応となる主な患者層はどれか？",
-        "c": [
-          "若年者・低リスク患者",
-          "開胸手術リスクが高い高齢者・ハイリスク患者",
-          "心房細動を合併した全患者",
-          "弁逆流（AR）が主体の患者"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "12. 形成外科",
-        "q": "顔面神経麻痺を生じる帯状疱疹（ラムゼイ・ハント症候群）の三徴として正しいものはどれか？",
-        "c": [
-          "顔面麻痺・耳介周囲の帯状疱疹・難聴または耳鳴り",
-          "顔面麻痺・前額部の帯状疱疹・視力障害",
-          "顔面麻痺・口角ヘルペス・嚥下障害",
-          "顔面麻痺・頸部リンパ節腫脹・発熱"
-        ],
-        "ans": 0
-      },
-      {
-        "section": "17. 糖尿病内科",
-        "q": "SGLT2阻害薬の副作用として特に注意が必要なものはどれか？",
-        "c": [
-          "低血糖と体重増加",
-          "尿路・性器感染症と正常血糖ケトアシドーシス",
-          "消化器症状と膵炎",
-          "骨粗鬆症と甲状腺機能低下"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "19. 呼吸器内科",
-        "q": "COPD（慢性閉塞性肺疾患）の重症度分類に用いるスパイロメトリーの指標はどれか？",
-        "c": [
-          "最大呼気流量（PEF）のみ",
-          "肺活量（VC）のみ",
-          "1秒率（FEV1/FVC）と%FEV1",
-          "機能的残気量（FRC）のみ"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "24. 脳神経外科",
-        "q": "くも膜下出血の原因として最も多いものはどれか？",
-        "c": [
-          "脳動静脈奇形（AVM）の破裂",
-          "脳腫瘍からの出血",
-          "脳動脈瘤（嚢状動脈瘤）の破裂",
-          "高血圧性脳出血"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "27. 医療費・診療報酬",
-        "q": "「DPC/PDPS」制度において包括評価の対象となるのはどれか？",
-        "c": [
-          "手術・処置・投薬など一部を除く入院基本料等",
-          "外来診療の全費用",
-          "在宅医療の全費用",
-          "薬剤費のみ"
-        ],
-        "ans": 0
-      },
-      {
-        "section": "30. 医師プラットフォーム",
-        "q": "「CareNet（ケアネット）」の主な特徴として正しいものはどれか？",
-        "c": [
-          "医師専門の転職・求人サービスのみを提供",
-          "医師向け医学・医療情報の動画・eラーニングが充実",
-          "電子処方箋の発行システムを提供",
-          "電子カルテのクラウドサービス専門プラットフォーム"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "33. 透析",
-        "q": "血液透析（HD）と腹膜透析（PD）の比較として正しいものはどれか？",
-        "c": [
-          "HDは自宅で毎日実施が基本、PDは週3回通院が基本",
-          "PDは残存腎機能の保護に有利、HDは通院が不要",
-          "HDは週2〜3回の通院が基本、PDは在宅で毎日実施が基本",
-          "両者の生存率・QOLに差はなく選択基準は費用のみ"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "6. 卒後教育・CME",
-        "q": "「日本医師会生涯教育制度」でCCコード（カリキュラムコード）が示すものはどれか？",
-        "c": [
-          "医師の専門科目の分類コード",
-          "医師免許更新のための単位番号",
-          "生涯学習の学習内容（症状・病態・技能など）の分類",
-          "医師会費の支払い管理コード"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "8. 女性医師支援",
-        "q": "院内保育所を設置する医療機関に対して国が行う主な支援はどれか？",
-        "c": [
-          "運営コストの全額国庫負担",
-          "設置・運営に対する補助金（病院内保育所運営費補助）",
-          "設置義務があるため補助は一切なし",
-          "税制上の優遇のみで補助金はない"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "25. 泌尿器科",
-        "q": "過活動膀胱（OAB）の薬物療法として第一選択薬となるのはどれか？",
-        "c": [
-          "α1遮断薬（タムスロシンなど）",
-          "5α還元酵素阻害薬（デュタステリドなど）",
-          "抗菌薬の長期予防投与",
-          "抗コリン薬またはβ3受容体作動薬"
-        ],
-        "ans": 3
-      },
-      {
-        "section": "29. 麻酔科",
-        "q": "術後痛管理における「マルチモーダル鎮痛」の考え方として正しいものはどれか？",
-        "c": [
-          "オピオイドのみを高用量使用して確実に除痛する",
-          "鎮痛薬は術後48時間使用禁止とする",
-          "複数の異なる鎮痛機序の薬剤・方法を組み合わせてオピオイドを減らす",
-          "NSAIDsと鎮静薬を同時投与して意識を低下させる"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "36. 医療安全",
-        "q": "「KYT（危険予知トレーニング）」の目的として正しいものはどれか？",
-        "c": [
-          "医療事故発生後の責任者特定",
-          "業務の効率化とコスト削減",
-          "職場の危険を先読みし事前に対策を立てる安全意識の向上",
-          "患者満足度の向上を目的としたサービス研修"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "40. クリニック開業",
-        "q": "クリニック開業時に「保険医療機関」の指定を受けるために必要な手続きはどれか？",
-        "c": [
-          "厚生労働大臣への直接申請",
-          "地方厚生局への申請・指定",
-          "都道府県医師会への届出のみ",
-          "市区町村保健センターへの登録"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "41. ファクトフルネス",
-        "q": "ファクトフルネスで紹介される「ネガティブ本能」の説明として正しいものはどれか？",
-        "c": [
-          "悪いニュースに過剰に注目し世界が悪化していると思い込む傾向",
-          "自分に不都合な情報を無視してしまう傾向",
-          "数字ではなく感情で物事を判断してしまう傾向",
-          "変化を恐れて現状維持を好む傾向"
-        ],
-        "ans": 0
-      },
-      {
-        "section": "43. 健診・人間ドック",
-        "q": "特定健診（メタボ健診）の必須検査項目に含まれるものはどれか？",
-        "c": [
-          "頭部MRIと骨密度測定",
-          "胃内視鏡と大腸内視鏡",
-          "腹囲・血圧・血液検査（脂質・血糖・肝機能等）・尿検査",
-          "心臓カテーテル検査と冠動脈CT"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "44. CONNECTの強み",
-        "q": "CONNECTが「両面型紹介」（医療機関側と医師側の両方を担当）で行う際のメリットはどれか？",
-        "c": [
-          "医療機関側への紹介手数料を二重に請求できる",
-          "医師と医療機関双方の希望・条件を正確に把握しミスマッチを防げる",
-          "双方から情報を得ることで守秘義務が免除される",
-          "厚生労働省の認定要件となっているため"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "42. 医師転職市場",
-        "q": "医師紹介の「成功報酬型」手数料の一般的な計算基準はどれか？",
-        "c": [
-          "医師の職歴年数×一定金額",
-          "内定後の面接回数に応じた固定額",
-          "採用された医師の年収の一定割合（理論年収の○%）",
-          "医療機関の病床数に応じた固定額"
-        ],
-        "ans": 2
-      }
-    ]
-  },
-  "adachi": {
-    "name": "安達",
-    "questions": [
-      {
-        "section": "3. 医師の働き方改革",
-        "q": "「連続勤務時間制限」として医師に義務付けられた上限（B・連携B水準）はどれか？",
-        "c": [
-          "連続12時間以内",
-          "連続16時間以内（勤務間インターバル9時間以上）",
-          "連続24時間以内",
-          "連続28時間以内（当直含む）"
-        ],
-        "ans": 3
-      },
-      {
-        "section": "7. 医師の偏在問題",
-        "q": "「医師少数区域」への勤務経験を専門医取得の要件とする取り組みの目的はどれか？",
-        "c": [
-          "都市部への医師集中を加速させるため",
-          "専門医資格の価値を下げるため",
-          "医師の地域偏在を是正し地方の医療確保につなげるため",
-          "専門医試験の難易度を上げるため"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "13. 皮膚科",
-        "q": "アトピー性皮膚炎に対するデュピルマブ（デュピクセント）の作用機序として正しいものはどれか？",
-        "c": [
-          "TNF-αを標的とした生物学的製剤",
-          "IL-4・IL-13シグナルを遮断する生物学的製剤",
-          "PDE4阻害による抗炎症作用",
-          "免疫抑制薬（カルシニューリン阻害薬）"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "16. 救急科",
-        "q": "「JTAS（日本版トリアージシステム）」の5段階区分のうち「緊急（レベル2）」の定義はどれか？",
-        "c": [
-          "生命・四肢・器官への危機的状態で即時対応が必要",
-          "軽微な症状で数時間以内の診察で対応可能",
-          "潜在的に生命を脅かす可能性があり15分以内の診察が必要",
-          "緊急性なく数日以内の受診で対応可能"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "20. 小児科",
-        "q": "川崎病の主要症状（6主要症状）に含まれないものはどれか？",
-        "c": [
-          "5日以上続く発熱",
-          "両側眼球結膜充血",
-          "急性腎不全",
-          "口唇・口腔の変化（イチゴ舌）"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "22. 消化器内科",
-        "q": "炎症性腸疾患（IBD）のうちクローン病と潰瘍性大腸炎の鑑別点として正しいものはどれか？",
-        "c": [
-          "クローン病は大腸のみ、潰瘍性大腸炎は全消化管に発症",
-          "クローン病は全消化管・全層性、潰瘍性大腸炎は大腸粘膜に限局",
-          "両疾患とも肛門病変（痔瘻など）を合併しやすい",
-          "潰瘍性大腸炎は外科治療で根治が困難"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "27. 医療費・診療報酬",
-        "q": "「入院基本料」の算定において「看護配置基準」が意味するものはどれか？",
-        "c": [
-          "病院全体の看護師人数",
-          "入院患者数に対する看護師数の比率（7対1・10対1など）",
-          "夜間勤務の看護師最低人数",
-          "看護師の経験年数別の配置基準"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "32. 耳鼻咽喉科",
-        "q": "副鼻腔炎の慢性化を防ぐための治療として有効とされるのはどれか？",
-        "c": [
-          "抗生剤の長期大量投与（6ヵ月以上）",
-          "少量マクロライド療法（3〜6ヵ月）",
-          "ステロイドの大量点滴（パルス療法）",
-          "抗ヒスタミン薬の単独長期投与"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "37. ドクターヘリ",
-        "q": "ドクターヘリの運航費用の主な負担形態として正しいものはどれか？",
-        "c": [
-          "全額を患者が自己負担",
-          "全額を民間保険会社が負担",
-          "都道府県と国が補助金で運航費を支援",
-          "基地病院が全額負担"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "39. 介護・福祉連携",
-        "q": "「地域包括支援センター」に配置が義務付けられている専門職として正しい組み合わせはどれか？",
-        "c": [
-          "医師・薬剤師・看護師",
-          "保健師・社会福祉士・主任ケアマネジャー",
-          "理学療法士・作業療法士・言語聴覚士",
-          "精神保健福祉士・臨床心理士・介護福祉士"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "4. 研修病院の選び方",
-        "q": "初期研修における「地域医療研修」が必修化されている理由として最も適切なのはどれか？",
-        "c": [
-          "離島・へき地勤務を義務付けるため",
-          "農村地帯での農業体験と医療の組み合わせを推進するため",
-          "地域医療・プライマリケアへの理解を深め医師偏在対策につなげるため",
-          "地方病院の収益改善に研修医の労働力を活用するため"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "21. 精神科",
-        "q": "うつ病の「休職から職場復帰」を支援するリワークプログラムの主な内容はどれか？",
-        "c": [
-          "薬物療法の最適化のみを行う入院プログラム",
-          "認知行動療法・生活リズム回復・職場復帰の段階的支援",
-          "身体的リハビリテーションを中心とした運動療法",
-          "家族への心理教育のみを行う外来プログラム"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "26. 医療法",
-        "q": "医療機関が「臨床研究」を行う際に必要な手続きとして正しいものはどれか？",
-        "c": [
-          "院長の口頭承認のみで実施可能",
-          "患者への説明と同意（インフォームドコンセント）は任意",
-          "倫理審査委員会（IRB）での審査と患者の同意が必要",
-          "実施後に厚生労働省に事後届出するだけでよい"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "34. 医師会",
-        "q": "「日本医師会」の医師賠償責任保険制度の特徴として正しいものはどれか？",
-        "c": [
-          "日本医師会員のみが加入でき、民事上の医療事故に対応",
-          "刑事事件の弁護費用を全額補償する",
-          "医療機関のみが加入できる法人向け保険",
-          "患者への見舞金のみを支払う制度"
-        ],
-        "ans": 0
-      },
-      {
-        "section": "38. 医療DX",
-        "q": "「電子処方箋」の普及によって期待される効果として正しいものはどれか？",
-        "c": [
-          "処方箋の発行コストが増大する",
-          "薬剤師の業務がすべて自動化される",
-          "重複投薬・薬の飲み合わせ確認が一元的に可能になる",
-          "保険請求が不要になり医療費が削減される"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "41. ファクトフルネス",
-        "q": "ファクトフルネスの「過大視本能」の説明として正しいものはどれか？",
-        "c": [
-          "単独の数字を見たときに実際より大きく重要だと感じてしまう傾向",
-          "自分の意見に賛成する情報だけを集めてしまう傾向",
-          "自分の業界だけが特別だと思い込む傾向",
-          "過去の成功体験に過剰な価値を見出す傾向"
-        ],
-        "ans": 0
-      },
-      {
-        "section": "43. 健診・人間ドック",
-        "q": "「腫瘍マーカー」として肺がんのスクリーニングに最も一般的に用いられるのはどれか？",
-        "c": [
-          "CEAとCA19-9",
-          "AFP（α-フェトプロテイン）",
-          "PSA（前立腺特異抗原）",
-          "SCC抗原・CEA・CYFRA21-1など"
-        ],
-        "ans": 3
-      },
-      {
-        "section": "44. CONNECTの強み",
-        "q": "CONNECTが医師に対して「キャリア面談」を行う際の主な目的はどれか？",
-        "c": [
-          "医師の個人情報を収集してデータベース化するため",
-          "医師の転職意向のみを確認するため",
-          "医師の将来のキャリアビジョン・生活設計を把握し長期的に支援するため",
-          "紹介手数料を最大化できる求人のみを提案するため"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "9. 神経内科",
-        "q": "脳梗塞の急性期治療においてtPA（アルテプラーゼ）静注療法の適応となる時間窓はどれか？",
-        "c": [
-          "発症後6時間以内",
-          "発症後24時間以内",
-          "発症後4.5時間以内",
-          "発症後12時間以内"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "42. 医師転職市場",
-        "q": "医師の転職活動において「エージェント（紹介会社）」を利用するメリットとして正しいものはどれか？",
-        "c": [
-          "医師が紹介会社に手数料を支払うことで優先的に紹介される",
-          "非公開求人へのアクセスや交渉代行・スケジュール調整などのサポートが受けられる",
-          "エージェント経由は直接応募より採用率が低い",
-          "エージェント経由では年収交渉が一切できない"
-        ],
-        "ans": 1
-      }
-    ]
-  },
-  "yamada": {
-    "name": "山田",
-    "questions": [
-      {
-        "section": "3. 医師の働き方改革",
-        "q": "「勤務間インターバル」制度において医師に義務付けられている最低休息時間はどれか？",
-        "c": [
-          "6時間",
-          "9時間",
-          "11時間",
-          "12時間"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "5. 専門医制度",
-        "q": "専門医更新要件として一般的に含まれるものはどれか？",
-        "c": [
-          "国家試験の再受験と合格",
-          "所定の学術活動・研修参加・症例経験による単位取得",
-          "大学院への再入学",
-          "海外学会への参加のみ"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "15. 放射線科",
-        "q": "乳がんの画像診断において「マンモグラフィ」と「超音波検査」の使い分けとして正しいものはどれか？",
-        "c": [
-          "超音波は石灰化病変の検出に優れ、マンモは若年者の高濃度乳房に適する",
-          "マンモは石灰化・腫瘤の検出に有用、超音波は若年者・高濃度乳房に有用",
-          "両検査とも乳がん診断において有効性に差はない",
-          "マンモグラフィは40歳未満に禁忌"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "21. 精神科",
-        "q": "統合失調症の「陰性症状」として正しいものはどれか？",
-        "c": [
-          "幻覚・妄想・思考障害",
-          "興奮・多弁・誇大妄想",
-          "感情鈍麻・意欲低下・会話の貧困化",
-          "強迫観念・強迫行為"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "24. 脳神経外科",
-        "q": "「正常圧水頭症（NPH）」の三徴として正しいものはどれか？",
-        "c": [
-          "頭痛・眩暈・耳鳴り",
-          "歩行障害・認知症・尿失禁",
-          "発熱・項部硬直・意識障害",
-          "振戦・固縮・無動"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "26. 医療法",
-        "q": "「医療安全支援センター」の主な役割はどれか？",
-        "c": [
-          "医療機関への立入検査と行政処分",
-          "医師免許の更新審査",
-          "患者・住民からの医療に関する苦情・相談への対応と情報提供",
-          "医療事故の刑事告発"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "28. 産業医",
-        "q": "産業医が「就業上の措置」として会社に意見を述べる際の根拠となる法律はどれか？",
-        "c": [
-          "医師法",
-          "労働基準法",
-          "労働安全衛生法",
-          "健康保険法"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "31. 訪問診療",
-        "q": "「在宅患者訪問診療料」を算定するための要件として正しいものはどれか？",
-        "c": [
-          "患者の希望があれば週7日算定可能",
-          "計画的・定期的に医師が患者宅を訪問して診療すること",
-          "往診（緊急時）と同様に随時訪問した際に算定",
-          "看護師が代わりに訪問しても医師の指示があれば算定可"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "34. 医師会",
-        "q": "「産業医科大学」が設置された主な目的はどれか？",
-        "c": [
-          "僻地医療を担う医師の育成",
-          "産業医・労働衛生の専門家を育成し産業保健の発展に寄与する",
-          "軍医・自衛隊医官の育成",
-          "国際保健・WHO派遣医師の育成"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "38. 医療DX",
-        "q": "「PHR（個人健康記録）」の説明として正しいものはどれか？",
-        "c": [
-          "病院の電子カルテシステムの別称",
-          "個人が自身の健康・医療情報を管理・活用する仕組み",
-          "診療報酬請求のための電子データ形式",
-          "薬局向けの在庫管理システム"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "4. 研修病院の選び方",
-        "q": "初期臨床研修の必修科目として定められているものはどれか？",
-        "c": [
-          "内科・外科・精神科・救急・地域医療など",
-          "内科・産婦人科・小児科のみ",
-          "外科・整形外科・泌尿器科のみ",
-          "すべての診療科を2週間ずつローテーション"
-        ],
-        "ans": 0
-      },
-      {
-        "section": "14. 眼科",
-        "q": "緑内障の主な治療目標として正しいものはどれか？",
-        "c": [
-          "視力の回復と眼底出血の止血",
-          "眼圧を下げることで視神経障害の進行を抑制する",
-          "白内障を早期に除去して視野を改善する",
-          "網膜剥離を予防するためのレーザー治療"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "19. 呼吸器内科",
-        "q": "肺がんのうち「小細胞肺がん」の特徴として正しいものはどれか？",
-        "c": [
-          "喫煙との関連が低く腺がんが多い",
-          "進行が遅く外科切除が第一選択",
-          "増殖が速く転移しやすいため抗がん剤・放射線治療が主体",
-          "生存率が高く5年生存率80%以上"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "23. 消化器外科",
-        "q": "腹腔鏡下手術（laparoscopic surgery）のメリットとして正しいものはどれか？",
-        "c": [
-          "全身麻酔が不要で局所麻酔で実施可能",
-          "出血量・術後疼痛・回復期間の短縮が期待できる",
-          "開腹手術より術野の視認性が低い",
-          "高額な器材費不要でコストが低い"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "35. 遠隔医療・オンライン診療",
-        "q": "オンライン診療の「初診からの実施」が恒久化された契機となった出来事はどれか？",
-        "c": [
-          "2011年東日本大震災後の特例措置",
-          "2020年新型コロナウイルス感染症拡大による時限的措置と2022年の恒久化",
-          "2018年の医療法改正による制度化",
-          "2015年の厚生労働省通達による全面解禁"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "39. 介護・福祉連携",
-        "q": "「居宅介護支援」を行うケアマネジャーの主な業務はどれか？",
-        "c": [
-          "介護保険の財源管理と給付審査",
-          "介護施設の入所審査",
-          "要介護者の状態に合わせたケアプランの作成と各サービスとの連絡調整",
-          "医師の指示のもとに医療行為を補助する"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "40. クリニック開業",
-        "q": "クリニック開業における「標榜科目」の設定について正しいものはどれか？",
-        "c": [
-          "専門医資格のある診療科しか標榜できない",
-          "医師は原則として自由に複数の標榜科目を設定できる（広告規制は別途あり）",
-          "標榜科目は1科目のみに限定されている",
-          "厚生労働大臣の事前承認が必要"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "41. ファクトフルネス",
-        "q": "ファクトフルネスで「直線本能」と呼ばれる傾向の説明として正しいものはどれか？",
-        "c": [
-          "物事が常に悪化し続けると思い込む傾向",
-          "グラフの傾向が将来も直線的に続くと思い込む傾向",
-          "原因と結果は常に一直線でつながっていると思い込む傾向",
-          "成功した人は最初から能力が高かったと思い込む傾向"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "42. 医師転職市場",
-        "q": "医師の「定期非常勤（週1日アルバイト）」が人気の理由として最も適切なものはどれか？",
-        "c": [
-          "常勤職より社会保険の保障が充実しているため",
-          "収入の安定性が常勤より優れているため",
-          "本業の常勤業務と並行して収入補填・専門性維持・人脈形成ができるため",
-          "厚生労働省が週1日勤務を推奨しているため"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "44. CONNECTの強み",
-        "q": "CONNECTが医療機関の「分院開業支援プラン」を提供する目的として最も適切なのはどれか？",
-        "c": [
-          "医療機関から不動産仲介手数料を受け取るため",
-          "建築会社と医療機関をつなぐ仲介業務のため",
-          "医師の常勤紹介だけでなく分院開業に必要な人材確保まで一括支援するため",
-          "厚生労働省の補助金申請を代行するため"
-        ],
-        "ans": 2
-      }
-    ]
-  },
-  "kase": {
-    "name": "加瀬",
-    "questions": [
-      {
-        "section": "3. 医師の働き方改革",
-        "q": "「副業・兼業先」の労働時間も通算する規則において医師に特有のルールとして正しいものはどれか？",
-        "c": [
-          "副業先の労働時間は一切通算しない",
-          "医師の副業兼業は法律上全面禁止されている",
-          "自己研鑽は時間外労働に含まない一方、業務上必要な研修は含む",
-          "副業先の労働時間は本業先が全責任を持つ"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "7. 医師の偏在問題",
-        "q": "「医師偏在指標」の算出に使用される主な要素として正しいものはどれか？",
-        "c": [
-          "医師数のみ",
-          "医師数・人口・年齢構成・医療ニーズ等を組み合わせた指標",
-          "診療所数と病院数の比率",
-          "医学部定員と医師免許取得者数の差"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "12. 形成外科",
-        "q": "「遊離皮弁移植（フリーフラップ）」の特徴として正しいものはどれか？",
-        "c": [
-          "皮膚だけを移植し血管の吻合は行わない",
-          "移植先近傍の皮膚を使う有茎皮弁と同義",
-          "遠隔部位の組織ごと切離し血管吻合で移植する高度な再建法",
-          "植皮（分層植皮）と同じ手技"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "17. 糖尿病内科",
-        "q": "糖尿病の「シックデイルール」として患者に指導すべき内容はどれか？",
-        "c": [
-          "体調不良時は全ての薬を自己判断で中止する",
-          "発熱・嘔吐・下痢時は主治医への連絡・水分補給・薬の取り扱い注意が必要",
-          "シックデイ中はインスリン量を必ず半量に減らす",
-          "体調不良時は絶食して血糖値を下げる"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "19. 呼吸器内科",
-        "q": "間質性肺炎（IP）の診断で重要な画像所見として正しいものはどれか？",
-        "c": [
-          "胸部X線での無気肺像",
-          "胸部X線でのlobar consolidation",
-          "高分解能CT（HRCT）でのすりガラス陰影・蜂巣肺",
-          "胸部CTでの葉間胸水貯留"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "24. 脳神経外科",
-        "q": "脳腫瘍のうち「神経膠腫（グリオーマ）」の特徴として正しいものはどれか？",
-        "c": [
-          "脳以外の臓器から転移した腫瘍",
-          "脳神経鞘（シュワン細胞）から発生する良性腫瘍",
-          "脳実質内に浸潤する原発性脳腫瘍で手術・放射線・化学療法を組み合わせる",
-          "硬膜から発生し根治的外科切除で治癒率が高い"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "28. 産業医",
-        "q": "「両立支援（治療と仕事の両立）」において産業医が担う主な役割はどれか？",
-        "c": [
-          "患者（労働者）の治療方針の決定",
-          "主治医・事業主・労働者をつなぎ就業継続のための環境整備を支援",
-          "薬剤の処方と副作用のモニタリング",
-          "労災認定の最終判断"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "29. 麻酔科",
-        "q": "「区域麻酔（脊椎麻酔・硬膜外麻酔）」の合併症として最も注意が必要なものはどれか？",
-        "c": [
-          "高血糖と腎機能障害",
-          "術後うつと不眠",
-          "低血圧・全脊椎麻酔・頭痛（PDPH）・神経損傷",
-          "術後悪心・嘔吐のみ"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "33. 透析",
-        "q": "透析患者に多い「二次性副甲状腺機能亢進症」の治療として正しいものはどれか？",
-        "c": [
-          "甲状腺ホルモン補充療法",
-          "活性型ビタミンD製剤・カルシウム受容体作動薬・副甲状腺切除術",
-          "副腎皮質ステロイドの長期投与",
-          "インスリン投与と食事療法のみ"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "35. 遠隔医療・オンライン診療",
-        "q": "「遠隔病理診断」の活用が特に期待される場面はどれか？",
-        "c": [
-          "大都市の基幹病院で病理医が余っている場合",
-          "病理医不在の地域病院が専門病理医に迅速診断を依頼する場合",
-          "患者が自宅で病理標本を作製する場合",
-          "健康診断の問診票を電子化する場合"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "6. 卒後教育・CME",
-        "q": "「専門医の更新」と「学会認定医の更新」の違いとして正しいものはどれか？",
-        "c": [
-          "どちらも日本専門医機構が一元管理している",
-          "専門医は日本専門医機構が管理し、学会認定医は各学会が独自基準で管理する",
-          "学会認定医の方が国家資格として上位に位置する",
-          "両者に違いはなく同一の資格を指す"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "10. 心臓血管外科",
-        "q": "「ハイブリッド手術室（Hybrid OR）」の特徴として正しいものはどれか？",
-        "c": [
-          "通常の手術室に電子カルテを設置したもの",
-          "血管造影・透視装置を備え外科手術と血管内治療を同室で行える施設",
-          "ロボット手術専用の手術室",
-          "ICU機能を持つ術後管理専用の部屋"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "11. 整形外科",
-        "q": "骨粗鬆症治療薬「ビスホスホネート系薬剤」の注意点として正しいものはどれか？",
-        "c": [
-          "腎機能が悪い患者では積極的に増量する",
-          "食事前すぐに服用し横になることを推奨する",
-          "服用後30分は上体を起こしたままにし食道潰瘍等に注意する",
-          "日光に当たると活性化されるため屋外で服用する"
-        ],
-        "ans": 2
-      },
-      {
-        "section": "22. 消化器内科",
-        "q": "「H.pylori（ピロリ菌）除菌」後に推奨される確認検査として正しいものはどれか？",
-        "c": [
-          "除菌直後（治療終了翌日）の血清抗体検査",
-          "除菌治療終了後4週間以上経過してから尿素呼気試験等で除菌判定",
-          "胃X線検査のみで除菌確認",
-          "除菌後の確認検査は不要"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "30. 医師プラットフォーム",
-        "q": "「民間医局」の主な特徴として正しいものはどれか？",
-        "c": [
-          "大学医局の電子化されたデータベースシステム",
-          "医師専門の求人・キャリア情報・コミュニティを提供するウェブサービス",
-          "厚生労働省が運営する医師免許管理システム",
-          "医師の給与水準を公表する政府統計データベース"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "36. 医療安全",
-        "q": "「ハインリッヒの法則」が医療安全に示す教訓として正しいものはどれか？",
-        "c": [
-          "医療事故は防ぐことができないため対処療法が重要",
-          "1件の重大事故の背後に29件の軽微な事故・300件のヒヤリハットがあり予防が重要",
-          "重大事故は特定の医師・看護師にのみ起こる",
-          "医療事故のほとんどは設備の老朽化が原因"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "40. クリニック開業",
-        "q": "クリニック開業後の「レセプト（診療報酬明細書）」の提出先として正しいものはどれか？",
-        "c": [
-          "都道府県医師会に毎月提出",
-          "審査支払機関（社会保険診療報酬支払基金・国保連合会）に毎月提出",
-          "厚生労働省に四半期ごとに提出",
-          "患者が直接保険組合に提出"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "41. ファクトフルネス",
-        "q": "ファクトフルネスで紹介される「恐怖本能」の説明として正しいものはどれか？",
-        "c": [
-          "自分が間違いを犯すことへの恐怖から意思決定を先延ばしにする傾向",
-          "印象的・劇的なものへの恐怖が統計的なリスク判断を歪める傾向",
-          "権威ある人物への恐怖から批判できなくなる傾向",
-          "失敗した経験が次の挑戦への恐怖となる傾向"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "43. 健診・人間ドック",
-        "q": "「ABC検診（胃がんリスク検診）」で評価される組み合わせはどれか？",
-        "c": [
-          "血清ガストリン値と腹部CT",
-          "H.pylori抗体とペプシノゲン値",
-          "CEAとCA19-9",
-          "便潜血反応と大腸カメラ"
-        ],
-        "ans": 1
-      },
-      {
-        "section": "42. 医師転職市場",
-        "q": "医師の「常勤求人」において「紹介予定派遣」の特徴として正しいものはどれか？",
-        "c": [
-          "派遣期間終了後も必ず正規採用される",
-          "最初から正規雇用として採用される形態",
-          "一定期間派遣として勤務した後、双方合意のうえで直接雇用に切り替えられる形態",
-          "派遣会社が永続的に雇用主となり直接雇用に切り替えはできない"
-        ],
-        "ans": 2
-      }
-    ]
-  }
-};
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login_page"))
 
-let player=null, currentQ=0, userAnswers={};
+# ─── メイン画面 ─────────────────────────────────────────
 
-function startQuiz(p){
-  player=p; currentQ=0; userAnswers={};
-  document.getElementById('selector').style.display='none';
-  document.getElementById('quiz-area').style.display='block';
-  renderQ();
+@app.route("/")
+@login_required
+def index():
+    from flask import render_template
+    return render_template("index.html")
+
+# ─── テキスト抽出 ────────────────────────────────────────
+
+def extract_text(filepath: str) -> str:
+    ext = Path(filepath).suffix.lower()
+    if ext == ".pdf":
+        import pdfplumber
+        lines = []
+        with pdfplumber.open(filepath) as pdf:
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t: lines.append(t)
+        return "\n".join(lines)
+    elif ext == ".docx":
+        from docx import Document
+        doc = Document(filepath)
+        lines = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+        for table in doc.tables:
+            for row in table.rows:
+                cells = [c.text.strip() for c in row.cells if c.text.strip()]
+                if cells: lines.append("  ".join(cells))
+        return "\n".join(lines)
+    elif ext in (".xlsx", ".xls"):
+        import openpyxl
+        wb = openpyxl.load_workbook(filepath, data_only=True)
+        lines = []
+        for sn in wb.sheetnames:
+            for row in wb[sn].iter_rows(values_only=True):
+                cells = [str(c) for c in row if c is not None and str(c).strip()]
+                if cells: lines.append("  ".join(cells))
+        return "\n".join(lines)
+    raise ValueError(f"非対応形式: {ext}")
+
+# ─── Claude API ──────────────────────────────────────────
+
+SYSTEM_PROMPT = """医師の履歴書から情報を抽出してJSON形式で返してください。
+値が不明・記載なしはnull。年月は数値。
+
+{
+  "furigana": "ふりがな",
+  "name": "氏名",
+  "birth_era": "生年の元号。西暦なら西暦、令和ならR、平成ならH、昭和ならS",
+  "birth_year": 生年（元号の年数。西暦の場合は西暦年）,
+  "birth_month": 生月,
+  "birth_day": 生日,
+  "age": 年齢,
+  "gender": "男 or 女",
+  "zip1": "郵便番号前3桁",
+  "zip2": "郵便番号後4桁",
+  "address": "住所（都道府県〜番地建物名）",
+  "address_furigana": "住所ふりがな",
+  "nearest_station": "最寄駅名のみ",
+  "walk_min": 徒歩分数,
+  "home_tel": "自宅電話",
+  "mobile_tel": "携帯電話",
+  "email": "メール",
+  "current_workplace_furigana": "現勤務先ふりがな",
+  "current_workplace": "現勤務先名",
+  "high_school": "高校名",
+  "high_school_enter_year": 高校入学年,
+  "high_school_enter_month": 高校入学月,
+  "high_school_grad_era": "高校卒業の元号。西暦なら西暦、令和ならR、平成ならH、昭和ならS",
+  "high_school_grad_year": 高校卒業年,
+  "high_school_grad_month": 高校卒業月,
+  "university": "大学名",
+  "university_enter_year": 大学入学年,
+  "university_enter_month": 大学入学月,
+  "university_grad_era": "大学卒業の元号。西暦なら西暦、令和ならR、平成ならH、昭和ならS",
+  "university_grad_year": 大学卒業年,
+  "university_grad_month": 大学卒業月,
+  "grad_school": "大学院名専攻",
+  "grad_school_enter_year": 大学院入学年,
+  "grad_school_enter_month": 大学院入学月,
+  "grad_school_grad_era": "大学院修了年号（西暦 or R or H or S）",
+  "grad_school_grad_year": 大学院修了年,
+  "grad_school_grad_month": 大学院修了月,
+  "license_year": 国試合格年,
+  "license_month": 国試合格月,
+  "ika_number": "医籍番号",
+  "license_issued_year": 免許交付年,
+  "license_issued_month": 免許交付月,
+  "jobs": [
+    {
+      "hospital": "医療機関名",
+      "ikyoku": "有 or 無",
+      "position": "職位",
+      "start_era": "勤務開始の元号。西暦なら西暦、令和ならR、平成ならH、昭和ならS",
+      "start_year": 開始年,
+      "start_month": 開始月,
+      "end_year": 終了年,
+      "end_month": 終了月,
+      "is_current": true/false,
+      "department": "診療科"
+    }
+  ],
+  "qualifications": "資格（改行区切り）",
+  "societies": "学会（改行区切り）",
+  "skills": "スキル症例数"
 }
 
-function renderQ(){
-  const qs=QUIZ_DATA[player].questions;
-  const q=qs[currentQ];
-  const total=qs.length;
-  const pct=Math.round((currentQ/total)*100);
-  const labels=['A','B','C','D'];
-  const dots=qs.map((_,i)=>`<div class="dot${i<currentQ?' done':''}"></div>`).join('');
-  const choices=q.c.map((c,i)=>{
-    const sel=userAnswers[currentQ]===i?' selected':'';
-    return `<button class="choice-btn${sel}" onclick="selectAnswer(${i})" id="cb${i}">
-      <span class="choice-label">${labels[i]}</span>${c}
-    </button>`;
-  }).join('');
-  document.getElementById('quiz-area').innerHTML=`
-    <div class="progress-wrap">
-      <div class="progress-top">
-        <span class="progress-label">QUESTION</span>
-        <span class="progress-count">${currentQ+1} / ${total}</span>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-    </div>
-    <div class="dots">${dots}</div>
-    <div class="q-card">
-      <div class="q-section">${q.section}</div>
-      <div class="q-num">Q${String(currentQ+1).padStart(2,'0')}</div>
-      <div class="q-text">${q.q}</div>
-      <div class="choices">${choices}</div>
-    </div>
-    <div class="nav-row">
-      <button class="nav-btn ghost" onclick="prevQ()" ${currentQ===0?'disabled':''}>← 前へ</button>
-      <button class="nav-btn" onclick="nextQ()" ${userAnswers[currentQ]===undefined?'disabled':''}>
-        ${currentQ===total-1?'結果を見る':'次へ →'}
-      </button>
-    </div>`;
-}
+JSONのみ返すこと。```不要。"""
 
-function selectAnswer(i){
-  userAnswers[currentQ]=i;
-  renderQ();
-}
+def extract_with_claude(text: str) -> dict:
+    import anthropic
+    client = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
+    res = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=2000,
+        system=SYSTEM_PROMPT,
+        messages=[{"role":"user","content":f"以下の履歴書から情報を抽出:\n\n{text}"}]
+    )
+    raw = res.content[0].text.strip()
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"): raw = raw[4:]
+    return json.loads(raw.strip())
 
-function prevQ(){ if(currentQ>0){ currentQ--; renderQ(); } }
+# ─── Excel転記 ───────────────────────────────────────────
 
-function nextQ(){
-  const qs=QUIZ_DATA[player].questions;
-  if(currentQ<qs.length-1){ currentQ++; renderQ(); }
-  else showResult();
-}
+def write_excel(info: dict, output_path: str):
+    import openpyxl
+    from openpyxl.cell.cell import MergedCell
+    from openpyxl.styles import Font
+    import re as _re
+    shutil.copy(str(TEMPLATE_PATH), output_path)
+    wb = openpyxl.load_workbook(output_path)
+    ws = wb["医師登録フォーム"]
 
-function showResult(){
-  const qs=QUIZ_DATA[player].questions;
-  const name=QUIZ_DATA[player].name;
-  let score=0;
-  const rows=qs.map((q,i)=>{
-    const ua=userAnswers[i];
-    const ok=ua===q.ans;
-    if(ok)score++;
-    const labels=['A','B','C','D'];
-    return `<div class="answer-row">
-      <span class="ans-num">Q${i+1}</span>
-      <span class="ans-icon">${ok?'✅':'❌'}</span>
-      <div class="ans-detail">
-        <div class="ans-q">${q.q}</div>
-        ${!ok?`<div class="ans-your">あなたの答え：${ua!==undefined?labels[ua]+'．'+q.c[ua]:'未回答'}</div>`:''}
-        <div class="ans-correct">正解：${labels[q.ans]}．${q.c[q.ans]}</div>
-      </div>
-    </div>`;
-  }).join('');
-  let rank,rankClass;
-  if(score>=15){rank='🏆 クリア！素晴らしい！';rankClass='clear';}
-  else if(score>=11){rank='😅 居残り特訓コース';rankClass='warn';}
-  else{rank='🚨 赤点！要復習！';rankClass='fail';}
-  document.getElementById('quiz-area').style.display='none';
-  const ra=document.getElementById('result-area');
-  ra.style.display='block';
-  ra.innerHTML=`
-    <div class="result-card">
-      <div class="result-name">${name} さんの結果</div>
-      <div class="result-score">${score}</div>
-      <div class="result-total">/ ${qs.length}問正解</div>
-      <div class="result-rank ${rankClass}">${rank}</div>
-      <div class="answer-list">${rows}</div>
-    </div>
-    <button class="retry-btn" onclick="location.reload()">🔄 もう一度挑戦する</button>`;
-}
-</script>
-</body>
-</html>
+    LIMIT_ROW = 43  # 43行以降（弊社記入欄）は一切触らない
+
+    def is_red(cell):
+        """セルが赤文字かどうか判定"""
+        try:
+            if cell.font and cell.font.color and cell.font.color.type == 'rgb':
+                rgb = cell.font.color.rgb.upper()
+                if rgb not in ["FF000000", "00000000", "FFFFFFFF"]:
+                    return True
+        except:
+            pass
+        return False
+
+    written_coords = set()  # 書き込み済みセルを追跡
+
+    def w(coord, val):
+        """赤文字セルに書き込み・黒文字に変換。青色など他のセルは触らない"""
+        if val is None or val == "":
+            return
+        m = _re.match(r"[A-Z]+(\d+)", coord)
+        if m and int(m.group(1)) >= LIMIT_ROW:
+            return
+        cell = ws[coord]
+        if isinstance(cell, MergedCell):
+            return
+        cell.value = val
+        written_coords.add(coord)
+        # 赤文字だった場合のみ黒文字に変換
+        if is_red(cell):
+            cell.font = cell.font.copy(color="FF000000")
+
+    # ─── 基本情報 ───
+    w("F6",  info.get("furigana"))
+    w("F7",  info.get("name"))
+    # 年号：4桁なら西暦、2桁以下ならAPIの元号を使用
+    def get_era(era_val, year_val):
+        if not year_val:
+            return None
+        try:
+            y = int(year_val)
+            if y >= 100:
+                return "西暦"  # 4桁（1993、2019など）→ 西暦
+            else:
+                # 2桁以下 → APIが返した元号を使用、なければ推定
+                if era_val:
+                    return era_val
+                # 元号の推定（令和1年=2019年、平成1年=1989年、昭和1年=1926年）
+                if y <= 6: return "R"   # 令和（1〜）
+                elif y <= 31: return "H" # 平成（1〜31）
+                else: return "S"         # 昭和
+        except:
+            return None
+
+    w("F9",  get_era(info.get("birth_era"), info.get("birth_year")))
+    w("G9",  info.get("birth_year"))
+    w("J9",  info.get("birth_month"))
+    w("L9",  info.get("birth_day"))
+    w("O9",  info.get("age"))
+    w("R9",  info.get("gender"))
+    w("G11", info.get("zip1"))
+    w("I11", info.get("zip2"))
+    w("I12", info.get("address_furigana"))
+    w("F13", info.get("address"))
+    w("V12", info.get("mobile_tel"))
+    w("V14", info.get("email"))
+
+    # ─── 学歴 ───
+    w("B17", info.get("high_school"))
+    w("V17", get_era(info.get("high_school_grad_era"), info.get("high_school_grad_year")))
+    w("W17", info.get("high_school_grad_year"))
+    w("Z17", info.get("high_school_grad_month"))
+    w("B18", info.get("university"))
+    w("V18", get_era(info.get("university_grad_era"), info.get("university_grad_year")))
+    w("W18", info.get("university_grad_year"))
+    w("Z18", info.get("university_grad_month"))
+
+    # 大学院：データがあれば書き込むだけ（行削除しない）
+    if info.get("grad_school"):
+        w("B19", info.get("grad_school"))
+        w("V19", info.get("grad_school_grad_era"))
+        w("W19", info.get("grad_school_grad_year"))
+        w("Z19", info.get("grad_school_grad_month"))
+
+    # 行削除後は動的に行を探す
+    def find_row_by_value(keyword):
+        for row in ws.iter_rows():
+            for cell in row:
+                if cell.value and keyword in str(cell.value):
+                    return cell.row
+        return None
+
+    # 国試合格
+    r_license = find_row_by_value("国家試験合格")
+    if r_license:
+        w(f"E{r_license}", info.get("license_year"))
+        w(f"I{r_license}", info.get("license_month"))
+        w(f"N{r_license}", info.get("ika_number"))
+
+    # ─── 職歴（動的に開始行を探す）───
+    r_job_header = find_row_by_value("職　　歴")
+    if r_job_header:
+        job_start = r_job_header + 1
+        jobs = (info.get("jobs") or [])[:12]
+        for i, job in enumerate(jobs):
+            row = job_start + i
+            w(f"B{row}", get_era(job.get("start_era"), job.get("start_year")))
+            w(f"D{row}", job.get("start_year"))
+            w(f"G{row}", job.get("start_month"))
+            hospital = job.get("hospital") or ""
+            if job.get("is_current"):
+                w(f"K{row}", f"{hospital}（現在）")
+            else:
+                w(f"K{row}", hospital)
+
+        # 行削除はしない（結合セルが壊れるため）
+
+    # ─── 資格（動的に開始行を探す）───
+    r_qual_header = find_row_by_value("資格（認定医")
+    if r_qual_header:
+        quals = [q.strip() for q in (info.get("qualifications") or "").split("\n") if q.strip()]
+        for i, q in enumerate(quals[:5]):
+            row = r_qual_header + 1 + i
+            if row < LIMIT_ROW:
+                w(f"H{row}", q)
+
+        # 行削除はしない（結合セルが壊れるため）
+
+    # ─── 赤文字プレースホルダーをクリア（書き込み済みセルは除く）───
+    placeholder_keywords = ["を入れる", "しょくれき", "しかく", "ふりなが"]
+    for row in ws.iter_rows(min_row=1, max_row=LIMIT_ROW - 1):
+        for cell in row:
+            if isinstance(cell, MergedCell):
+                continue
+            if cell.coordinate in written_coords:
+                continue  # 書き込み済みセルはスキップ
+            if not cell.value:
+                continue
+            try:
+                red = (cell.font and cell.font.color and
+                       cell.font.color.type == 'rgb' and
+                       cell.font.color.rgb.upper() not in ["FF000000", "00000000", "FFFFFFFF"])
+                if red:
+                    val = str(cell.value)
+                    if any(kw in val for kw in placeholder_keywords):
+                        cell.value = None
+            except:
+                pass
+
+    wb.save(output_path)
+
+# ─── API エンドポイント ──────────────────────────────────
+
+@app.route("/api/upload", methods=["POST"])
+@login_required
+def api_upload():
+    """ファイルアップロード → テキスト抽出 → Claude解析"""
+    if "file" not in request.files:
+        return jsonify({"error": "ファイルがありません"}), 400
+    f = request.files["file"]
+    if not f.filename:
+        return jsonify({"error": "ファイル名が空です"}), 400
+
+    ext = Path(f.filename).suffix.lower()
+    if ext not in (".pdf", ".docx", ".xlsx", ".xls"):
+        return jsonify({"error": f"非対応形式: {ext}"}), 400
+
+    uid = str(uuid.uuid4())
+    save_path = UPLOAD_DIR / f"{uid}{ext}"
+    f.save(str(save_path))
+
+    try:
+        text = extract_text(str(save_path))
+        if not text.strip():
+            return jsonify({"error": "テキストを抽出できませんでした（スキャン画像PDFの可能性があります）"}), 400
+        info = extract_with_claude(text)
+        session["upload_uid"] = uid
+        session["upload_ext"] = ext
+        session["original_filename"] = f.filename
+        return jsonify({"info": info, "uid": uid})
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/download", methods=["POST"])
+@login_required
+def api_download():
+    """確認済み情報からExcelを生成してダウンロード"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "データがありません"}), 400
+
+    info = data.get("info", {})
+    original_filename = data.get("original_filename", "履歴書")
+    stem = Path(original_filename).stem
+
+    uid = str(uuid.uuid4())
+    output_path = str(OUTPUT_DIR / f"{uid}.xlsx")
+
+    try:
+        write_excel(info, output_path)
+        download_name = f"{stem}_エントリーカード.xlsx"
+        return send_file(
+            output_path,
+            as_attachment=True,
+            download_name=download_name,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/view_original/<uid>")
+@login_required
+def view_original(uid):
+    """元の履歴書ファイルをプレビュー用に返す"""
+    import re
+    if not re.match(r'^[0-9a-f-]{36}$', uid):
+        return "invalid", 400
+    for ext in [".pdf", ".docx", ".xlsx", ".xls"]:
+        p = UPLOAD_DIR / f"{uid}{ext}"
+        if p.exists():
+            if ext == ".pdf":
+                return send_file(str(p), mimetype="application/pdf")
+            else:
+                return send_file(str(p), as_attachment=False)
+    return "not found", 404
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(host="0.0.0.0", port=port, debug=debug)
