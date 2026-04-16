@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>医師紹介 実力テスト Vol.4 | CONNECT</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f0f1a;--card:#1a1a2e;--card2:#16213e;--accent:#e94560;--gold:#ffd700;--text:#e0e0e0;--muted:#7a7a9a}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;min-height:100vh;padding:0 0 60px}
+.hero{background:linear-gradient(135deg,#0f3460 0%,#1a1a2e 60%,#0a0a15 100%);padding:40px 20px 30px;text-align:center;border-bottom:2px solid var(--accent);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(233,69,96,0.08) 0%,transparent 60%);pointer-events:none}
+.hero-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:4px;color:var(--accent);margin-bottom:8px}
+.hero-title{font-size:26px;font-weight:900;color:#fff;margin-bottom:6px;line-height:1.3}
+.hero-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.hero-badges{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.badge{background:rgba(233,69,96,0.12);border:1px solid rgba(233,69,96,0.3);color:var(--text);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px}
+
+.selector{max-width:600px;margin:36px auto 0;padding:0 16px}
+.selector-title{font-size:12px;color:var(--muted);text-align:center;margin-bottom:14px;letter-spacing:2px}
+.player-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.player-btn{background:var(--card2);border:2px solid #2a2a3e;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;padding:18px 8px;border-radius:14px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px}
+.player-btn .emoji{font-size:28px}
+.player-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff;transform:translateY(-3px);box-shadow:0 8px 24px rgba(233,69,96,0.3)}
+
+#quiz-area{display:none;max-width:640px;margin:0 auto;padding:24px 16px}
+.progress-wrap{margin-bottom:20px}
+.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.progress-label{font-size:12px;color:var(--muted)}
+.progress-count{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);letter-spacing:2px}
+.progress-bar{height:4px;background:#2a2a3e;border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:2px;transition:width .4s}
+.dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
+.dot{width:9px;height:9px;border-radius:50%;background:#2a2a3e;transition:.2s}
+.dot.done{background:var(--accent)}
+
+.q-card{background:var(--card);border-radius:20px;padding:24px;border:1px solid #2a2a3e;position:relative;overflow:hidden;margin-bottom:16px}
+.q-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--accent)}
+.q-section{font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:1px}
+.q-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);line-height:1;margin-bottom:6px}
+.q-text{font-size:16px;font-weight:700;color:#fff;line-height:1.7}
+.choices{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.choice-btn{background:#1e1e32;border:2px solid #2a2a3e;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:600;padding:14px 18px;border-radius:12px;cursor:pointer;text-align:left;transition:all .2s;display:flex;align-items:center;gap:12px;width:100%}
+.choice-label{width:28px;height:28px;border-radius:50%;background:#2a2a3e;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;flex-shrink:0;color:var(--muted)}
+.choice-btn:not(:disabled):hover{border-color:var(--accent);background:rgba(233,69,96,0.08);transform:translateX(4px)}
+.choice-btn.selected{border-color:var(--gold);background:rgba(255,215,0,0.08);color:var(--gold)}
+.choice-btn.selected .choice-label{background:var(--gold);color:#000}
+
+.nav-row{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
+.nav-btn{background:var(--accent);color:#fff;border:none;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;padding:14px 28px;border-radius:12px;cursor:pointer;transition:all .2s}
+.nav-btn:hover:not(:disabled){background:#c73652;transform:translateY(-1px)}
+.nav-btn:disabled{background:#2a2a3e;color:var(--muted);cursor:default}
+.nav-btn.ghost{background:transparent;border:2px solid #2a2a3e;color:var(--muted)}
+.nav-btn.ghost:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:transparent;transform:none}
+
+#result-area{display:none;max-width:480px;margin:60px auto 0;padding:0 16px;text-align:center}
+.result-card{background:var(--card);border-radius:20px;padding:32px 24px;border:1px solid #2a2a3e;margin-bottom:20px}
+.result-name{font-size:13px;color:var(--muted);margin-bottom:8px}
+.result-score{font-family:'Bebas Neue',sans-serif;font-size:72px;color:var(--accent);line-height:1}
+.result-total{font-size:14px;color:var(--muted);margin-bottom:16px}
+.result-rank{font-size:20px;font-weight:900;margin-bottom:20px}
+.result-rank.clear{color:var(--gold)}
+.result-rank.warn{color:#ff9f43}
+.result-rank.fail{color:var(--accent)}
+.answer-list{text-align:left;margin-top:16px}
+.answer-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #2a2a3e;font-size:13px}
+.answer-row:last-child{border-bottom:none}
+.ans-num{font-family:'Bebas Neue',sans-serif;color:var(--muted);min-width:28px}
+.ans-icon{font-size:16px;min-width:20px}
+.ans-detail{flex:1;line-height:1.6}
+.ans-q{color:#fff;font-weight:600;margin-bottom:4px}
+.ans-your{color:var(--muted)}
+.ans-correct{color:#2ecc71}
+.retry-btn{display:inline-block;background:linear-gradient(135deg,var(--accent),#c73652);color:#fff;text-decoration:none;font-weight:700;font-size:16px;padding:18px 36px;border-radius:14px;transition:all .2s;box-shadow:0 4px 20px rgba(233,69,96,0.3);cursor:pointer;border:none;font-family:'Noto Sans JP',sans-serif;width:100%;margin-top:16px}
+.retry-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(233,69,96,0.5)}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-label">CONNECT MEDICAL KNOWLEDGE TEST</div>
+  <div class="hero-title">🏥 医師紹介<br>実力テスト Vol.4</div>
+  <div class="hero-sub">医師紹介基礎知識 全20問・一発勝負</div>
+  <div class="hero-badges">
+    <span class="badge">🏆 15問以上 → クリア</span>
+    <span class="badge">😅 11〜14問 → 居残り</span>
+    <span class="badge">🚨 10問以下 → 赤点</span>
+  </div>
+</div>
+
+<div class="selector" id="selector">
+  <div class="selector-title">▼ 受験者を選んでください</div>
+  <div class="player-btns">
+    <button class="player-btn" onclick="startQuiz('izumi')"><span class="emoji">🧑</span>和泉</button>
+    <button class="player-btn" onclick="startQuiz('adachi')"><span class="emoji">👩</span>安達</button>
+    <button class="player-btn" onclick="startQuiz('yamada')"><span class="emoji">👨</span>山田</button>
+    <button class="player-btn" onclick="startQuiz('kase')"><span class="emoji">👨‍💼</span>加瀬</button>
+    <button class="player-btn" onclick="startQuiz('hayakawa')"><span class="emoji">🧑‍💻</span>早川</button>
+  </div>
+</div>
+
+<div id="quiz-area"></div>
+<div id="result-area"></div>
+
+<script>
+const QUIZ_DATA = {
+  "izumi": {
+    "name": "和泉",
+    "questions": [
+      {
+        "section": "3. 医師の働き方改革",
+        "q": "2024年以降の医師の時間外労働において「A水準」と「B水準」の主な違いはどれか？",
+        "c": [
+          "A水準は研修医のみに適用される",
+          "A水準は年720h・B水準は地域医療確保のため年1860h",
+          "A水準は外科・B水準は内科に適用される",
+          "B水準は大学病院のみに適用される"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "5. 専門医制度",
+        "q": "専門医制度における「基本領域」と「サブスペシャルティ領域」の関係として正しいものはどれか？",
+        "c": [
+          "サブスペシャルティは基本領域取得前に取得できる",
+          "基本領域専門医取得後にサブスペシャルティを取得する流れ",
+          "両者は全く独立して取得できる",
+          "サブスペシャルティは医師会のみが認定する"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "11. 整形外科",
+        "q": "腱板断裂の診断に最も有用な画像検査はどれか？",
+        "c": [
+          "単純X線撮影",
+          "MRI検査",
+          "骨シンチグラフィ",
+          "CT単独検査"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "14. 眼科",
+        "q": "網膜色素変性症の主な症状として正しいものはどれか？",
+        "c": [
+          "中心視野のみの欠損（中心暗点）",
+          "夜盲・視野狭窄・最終的に視力低下",
+          "眼圧上昇による視神経障害",
+          "水晶体の混濁による霧視"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "17. 糖尿病内科",
+        "q": "糖尿病合併症のうち「三大合併症」に含まれないものはどれか？",
+        "c": [
+          "網膜症",
+          "腎症",
+          "心筋梗塞（大血管障害）",
+          "神経障害"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "19. 呼吸器内科",
+        "q": "喘息の長期管理薬として第一選択とされるのはどれか？",
+        "c": [
+          "短時間作用型β2刺激薬（SABA）の頓用",
+          "吸入ステロイド薬（ICS）",
+          "経口テオフィリン単独投与",
+          "抗ヒスタミン薬の長期投与"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "26. 医療法",
+        "q": "「病院」と「診療所」の定義上の違いはどれか？",
+        "c": [
+          "病院は救急指定が必要・診療所は不要",
+          "病院は20床以上・診療所は19床以下",
+          "病院は専門医が必須・診療所は不要",
+          "病院は株式会社が運営可能・診療所は不要"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "32. 耳鼻咽喉科",
+        "q": "メニエール病の三主徴として正しいものはどれか？",
+        "c": [
+          "耳鳴・頭痛・嘔吐",
+          "反復する回転性めまい・低音域難聴・耳鳴",
+          "眼振・小脳失調・構音障害",
+          "持続性頭位めまい・眼振・悪心"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "38. 医療DX",
+        "q": "「クラウド型電子カルテ」のメリットとして正しいものはどれか？",
+        "c": [
+          "完全オフライン環境で最も安全に運用できる",
+          "初期費用が低くどこからでもアクセス可能",
+          "データ容量に厳しい制限があり大病院には不向き",
+          "個人情報保護法の対象外となる"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "42. 医師転職市場",
+        "q": "医師の「スポット（単発）アルバイト」の特徴として正しいものはどれか？",
+        "c": [
+          "雇用契約が1年以上の長期契約が基本",
+          "1日単位の単発勤務で高時間単価が特徴",
+          "社会保険が完備されている",
+          "常勤よりも年収が必ず低くなる"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "9. 神経内科",
+        "q": "重症筋無力症（MG）の特徴として正しいものはどれか？",
+        "c": [
+          "症状は安静時に増悪・運動で改善する",
+          "眼瞼下垂・複視など易疲労性が特徴で夕方に悪化",
+          "主に下肢の感覚障害から始まる",
+          "脳梗塞との鑑別が不要な疾患"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "22. 消化器内科",
+        "q": "胃がんのリスク因子として最も重要視されるものはどれか？",
+        "c": [
+          "過度の運動",
+          "H.pylori感染・食塩摂取過多・喫煙など",
+          "アレルギー体質",
+          "高脂肪食のみ"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "27. 医療費・診療報酬",
+        "q": "「外来機能分化」の目的として正しいものはどれか？",
+        "c": [
+          "すべての患者が大病院で診療を受けられるようにする",
+          "紹介状なし大病院外来への特別料金を廃止する",
+          "大病院と中小医療機関の役割分担を促進する",
+          "専門医のみが外来診療を行う制度"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "36. 医療安全",
+        "q": "「SBAR」コミュニケーションツールの構成要素として正しいものはどれか？",
+        "c": [
+          "速度・負荷・評価・再評価",
+          "状況・背景・評価・提案",
+          "安全・報告・評価・結果",
+          "シフト・病床・評価・要求"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "40. クリニック開業",
+        "q": "クリニックが「在宅療養支援診療所」の届出を行うメリットはどれか？",
+        "c": [
+          "保険診療の自己負担割合が免除される",
+          "往診料・訪問診療料などの加算が算定できる",
+          "標榜科目の制限がなくなる",
+          "専門医資格がなくても届出できる唯一の制度"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "44. CONNECTの強み",
+        "q": "CONNECTが「非公開求人」を保有する意義として最も適切なのはどれか？",
+        "c": [
+          "公開すると医師が集まらない不人気求人のため",
+          "医療機関の機密保持・候補者を厳選したい求人のため",
+          "法的規制により公開が禁止されているため",
+          "競合他社からの情報漏洩を防ぐためのみ"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "21. 精神科",
+        "q": "「アルコール依存症」の離脱症状として危険なものはどれか？",
+        "c": [
+          "過眠・食欲増加・無気力",
+          "振戦せん妄・痙攣発作（重篤化しうる）",
+          "慢性頭痛・肩こりのみ",
+          "抑うつ状態のみ"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "35. 遠隔医療・オンライン診療",
+        "q": "「遠隔ICU（tele-ICU）」の主な目的はどれか？",
+        "c": [
+          "ICUを廃止して在宅管理に移行する",
+          "遠隔から集中治療専門医が監視・支援する体制",
+          "ICU看護師の完全代替を目指す",
+          "薬剤師が遠隔で処方を管理するシステム"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "43. 健診・人間ドック",
+        "q": "「胸部CT検診」が肺がんの早期発見に有用とされる理由はどれか？",
+        "c": [
+          "放射線被曝がゼロで安全なため",
+          "従来の胸部X線より小さな結節も検出できるため",
+          "すべての肺疾患を一度に診断できるため",
+          "検査費用が安く広く普及しているため"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "7. 医師の偏在問題",
+        "q": "「地域枠」医学生制度の主な目的はどれか？",
+        "c": [
+          "都市部の医師不足を解消するため",
+          "医師少数区域への将来的な医師確保と定着促進",
+          "医学部の定員削減を補うため",
+          "外国医師を国内に誘致するため"
+        ],
+        "ans": 0
+      }
+    ]
+  },
+  "adachi": {
+    "name": "安達",
+    "questions": [
+      {
+        "section": "3. 医師の働き方改革",
+        "q": "医師の時間外労働に関し「追加的健康確保措置」として定められているものはどれか？",
+        "c": [
+          "健康診断の年3回受診",
+          "面接指導の実施・勤務間インターバルの確保",
+          "有給休暇の年20日取得",
+          "社員食堂の設置義務"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "7. 医師の偏在問題",
+        "q": "医師偏在対策として「重点支援区域」に指定された地域に対して行われる支援はどれか？",
+        "c": [
+          "医師を強制的に派遣する法的強制力がある",
+          "財政支援・医師派遣のあっせん・就労環境整備の支援",
+          "医学部定員を当該地域のみに限定する",
+          "都市部の医師免許を一時停止する"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "13. 皮膚科",
+        "q": "蕁麻疹の治療において「第二世代抗ヒスタミン薬」が第一選択とされる理由はどれか？",
+        "c": [
+          "即時型アレルギー反応の根本を治癒できるため",
+          "眠気などの副作用が少なく安全性が高いため",
+          "ステロイドより強力な抗炎症作用があるため",
+          "保険適用外のため患者負担がなくなるため"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "16. 救急科",
+        "q": "「敗血症（Sepsis）」の診断基準「qSOFA」の3項目として正しいものはどれか？",
+        "c": [
+          "体温・血圧・脈拍",
+          "意識変容・呼吸数増加・収縮期血圧低下",
+          "血小板減少・肝機能障害・凝固異常",
+          "発熱・白血球増多・炎症反応上昇"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "18. 循環器内科",
+        "q": "「BNP（脳性ナトリウム利尿ペプチド）」が心不全の指標として有用な理由はどれか？",
+        "c": [
+          "心筋梗塞の壊死範囲を正確に示すため",
+          "心臓への負荷（心室壁ストレス）を反映するため",
+          "冠動脈の狭窄度を直接反映するため",
+          "不整脈の種類を特定できるため"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "23. 消化器外科",
+        "q": "「腸閉塞（イレウス）」の機能的イレウスと機械的イレウスの違いとして正しいものはどれか？",
+        "c": [
+          "機能的イレウスは手術が唯一の治療法",
+          "機械的イレウスは蠕動運動の停止・機能的は物理的閉塞",
+          "機能的は腸の動き異常・機械的は物理的な閉塞",
+          "両者の治療法は全く同一である"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "27. 医療費・診療報酬",
+        "q": "「急性期病床」の平均在院日数短縮が推進される主な理由はどれか？",
+        "c": [
+          "患者が早期退院を強く望んでいるため",
+          "医療費の効率化と地域包括ケアへの移行促進のため",
+          "病床数を増やすための規制緩和のため",
+          "看護師不足を補うための措置のため"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "33. 透析",
+        "q": "「シャント（動静脈瘻）」が血液透析に必要な理由はどれか？",
+        "c": [
+          "細菌感染を防ぐための専用ルートのため",
+          "透析に必要な大量の血流量を確保するため",
+          "透析膜を通過させるために必要な圧力をかけるため",
+          "抗凝固薬を直接投与するための経路のため"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "36. 医療安全",
+        "q": "「タイムアウト（手術安全チェックリスト）」を実施する主な目的はどれか？",
+        "c": [
+          "手術室のスケジュール管理を効率化するため",
+          "手術開始前に患者・術式・部位などを全員で確認するため",
+          "麻酔科医のみが確認する術前チェックのため",
+          "術後の合併症報告を効率化するため"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "39. 介護・福祉連携",
+        "q": "「特別養護老人ホーム（特養）」の入居要件として正しいものはどれか？",
+        "c": [
+          "60歳以上であれば誰でも入居できる",
+          "原則として要介護3以上の認定が必要",
+          "要支援1以上から入居可能",
+          "自立した高齢者が優先的に入居できる"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "4. 研修病院の選び方",
+        "q": "「地域医療研修」（離島・僻地実習）を経験した医師が得ると言われる能力はどれか？",
+        "c": [
+          "専門診療の高度技術",
+          "限られた資源での総合的な診療能力",
+          "外科手術の技術向上",
+          "学術論文執筆能力"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "8. 女性医師支援",
+        "q": "「女性医師の復職支援研修」が各地の医師会・大学病院で行われる背景はどれか？",
+        "c": [
+          "医師会費の一部が復職研修費用に充てられているため",
+          "女性医師のみに専門医資格が付与されるため",
+          "厚生労働省が全医師に復職研修を義務化したため",
+          "女性医師が増加する中で産後の復職ギャップを埋める必要性"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "20. 小児科",
+        "q": "子どもの「熱性けいれん」への対応として正しいものはどれか？",
+        "c": [
+          "発熱を下げるために冷水を体にかける",
+          "けいれん中は横向きに寝かせ気道を確保する",
+          "すぐに抗てんかん薬を経口投与する",
+          "即座に口腔内に指を入れ舌を押さえる"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "24. 脳神経外科",
+        "q": "「慢性硬膜下血腫」が高齢者に多い理由はどれか？",
+        "c": [
+          "高齢者は転倒しにくいため",
+          "脳萎縮により脳と硬膜の間にスペースがあり静脈が伸展されやすいため",
+          "高齢者は抗凝固薬を服用しないため",
+          "高齢者は頭蓋骨が薄くなるため"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "30. 医師プラットフォーム",
+        "q": "「MedPeer（メドピア）」の主な特徴として正しいものはどれか？",
+        "c": [
+          "医師のアルバイト求人のみを扱うプラットフォーム",
+          "医師同士の症例共有・処方支援・情報交換SNS",
+          "医療機器メーカーが運営する製品情報サイト",
+          "医師免許の更新手続きを支援するシステム"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "35. 遠隔医療・オンライン診療",
+        "q": "「オンライン診療」で禁止されている行為として正しいものはどれか？",
+        "c": [
+          "定期処方の継続投与",
+          "慢性疾患の経過観察",
+          "初診での麻薬・向精神薬処方",
+          "花粉症の抗アレルギー薬処方"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "41. ファクトフルネス",
+        "q": "ファクトフルネスで紹介される「犯人捜し本能」の説明として正しいものはどれか？",
+        "c": [
+          "物事が改善したときに称賛する人を探す傾向",
+          "悪いことが起きると原因を単純化し犯人を探す傾向",
+          "グループ間の違いを過小評価する傾向",
+          "データの変化を過大評価する傾向"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "43. 健診・人間ドック",
+        "q": "「胃がん検診」における内視鏡検査の利点として正しいものはどれか？",
+        "c": [
+          "自覚症状がある患者のみに適用される",
+          "バリウム検査より検査時間が常に短い",
+          "全国どこでも低コストで受診できる",
+          "放射線被曝がなく超高精度で早期発見可能"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "44. CONNECTの強み",
+        "q": "CONNECTが医師へのヒアリングを丁寧に行う理由として最も適切なのはどれか？",
+        "c": [
+          "ヒアリング時間が長いほど報酬が増えるため",
+          "医師の本音のニーズを把握しミスマッチを防ぐため",
+          "競合との差別化として形式的に実施するため",
+          "厚生労働省からヒアリング実施を義務付けられているため"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "25. 泌尿器科",
+        "q": "「前立腺肥大症（BPH）」の薬物療法で第一選択薬として使われるのはどれか？",
+        "c": [
+          "β遮断薬",
+          "α1遮断薬（タムスロシンなど）",
+          "カルシウム拮抗薬",
+          "利尿薬"
+        ],
+        "ans": 3
+      }
+    ]
+  },
+  "yamada": {
+    "name": "山田",
+    "questions": [
+      {
+        "section": "3. 医師の働き方改革",
+        "q": "医師の時間外労働上限規制において「C水準」が適用される対象として正しいものはどれか？",
+        "c": [
+          "全ての研修病院",
+          "救急病院のみ",
+          "高度技能習得・臨床研究中核病院の医師",
+          "地方の診療所勤務医"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "5. 専門医制度",
+        "q": "「専門研修プログラム」の整備主体として正しいものはどれか？",
+        "c": [
+          "厚生労働省が全て作成する",
+          "各学会が日本専門医機構の認定のもとで整備する",
+          "個々の病院が独自に作成する",
+          "医師会が統一プログラムを作成する"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "9. 神経内科",
+        "q": "「ギランバレー症候群」の治療として有効とされるのはどれか？",
+        "c": [
+          "ステロイドの大量経口投与のみ",
+          "免疫グロブリン大量静注療法（IVIg）または血漿交換",
+          "抗生剤の長期投与",
+          "抗てんかん薬の継続投与"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "11. 整形外科",
+        "q": "「変形性股関節症」の最終的な外科的治療として一般的なのはどれか？",
+        "c": [
+          "関節鏡手術（関節内を洗浄するのみ）",
+          "人工股関節全置換術（THA）",
+          "骨膜切除術",
+          "靭帯再建術"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "13. 皮膚科",
+        "q": "「疥癬（かいせん）」の感染経路として正しいものはどれか？",
+        "c": [
+          "飛沫感染",
+          "ヒゼンダニの接触感染（皮膚の直接接触・寝具など）",
+          "食物を介した経口感染",
+          "蚊などの虫刺されによる媒介感染"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "20. 小児科",
+        "q": "「百日咳」の典型的な咳の特徴として正しいものはどれか？",
+        "c": [
+          "乾性咳嗽が1週間で自然軽快する",
+          "スタッカート（階段状）の咳の後に吸気性の笛声（ウープ音）を生じる",
+          "夜間のみに出現する喘鳴を伴う咳",
+          "血痰を伴う慢性の湿性咳嗽"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "22. 消化器内科",
+        "q": "「非アルコール性脂肪性肝炎（NASH）」が重要視される理由はどれか？",
+        "c": [
+          "感染力が強く院内感染を引き起こすため",
+          "肝硬変・肝がんに進展しうる疾患のため",
+          "若年者にのみ発症する稀な疾患のため",
+          "治療薬がなく完全に不治の疾患のため"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "28. 産業医",
+        "q": "産業医の「定期巡視」の頻度として労働安全衛生法で定められているのはどれか？",
+        "c": [
+          "年1回",
+          "半年に1回",
+          "週1回",
+          "月1回（一定要件を満たせば2か月に1回）"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "34. 医師会",
+        "q": "「郡市区医師会」が行う主な学術活動として正しいものはどれか？",
+        "c": [
+          "国際学会への代表派遣",
+          "地域の勉強会・症例検討会・医師向け研修会の開催",
+          "医師免許の更新審査",
+          "薬価の交渉"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "38. 医療DX",
+        "q": "「医療情報システムの安全管理に関するガイドライン」が求めることとして正しいものはどれか？",
+        "c": [
+          "電子カルテを紙カルテと完全に二重で保存すること",
+          "リスク管理・セキュリティ対策・データバックアップ等の体制整備",
+          "AIによる完全自動診断の実施",
+          "個人情報は一切電子化しないこと"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "4. 研修病院の選び方",
+        "q": "「医師臨床研修マッチング」の仕組みとして正しいものはどれか？",
+        "c": [
+          "病院が一方的に研修医を選ぶ制度",
+          "研修医と病院の希望をアルゴリズムで最適マッチングする制度",
+          "成績順に上位の学生から病院を選べる制度",
+          "抽選で研修病院が決まる制度"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "12. 形成外科",
+        "q": "「植皮術」における「分層植皮」と「全層植皮」の違いとして正しいものはどれか？",
+        "c": [
+          "分層は生着しやすいが収縮しやすく・全層は収縮しにくく整容性が高い",
+          "全層は生着しやすく収縮もしにくいため全症例で優先される",
+          "両者は同一の術式で使用する皮膚の量が異なるだけ",
+          "分層植皮は手掌・足底にのみ用いる"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "24. 脳神経外科",
+        "q": "「硬膜動静脈瘻（DAVF）」の治療として主流なのはどれか？",
+        "c": [
+          "薬物療法のみ",
+          "血管内治療（コイル塞栓・Onyx塞栓）または開頭術",
+          "放射線治療は禁忌である",
+          "手術以外では改善しない"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "31. 訪問診療",
+        "q": "「居宅療養管理指導」を実施できる職種として正しいものはどれか？",
+        "c": [
+          "医師・歯科医師のみ",
+          "医師・歯科医師・薬剤師・管理栄養士・歯科衛生士など",
+          "訪問看護師のみ",
+          "ケアマネジャーのみ"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "36. 医療安全",
+        "q": "「医療事故調査制度」（2015年施行）の対象となる事例はどれか？",
+        "c": [
+          "院内で発生した全ての有害事象",
+          "管理者が予期しなかった死亡・死産",
+          "患者からの全ての苦情・クレーム",
+          "ヒヤリハット事例の全て"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "40. クリニック開業",
+        "q": "クリニックの「レセプトコンピュータ（レセコン）」の主な役割はどれか？",
+        "c": [
+          "電子カルテの完全代替として診断を支援する",
+          "診療報酬の計算・請求・管理を行うシステム",
+          "患者の予約管理のみを行うシステム",
+          "医療機器の保守管理を行うシステム"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "41. ファクトフルネス",
+        "q": "ファクトフルネスで紹介される「宿命本能」の説明として正しいものはどれか？",
+        "c": [
+          "悪いことが起きると犯人を探す傾向",
+          "社会・文化・宗教・国家は変わらないと思い込む傾向",
+          "一つのデータで全体を判断する傾向",
+          "急いで行動しないと間に合わないと感じる傾向"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "43. 健診・人間ドック",
+        "q": "「血清アミラーゼ高値」を指摘された場合に疑う主な疾患はどれか？",
+        "c": [
+          "膵炎・耳下腺炎",
+          "肺炎・胸膜炎",
+          "腸閉塞・腸炎",
+          "肝硬変・脂肪肝"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "44. CONNECTの強み",
+        "q": "CONNECTが常勤・非常勤の両方を取り扱うメリットとして最も適切なのはどれか？",
+        "c": [
+          "非常勤は成功報酬が高いため",
+          "医師のライフステージに合わせた幅広い支援が可能なため",
+          "厚生労働省から両方を取り扱うよう義務付けられているため",
+          "常勤のみに特化した方が収益性が高いため"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "42. 医師転職市場",
+        "q": "「医師紹介会社」の選び方として重要なポイントはどれか？",
+        "c": [
+          "公式サイトのデザインが優れているかどうか",
+          "専門性・求人数・担当者の質・アフターフォロー",
+          "広告費を多くかけているかどうか",
+          "登録の手間がかからないこと"
+        ],
+        "ans": 3
+      }
+    ]
+  },
+  "kase": {
+    "name": "加瀬",
+    "questions": [
+      {
+        "section": "3. 医師の働き方改革",
+        "q": "「宿日直許可」を取得するための主な条件として正しいものはどれか？",
+        "c": [
+          "常勤医師が50名以上いること",
+          "通常の勤務と同様の業務が行われないこと",
+          "救急指定病院であること",
+          "大学病院のみが申請できる"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "5. 専門医制度",
+        "q": "「暫定指導医」制度の目的として正しいものはどれか？",
+        "c": [
+          "研修医の医師国家試験合格を支援する",
+          "新専門医制度移行期に指導医を確保する",
+          "医師免許の更新時に指導する役割",
+          "外国人医師の国内研修を担う"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "7. 医師の偏在問題",
+        "q": "「医師の地域偏在」において都市部への集中が起きる要因として正しいものはどれか？",
+        "c": [
+          "地方の医療機器が老朽化しているため",
+          "専門研修・生活環境・収入面での都市の有利性",
+          "地方では医師免許が取得できないため",
+          "地方の患者数が極端に少ないため"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "11. 整形外科",
+        "q": "「靱帯損傷」の治療方針で保存療法が選択される条件として正しいものはどれか？",
+        "c": [
+          "全ての靱帯損傷に保存療法が適用される",
+          "部分断裂・軽度損傷の場合や競技復帰が不要の場合",
+          "アスリートには保存療法のみ適用される",
+          "完全断裂でも高齢者には保存療法のみ"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "15. 放射線科",
+        "q": "「IVR（Interventional Radiology）」の説明として正しいものはどれか？",
+        "c": [
+          "画像を見ながらカテーテルや針を用いた低侵襲治療",
+          "放射線を用いたがんの外照射治療",
+          "超音波を用いた心機能評価",
+          "核医学検査の一種"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "18. 循環器内科",
+        "q": "「心臓再同期療法（CRT）」の適応となる主な病態はどれか？",
+        "c": [
+          "発作性心房細動",
+          "心室内伝導障害（LBBB）を伴う重症心不全",
+          "洞不全症候群",
+          "慢性の心房粗動"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "22. 消化器内科",
+        "q": "「大腸がん」の早期発見に有効なスクリーニング検査はどれか？",
+        "c": [
+          "便潜血検査（FOBT）・大腸内視鏡",
+          "血清CEAのみ",
+          "腹部エコーのみ",
+          "胃カメラの同時検査"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "25. 泌尿器科",
+        "q": "「腎細胞がん（腎がん）」の特徴として正しいものはどれか？",
+        "c": [
+          "化学療法が第一選択である",
+          "早期は無症状のことが多くCTで偶発的に発見されることが多い",
+          "両側性・多発性に生じることが多い",
+          "手術は禁忌で放射線治療のみが有効"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "29. 麻酔科",
+        "q": "「静脈麻酔薬」として使用されるプロポフォールの特徴として正しいものはどれか？",
+        "c": [
+          "強い鎮痛効果を持つオピオイド系薬剤",
+          "作用発現が速く覚醒も速やかで外来麻酔にも使用される",
+          "作用発現が遅く長時間麻酔に不向き",
+          "筋弛緩作用を主目的とした薬剤"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "35. 遠隔医療・オンライン診療",
+        "q": "「オンライン診療」の普及が医師不足地域にもたらす期待として正しいものはどれか？",
+        "c": [
+          "医師が都市部に集中することをさらに促進する",
+          "専門医が遠隔から診察できることで地域医療へのアクセス改善",
+          "全ての診療がオンラインに移行し施設が不要になる",
+          "診療費用が増大し医療費抑制に逆効果となる"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "6. 卒後教育・CME",
+        "q": "「学会発表」が医師のキャリアにもたらす主なメリットはどれか？",
+        "c": [
+          "学会発表は大学教員のみに義務付けられている",
+          "専門医更新単位の取得・研究姿勢の評価・ネットワーク構築",
+          "発表回数が多いほど給与が自動的に上がる",
+          "発表するだけで海外留学の権利が得られる"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "8. 女性医師支援",
+        "q": "「マミートラック」とは何か？",
+        "c": [
+          "女性医師専用の短時間勤務制度の正式名称",
+          "育児中の女性が出世から外れた業務に固定されるキャリア停滞現象",
+          "出産後の女性医師が育児をしながら活躍できる理想的なキャリアパス",
+          "産前産後の女性医師向け特別手当制度"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "16. 救急科",
+        "q": "「多発外傷（Polytrauma）」の初期対応でまず優先されることはどれか？",
+        "c": [
+          "全身CT撮影の即時実施",
+          "Primary Survey（ABCDE評価）による生命危機の評価",
+          "骨折部位の全ての固定",
+          "疼痛管理のための鎮痛薬投与"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "20. 小児科",
+        "q": "「先天性心疾患」のうち最も頻度の高いものはどれか？",
+        "c": [
+          "大動脈縮窄症",
+          "心室中隔欠損症（VSD）",
+          "ファロー四徴症",
+          "肺動脈閉鎖症"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "23. 消化器外科",
+        "q": "「胆石症」の外科的治療として標準術式とされるのはどれか？",
+        "c": [
+          "胆嚢温存手術",
+          "腹腔鏡下胆嚢摘出術（LC）",
+          "体外衝撃波砕石術（ESWL）",
+          "開腹胆嚢摘出術"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "31. 訪問診療",
+        "q": "「在宅医療・介護連携推進事業」が市区町村に義務付けられた背景はどれか？",
+        "c": [
+          "在宅医療の診療報酬を引き下げるための措置のため",
+          "病院病床数を増やすための補完措置のため",
+          "訪問看護師の雇用確保のため",
+          "在宅医療の需要増大と地域包括ケアシステムの構築のため"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "38. 医療DX",
+        "q": "「RPAロボット（Robotic Process Automation）」が医療現場で活用される用途として正しいものはどれか？",
+        "c": [
+          "患者への直接ケアを担うロボット",
+          "レセプト作成・データ入力などの定型業務の自動化",
+          "医師の診断を代替するAI診断システム",
+          "手術ロボットとして外科手術を支援する"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "42. 医師転職市場",
+        "q": "医師転職における「条件交渉」について正しいものはどれか？",
+        "c": [
+          "条件交渉の結果は全て公開情報として開示される",
+          "紹介会社が医療機関との条件交渉を代行できる",
+          "条件交渉は違法行為であり禁止されている",
+          "医師は条件交渉を直接行うべきで紹介会社の関与は不要"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "40. クリニック開業",
+        "q": "クリニックの「電子カルテ」導入において紙カルテとの最大の違いはどれか？",
+        "c": [
+          "電子カルテ導入で保険点数が加算される",
+          "情報の検索・共有・バックアップが効率的にできる",
+          "医師の診断精度が電子カルテで自動的に向上する",
+          "コストが無条件に紙より低くなる"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "44. CONNECTの強み",
+        "q": "CONNECTが医師紹介において「アフターフォロー」を重視する理由として最も適切なのはどれか？",
+        "c": [
+          "フォロー回数に応じた報酬が医療機関から支払われるため",
+          "入職後のミスマッチ防止と長期的な信頼関係の構築のため",
+          "法律でアフターフォローが義務付けられているため",
+          "フォローしないと医師が競合に転職してしまうため"
+        ],
+        "ans": 3
+      }
+    ]
+  },
+  "hayakawa": {
+    "name": "早川",
+    "questions": [
+      {
+        "section": "世界情勢ニュース",
+        "q": "2024年に発効した「CPTPP（環太平洋パートナーシップに関する包括的及び先進的な協定）」に新たに加盟したのはどれか？",
+        "c": [
+          "インド",
+          "英国",
+          "ブラジル",
+          "韓国"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "世界情勢ニュース",
+        "q": "2024年のアメリカ大統領選挙で共和党候補として当選したのはどれか？",
+        "c": [
+          "ロン・デサンティス",
+          "ニッキー・ヘイリー",
+          "ドナルド・トランプ",
+          "マイク・ペンス"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "世界情勢ニュース",
+        "q": "2024年、イスラエルとの紛争が激化したパレスチナの自治組織として正しいのはどれか？",
+        "c": [
+          "ヒズボラ",
+          "PLO（パレスチナ解放機構）",
+          "ハマス",
+          "ファタハ"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "世界情勢ニュース",
+        "q": "2025年現在、日本の首相として正しいのはどれか？",
+        "c": [
+          "岸田文雄",
+          "石破茂",
+          "河野太郎",
+          "林芳正"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "世界情勢ニュース",
+        "q": "2024年に開催されたパリオリンピックで日本の金メダル獲得数として正しいのはどれか？",
+        "c": [
+          "12個",
+          "17個",
+          "20個",
+          "26個"
+        ],
+        "ans": 1
+      },
+      {
+        "section": "医学部について",
+        "q": "日本の医学部の標準的な修業年限として正しいのはどれか？",
+        "c": [
+          "4年",
+          "5年",
+          "6年",
+          "8年"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "医学部について",
+        "q": "医学部の「CBT（Computer Based Testing）」試験が実施される主な目的はどれか？",
+        "c": [
+          "医師免許の一次試験として機能するため",
+          "臨床実習前の知識水準を確認するための共用試験",
+          "海外医学部との単位互換のため",
+          "大学院進学の選抜試験として使用するため"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "医師免許・国家資格",
+        "q": "医師国家試験の受験資格として必要な条件はどれか？",
+        "c": [
+          "医学部6年間の課程修了（見込み含む）",
+          "大学院博士課程の修了",
+          "臨床研修の修了",
+          "看護師免許の取得"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "医師免許・国家資格",
+        "q": "「医籍」への登録を行う機関として正しいのはどれか？",
+        "c": [
+          "日本医師会",
+          "都道府県知事",
+          "厚生労働大臣",
+          "法務局"
+        ],
+        "ans": 2
+      },
+      {
+        "section": "皮膚科",
+        "q": "「白癬（水虫）」の原因となる病原体はどれか？",
+        "c": [
+          "細菌（黄色ブドウ球菌）",
+          "真菌（皮膚糸状菌）",
+          "ウイルス",
+          "ダニ（疥癬虫）"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "皮膚科",
+        "q": "皮膚科専門医が「光線療法（ナローバンドUVB）」を主に適用する疾患はどれか？",
+        "c": [
+          "尋常性白斑・乾癬・アトピー性皮膚炎など",
+          "細菌性皮膚感染症",
+          "蕁麻疹の急性期",
+          "皮膚がんの根治治療"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "形成外科",
+        "q": "「ケロイド」と「肥厚性瘢痕」の主な違いとして正しいものはどれか？",
+        "c": [
+          "ケロイドは感染が原因・肥厚性瘢痕は外傷が原因",
+          "ケロイドは元の傷の範囲を超えて増殖・肥厚性瘢痕は傷の範囲内にとどまる",
+          "両者は全く同一の疾患で呼称が異なるだけ",
+          "肥厚性瘢痕のみが外科的治療の対象となる"
+        ],
+        "ans": 1
+      },
+      {
+        "section": "形成外科",
+        "q": "「口唇口蓋裂」の手術が行われる主なタイミングとして正しいのはどれか？",
+        "c": [
+          "出生直後（生後24時間以内）",
+          "生後3〜6ヶ月ごろ（口唇）・1歳前後（口蓋）",
+          "学童期（6〜12歳）",
+          "成人になってから（18歳以降）"
+        ],
+        "ans": 1
+      },
+      {
+        "section": "医師プラットフォーム",
+        "q": "「Antaa（アンター）」の主なサービス内容として正しいものはどれか？",
+        "c": [
+          "医師向けの転職・求人情報サービス",
+          "医師間で症例相談・知識共有ができるプラットフォーム",
+          "医療機器メーカーと医師をつなぐ営業支援ツール",
+          "医師の勤怠管理システム"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "美容外科・美容クリニック",
+        "q": "美容外科クリニックが自由診療を主体とする主な理由はどれか？",
+        "c": [
+          "保険適用申請が煩雑なため",
+          "美容目的の施術は健康保険が適用されないため",
+          "美容外科医は保険医登録ができないため",
+          "自由診療の方が患者の満足度が低いため"
+        ],
+        "ans": 1
+      },
+      {
+        "section": "美容外科・美容クリニック",
+        "q": "「二重まぶた手術」の主な術式として「埋没法」の特徴はどれか？",
+        "c": [
+          "切開が必要で元に戻せない永久的な術式",
+          "糸で留めるため比較的低侵襲で修正も可能",
+          "保険適用が認められている術式",
+          "全身麻酔が必須の術式"
+        ],
+        "ans": 3
+      },
+      {
+        "section": "医療脱毛",
+        "q": "医療脱毛と美容サロン脱毛（光脱毛）の主な違いとして正しいのはどれか？",
+        "c": [
+          "美容サロン脱毛の方が痛みが強い",
+          "医療脱毛は医師の管理下で高出力レーザーを使用し永久脱毛効果がある",
+          "医療脱毛の方が費用が常に安い",
+          "医療脱毛は保険適用のため安価に受けられる"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "医師紹介会社の業界構造・競合",
+        "q": "医師紹介会社が「有料職業紹介事業」を行うために必要な許可はどれか？",
+        "c": [
+          "厚生労働大臣による有料職業紹介事業の許可",
+          "都道府県知事への届出のみ",
+          "日本医師会の認定",
+          "医師会員の過半数の賛成"
+        ],
+        "ans": 0
+      },
+      {
+        "section": "医師の転職理由",
+        "q": "医師が転職を検討する理由として「職場の人間関係」が上位に挙げられる背景として正しいものはどれか？",
+        "c": [
+          "医師は人間関係を最も重視するため必ず転職理由の第1位になる",
+          "閉鎖的な医局・診療科内のヒエラルキーが影響しやすいため",
+          "医師免許の更新要件に転職経験が含まれているため",
+          "転職エージェントが人間関係を理由にするよう誘導するため"
+        ],
+        "ans": 1
+      },
+      {
+        "section": "女性医師のキャリア",
+        "q": "女性医師が「非常勤勤務」を選択する主な理由として最も多いものはどれか？",
+        "c": [
+          "常勤よりも給与が高いため",
+          "育児・家事との両立を図るためのワークライフバランス",
+          "専門医資格が不要なため",
+          "非常勤の方が専門性を高めやすいため"
+        ],
+        "ans": 2
+      }
+    ]
+  }
+};
+
+let player=null, currentQ=0, userAnswers={};
+
+function startQuiz(p){
+  player=p; currentQ=0; userAnswers={};
+  document.getElementById('selector').style.display='none';
+  document.getElementById('quiz-area').style.display='block';
+  renderQ();
+}
+
+function renderQ(){
+  const qs=QUIZ_DATA[player].questions;
+  const q=qs[currentQ];
+  const total=qs.length;
+  const pct=Math.round((currentQ/total)*100);
+  const labels=['A','B','C','D'];
+  const dots=qs.map((_,i)=>`<div class="dot${i<currentQ?' done':''}"></div>`).join('');
+  const choices=q.c.map((c,i)=>{
+    const sel=userAnswers[currentQ]===i?' selected':'';
+    return `<button class="choice-btn${sel}" onclick="selectAnswer(${i})" id="cb${i}">
+      <span class="choice-label">${labels[i]}</span>${c}
+    </button>`;
+  }).join('');
+  document.getElementById('quiz-area').innerHTML=`
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label">QUESTION</span>
+        <span class="progress-count">${currentQ+1} / ${total}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="dots">${dots}</div>
+    <div class="q-card">
+      <div class="q-section">${q.section}</div>
+      <div class="q-num">Q${String(currentQ+1).padStart(2,'0')}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="choices">${choices}</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn ghost" onclick="prevQ()" ${currentQ===0?'disabled':''}>← 前へ</button>
+      <button class="nav-btn" onclick="nextQ()" ${userAnswers[currentQ]===undefined?'disabled':''}>
+        ${currentQ===total-1?'結果を見る':'次へ →'}
+      </button>
+    </div>`;
+}
+
+function selectAnswer(i){
+  userAnswers[currentQ]=i;
+  renderQ();
+}
+
+function prevQ(){ if(currentQ>0){ currentQ--; renderQ(); } }
+
+function nextQ(){
+  const qs=QUIZ_DATA[player].questions;
+  if(currentQ<qs.length-1){ currentQ++; renderQ(); }
+  else showResult();
+}
+
+function showResult(){
+  const qs=QUIZ_DATA[player].questions;
+  const name=QUIZ_DATA[player].name;
+  let score=0;
+  const rows=qs.map((q,i)=>{
+    const ua=userAnswers[i];
+    const ok=ua===q.ans;
+    if(ok)score++;
+    const labels=['A','B','C','D'];
+    return `<div class="answer-row">
+      <span class="ans-num">Q${i+1}</span>
+      <span class="ans-icon">${ok?'✅':'❌'}</span>
+      <div class="ans-detail">
+        <div class="ans-q">${q.q}</div>
+        ${!ok?`<div class="ans-your">あなたの答え：${ua!==undefined?labels[ua]+'．'+q.c[ua]:'未回答'}</div>`:''}
+        <div class="ans-correct">正解：${labels[q.ans]}．${q.c[q.ans]}</div>
+      </div>
+    </div>`;
+  }).join('');
+  let rank,rankClass;
+  if(score>=15){rank='🏆 クリア！素晴らしい！';rankClass='clear';}
+  else if(score>=11){rank='😅 居残り特訓コース';rankClass='warn';}
+  else{rank='🚨 赤点！要復習！';rankClass='fail';}
+  document.getElementById('quiz-area').style.display='none';
+  const ra=document.getElementById('result-area');
+  ra.style.display='block';
+  ra.innerHTML=`
+    <div class="result-card">
+      <div class="result-name">${name} さんの結果</div>
+      <div class="result-score">${score}</div>
+      <div class="result-total">/ ${qs.length}問正解</div>
+      <div class="result-rank ${rankClass}">${rank}</div>
+      <div class="answer-list">${rows}</div>
+    </div>
+    <button class="retry-btn" onclick="location.reload()">🔄 もう一度挑戦する</button>`;
+}
+</script>
+</body>
+</html>
