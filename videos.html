@@ -31,6 +31,12 @@
     --cat-seido-light: #d1fae5;
     --cat-seido-dark: #047857;
     --cat-seido-badge: #a7f3d0;
+
+    /* カテゴリカラー：事務作業ノウハウ */
+    --cat-jimu-main: #f97316;
+    --cat-jimu-light: #ffedd5;
+    --cat-jimu-dark: #c2410c;
+    --cat-jimu-badge: #fed7aa;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -193,6 +199,13 @@ body {
     color: #fff;
 }
 
+.cat-chip[data-cat="事務作業ノウハウ"]:hover,
+.cat-chip[data-cat="事務作業ノウハウ"].active {
+    background: var(--cat-jimu-main);
+    border-color: var(--cat-jimu-main);
+    color: #fff;
+}
+
 /* ===== セクションヘッダー（カテゴリ区分け表示） ===== */
 .section-header {
     display: flex;
@@ -218,6 +231,11 @@ body {
     border-left: 4px solid var(--cat-seido-main);
 }
 
+.section-header.jimu {
+    background: var(--cat-jimu-light);
+    border-left: 4px solid var(--cat-jimu-main);
+}
+
 .section-header-icon {
     font-size: 20px;
 }
@@ -237,6 +255,10 @@ body {
 
 .section-header.seido .section-header-title {
     color: var(--cat-seido-dark);
+}
+
+.section-header.jimu .section-header-title {
+    color: var(--cat-jimu-dark);
 }
 
 .section-header-sub {
@@ -260,6 +282,11 @@ body {
 .seido .section-count-badge {
     background: var(--cat-seido-badge);
     color: var(--cat-seido-dark);
+}
+
+.jimu .section-count-badge {
+    background: var(--cat-jimu-badge);
+    color: var(--cat-jimu-dark);
 }
 
 /* ===== Video Grid ===== */
@@ -299,6 +326,10 @@ body {
     border-bottom: 3px solid var(--cat-seido-badge);
 }
 
+.video-card.cat-jimu {
+    border-bottom: 3px solid var(--cat-jimu-badge);
+}
+
 .video-card.cat-shinryo:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
@@ -311,6 +342,13 @@ body {
     box-shadow: var(--shadow-lg);
     border-color: var(--cat-seido-main);
     border-bottom-color: var(--cat-seido-main);
+}
+
+.video-card.cat-jimu:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--cat-jimu-main);
+    border-bottom-color: var(--cat-jimu-main);
 }
 
 .thumb-wrap {
@@ -403,6 +441,11 @@ body {
     color: #fff;
 }
 
+.cat-badge.jimu {
+    background: var(--cat-jimu-main);
+    color: #fff;
+}
+
 .card-body {
     padding: 12px;
 }
@@ -424,6 +467,10 @@ body {
     color: var(--cat-seido-dark);
 }
 
+.card-cat.jimu {
+    color: var(--cat-jimu-dark);
+}
+
 .card-cat-dot {
     width: 6px;
     height: 6px;
@@ -437,6 +484,10 @@ body {
 
 .card-cat-dot.seido {
     background: var(--cat-seido-main);
+}
+
+.card-cat-dot.jimu {
+    background: var(--cat-jimu-main);
 }
 
 .card-title {
@@ -707,6 +758,12 @@ const videos = [
     { id: 'CttTlCE7_m0', title: '病院の種類 と 病棟の種類', cat: '医療制度' },
     { id: 'pIsbsPWeZ1s', title: '医師の働き方改革と時間外労働の上限制度', cat: '医療制度' },
 
+    // ---------- 事務作業ノウハウ ----------
+    { id: 'uHW3P2rlIOg', title: 'MG求人案件から日経・メドピアアップロード方法', cat: '事務作業ノウハウ' },
+    { id: '1Rdqzc2aXh8', title: 'MG→m³に登録方法手順', cat: '事務作業ノウハウ' },
+    { id: 'dxgjgLo4kWE', title: 'メルマガクリック測定事務手順', cat: '事務作業ノウハウ' },
+    { id: 'QVd2Ui4gKcc', title: '更新エラー修正手順', cat: '事務作業ノウハウ' },
+
     // ---------- 今後追加する動画はここに ----------
     // { id: 'YouTubeのID', title: 'タイトル', cat: 'カテゴリ名' },
 ];
@@ -717,6 +774,7 @@ const videos = [
 const catConfig = {
     '診療科':  { icon: '🩺', cls: 'shinryo', label: '診療科' },
     '医療制度': { icon: '🏥', cls: 'seido',   label: '医療制度' },
+    '事務作業ノウハウ': { icon: '📋', cls: 'jimu', label: '事務作業ノウハウ' },
 };
 
 function getCls(cat) {
@@ -820,7 +878,7 @@ function renderContent() {
             grouped[v.cat].push(v);
         });
 
-        const catOrder = ['診療科', '医療制度'];
+        const catOrder = ['診療科', '医療制度', '事務作業ノウハウ'];
         let html = '';
 
         catOrder.forEach(cat => {
@@ -829,6 +887,7 @@ function renderContent() {
             const subtitles = {
                 '診療科': '各専門科の特徴・役割を動画で解説',
                 '医療制度': '医療の仕組み・制度を動画で学ぶ',
+                '事務作業ノウハウ': '社内事務作業の手順・ノウハウを動画で解説',
             };
             html += `
                 <div class="section-header ${cfg.cls}">
