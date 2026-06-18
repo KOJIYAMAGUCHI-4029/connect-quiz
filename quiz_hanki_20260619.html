@@ -23,6 +23,9 @@
   .name-btn .score-chip { position:absolute; top:8px; right:10px; font-size:0.7em; background:#4caf50; color:#fff; padding:1px 8px; border-radius:12px; }
   .big-board-btn { margin:26px auto 0; display:inline-block; padding:16px 40px; border:none; border-radius:30px; cursor:pointer; font-size:1.15em; font-weight:bold; letter-spacing:1px; background:linear-gradient(135deg,#ffd54f,#ff8f00); color:#3e2723; box-shadow:0 6px 20px rgba(255,143,0,0.35); }
   .big-board-btn:hover { transform:translateY(-2px); }
+  .host-controls { margin-top:30px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .host-btn { background:transparent; border:1px solid rgba(255,255,255,0.18); color:#7e8aa0; padding:6px 14px; border-radius:18px; font-size:0.72em; cursor:pointer; }
+  .host-btn:hover { color:#e0c97f; border-color:rgba(224,201,127,0.5); }
   .note { font-size:0.78em; color:#888; margin-top:20px; line-height:1.7; }
   .back-bar { margin-bottom:14px; }
   .back-btn { background:transparent; border:1px solid rgba(224,201,127,0.5); color:#e0c97f; padding:7px 18px; border-radius:20px; cursor:pointer; font-size:0.85em; }
@@ -115,8 +118,10 @@
   <div id="select-screen" class="select-screen">
     <div class="select-title">▼ 名前をタップしてスタート</div>
     <div class="name-grid" id="name-grid"></div>
-    <div><button class="big-board-btn" id="to-reveal">🏆 結果発表（ランキング）へ</button></div>
-    <div style="margin-top:12px;"><button class="back-btn" id="to-board">📋 スコアを手入力・修正する</button></div>
+    <div class="host-controls">
+      <button class="host-btn" id="to-reveal">🏆 結果発表（司会用）</button>
+      <button class="host-btn" id="to-board">📋 スコア手入力（司会用）</button>
+    </div>
     <div class="tier-legend">
       <span class="tl pass">🟢 14問以上：合格</span>
       <span class="tl yellow">🟡 10〜13問：イエローカード</span>
@@ -169,13 +174,12 @@ function show(id){ ['select-screen','quiz-screen','board-screen','reveal-screen'
 function backToSelect(){ buildNames(); show('select-screen'); }
 
 function buildNames(){
-  const grid=document.getElementById('name-grid'); const scores=loadScores(); grid.innerHTML='';
+  const grid=document.getElementById('name-grid'); grid.innerHTML='';
   members.forEach(m=>{
     const btn=document.createElement('button');
-    const done=scores[m.name]!==undefined;
-    btn.className='name-btn'+(m.theme==='entertainment'?' ent':'')+(done?' done':'');
+    btn.className='name-btn'+(m.theme==='entertainment'?' ent':'');
     const tag=m.theme==='entertainment'?'🎀 ディズニー / 嵐 / Snow Man':'💼 医師紹介 基礎知識';
-    btn.innerHTML=m.name+`<span class="tag">${tag}</span>`+(done?`<span class="score-chip">${scores[m.name]}点</span>`:'');
+    btn.innerHTML=m.name+`<span class="tag">${tag}</span>`;
     btn.addEventListener('click',()=>startQuiz(m));
     grid.appendChild(btn);
   });
@@ -209,19 +213,13 @@ function updateProgress(){ const done=Object.keys(answered).length, total=questi
 function showResult(){
   const total=questions.length; let correct=0;
   for(let i=0;i<total;i++) if(answered[i]===questions[i].answer) correct++;
-  saveScore(currentName,correct);
-  const ent=currentTheme==='entertainment'; let vClass,vText,comment;
-  if(correct>=14){ vClass='pass'; vText='🟢 合格！おめでとう🎉';
-    comment= ent ? `${currentName}さん、${correct}問正解！さすがの知識量です✨<br>大好きなジャンル、ばっちりですね！<br>CONNECTへようこそ😊` : `${currentName}さん、${correct}問正解！見事合格です！✨<br>医師紹介の基礎、しっかり身についていますね。`;
-  } else if(correct>=10){ vClass='yellow'; vText='🟡 イエローカード';
-    comment= ent ? `${currentName}さん、${correct}問正解。あと一歩で合格でした😆<br>推し活パワーでリベンジしましょう！` : `${currentName}さん、${correct}問正解。イエローカードです🟡<br>合格ラインまであと少し！次は14問超えを狙いましょう。`;
-  } else { vClass='red'; vText='🔴 追試…';
-    comment= ent ? `${currentName}さん、${correct}問正解。ここからが伸びしろですね😉<br>もう一度チャレンジしてみましょう！` : `${currentName}さん、${correct}問正解…。追試決定です😱<br>医師紹介の基礎から、もう一度しっかり叩き直しましょう！<br>山口社長より通達が届いています。覚悟してください。`;
-  }
+  saveScore(currentName,correct); // スコアは裏で記録のみ（本人には表示しない）
   const el=document.getElementById('result'); el.classList.remove('hidden');
-  el.innerHTML=`<div class="score-display">${correct} <span style="font-size:0.45em;color:#bbb">/ ${total}</span></div><div class="score-label">${currentName} さんの正解数</div><div class="verdict ${vClass}">${vText}</div><div class="verdict-comment" style="white-space:pre-line">${comment}</div><div style="margin-top:14px;font-size:0.8em;color:#888;">🟢 合格：14問以上 ／ 🟡 イエローカード：10〜13問 ／ 🔴 追試：9問以下</div><button class="btn-gold" id="next-person">👥 次の人へ</button><button class="btn-outline" id="to-board2">🏆 結果発表へ</button>`;
-  document.getElementById('next-person').addEventListener('click',backToSelect);
-  document.getElementById('to-board2').addEventListener('click',startReveal);
+  el.innerHTML=`<div style="font-size:3em;margin-bottom:8px;">🎉</div>
+    <div style="font-size:1.4em;color:#e0c97f;font-weight:bold;margin-bottom:12px;">回答おつかれさまでした！</div>
+    <div style="color:#ddd;line-height:1.9;">${currentName} さん、全${total}問おわりました。<br>ご回答ありがとうございました。<br>結果は後ほどの発表をお楽しみに🏆</div>
+    <button class="btn-outline" id="back-top" style="margin-top:22px;">▶ 最初の画面にもどる</button>`;
+  document.getElementById('back-top').addEventListener('click',backToSelect);
   el.scrollIntoView({behavior:'smooth'});
 }
 
