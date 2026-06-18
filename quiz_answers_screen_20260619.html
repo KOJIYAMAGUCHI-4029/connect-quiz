@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>答え合わせ（スクリーン投影用） ／ 半期表彰式</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh; color: #fff; padding: 24px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+  .header { text-align: center; padding: 20px 0 6px; }
+  .header h1 { font-size: 2em; letter-spacing: 2px; color: #e0c97f; text-shadow: 0 0 20px rgba(224,201,127,0.4); }
+  .header .subtitle { font-size: 1em; color: #aaa; margin-top: 6px; }
+
+  .controls { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; align-items:center; margin: 18px 0 26px; }
+  .tab-btn { padding: 12px 34px; border: 2px solid #e0c97f; background: transparent; color: #e0c97f; border-radius: 30px; cursor: pointer; font-size: 1.1em; font-weight: bold; }
+  .tab-btn.active, .tab-btn:hover { background: #e0c97f; color: #1a1a2e; }
+  .tab-btn.ent { border-color:#e36bae; color:#f7a8d4; }
+  .tab-btn.ent.active, .tab-btn.ent:hover { background:#e36bae; color:#1a1a2e; }
+  .reveal-btn { padding: 12px 28px; border:none; border-radius: 30px; cursor:pointer; font-size:1.1em; font-weight:bold;
+    background: linear-gradient(135deg,#4caf50,#2e7d32); color:#fff; }
+  .reveal-btn.hide-mode { background: linear-gradient(135deg,#e0c97f,#c8a84b); color:#1a1a2e; }
+
+  .card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 18px; padding: 28px 32px; margin-bottom: 20px; }
+  .badge { display:inline-block; background: rgba(224,201,127,0.15); border:1px solid rgba(224,201,127,0.35); color:#e0c97f; font-size:0.85em; padding:3px 14px; border-radius:20px; margin-bottom:12px; }
+  .badge.ent { background: rgba(227,107,174,0.15); border-color: rgba(227,107,174,0.45); color:#f7a8d4; }
+  .q-row { display:flex; gap:16px; align-items:flex-start; }
+  .q-num { background: linear-gradient(135deg,#e0c97f,#c8a84b); color:#1a1a2e; min-width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.1em; flex-shrink:0; }
+  .q-text { font-size:1.5em; line-height:1.5; color:#fff; font-weight:600; padding-top:6px; }
+  .options { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:18px; }
+  .opt { background: rgba(255,255,255,0.06); border:2px solid rgba(255,255,255,0.18); color:#ddd; padding:14px 18px; border-radius:12px; font-size:1.2em; line-height:1.4; transition: all 0.2s; }
+  .opt.correct { background: rgba(76,175,80,0.28); border-color:#4caf50; color:#c8e6c9; font-weight:bold; box-shadow:0 0 18px rgba(76,175,80,0.35); }
+  .answer-line { margin-top:18px; padding:16px 20px; border-radius:12px; background: rgba(76,175,80,0.12); border-left:5px solid #4caf50; font-size:1.15em; line-height:1.6; color:#d7f0d8; display:none; }
+  .answer-line.show { display:block; }
+  .answer-line .ans-label { color:#a5d6a7; font-weight:bold; margin-right:8px; }
+  .answer-line .exp { display:block; margin-top:8px; color:#cfe8d0; font-size:0.92em; }
+  .hidden { display:none; }
+  .footer-tip { text-align:center; color:#888; font-size:0.85em; margin:10px 0 30px; line-height:1.7; }
+  @media (max-width: 640px) {
+    .options { grid-template-columns:1fr; }
+    .q-text { font-size:1.2em; }
+    .header h1 { font-size:1.4em; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>📺 答え合わせ（投影用）</h1>
+    <div class="subtitle">半期表彰式 ／ 司会者がスクリーンに映して使う用</div>
+  </div>
+
+  <div class="controls">
+    <button class="tab-btn active" id="tab-med" onclick="switchSet('medical')">💼 営業（医師紹介）</button>
+    <button class="tab-btn ent" id="tab-ent" onclick="switchSet('entertainment')">🎀 エンタメ（中畑さん）</button>
+    <button class="reveal-btn hide-mode" id="reveal-all" onclick="toggleAll()">👁 全部の答えを表示</button>
+  </div>
+  <div class="footer-tip">各問の「<b>答えを表示</b>」を押すと、その問題だけ正解＋解説が出ます。<br>「全部の答えを表示」で一括ON/OFFも可能です。</div>
+
+  <div id="list"></div>
+</div>
+
+<script>
+const SETS = {
+  medical: [
+  {
+    "section": "有料職業紹介の仕組み",
+    "q": "医師の人材紹介サービスで、医師本人が紹介会社に支払う費用はどれ？",
+    "options": [
+      "想定年収の2割相当",
+      "毎月の登録料のみ",
+      "費用は一切不要",
+      "成功報酬の半額"
+    ],
+    "answer": 2,
+    "hint": "医師側の費用負担はゼロが原則。紹介手数料は採用する医療機関が支払います。"
+  },
+  {
+    "section": "有料職業紹介の仕組み",
+    "q": "紹介会社が医療機関から受け取る成功報酬の相場はどれ？",
+    "options": [
+      "想定年収の5%ほど",
+      "想定年収の2〜3割",
+      "一律50万円の固定",
+      "毎月10万円の定額"
+    ],
+    "answer": 1,
+    "hint": "成功報酬型が基本で、想定年収の20〜35%が相場。医師側の負担はありません。"
+  },
+  {
+    "section": "労働法・働き方改革",
+    "q": "医師の時間外労働の上限規制「A水準」で定められた年間上限はどれ？",
+    "options": [
+      "年720時間",
+      "年960時間",
+      "年1,200時間",
+      "年1,860時間"
+    ],
+    "answer": 1,
+    "hint": "A水準は年960時間。地域医療確保等のB・C水準は年1,860時間まで認められます。"
+  },
+  {
+    "section": "医療機関の種類",
+    "q": "医療法上、「病院」と「診療所（クリニック）」を分ける基準はどれ？",
+    "options": [
+      "診療科目の数",
+      "常勤医師の人数",
+      "外来患者の数",
+      "入院ベッドの数"
+    ],
+    "answer": 3,
+    "hint": "入院ベッド19床以下が診療所、20床以上が病院。医療法上の区分です。"
+  },
+  {
+    "section": "勤務形態の基礎",
+    "q": "医療機関における「常勤医師」の一般的な目安はどれ？",
+    "options": [
+      "週4日以上の勤務",
+      "当直を月1回以上",
+      "夜間対応が中心",
+      "外来のみ担当する"
+    ],
+    "answer": 0,
+    "hint": "常勤は概ね週4日以上のフルタイム勤務が目安。それ未満は非常勤として扱われます。"
+  },
+  {
+    "section": "非常勤・スポット",
+    "q": "医師のスポットアルバイトで、日当が高額になりやすい条件はどれ？",
+    "options": [
+      "都市部の日中外来",
+      "短時間の健診業務",
+      "僻地での当直勤務",
+      "人気病院の見学"
+    ],
+    "answer": 2,
+    "hint": "当直＋僻地の組み合わせが高単価の王道。離島の当直は日当15〜20万円超も。"
+  },
+  {
+    "section": "面談・見学",
+    "q": "医師紹介で入職前の「見学」を設定する主な目的はどれ？",
+    "options": [
+      "給与条件を交渉する",
+      "相互の不一致を防ぐ",
+      "書類選考の代替手段",
+      "入職日程を確定する"
+    ],
+    "answer": 1,
+    "hint": "見学は病院と医師双方のミスマッチ防止が最大の目的。雰囲気を確かめる機会です。"
+  },
+  {
+    "section": "診療科と報酬",
+    "q": "自由診療が中心で、医師の収入が高くなりやすい診療科はどれ？",
+    "options": [
+      "美容外科",
+      "小児科",
+      "産婦人科",
+      "総合内科"
+    ],
+    "answer": 0,
+    "hint": "美容外科・美容皮膚科は自由診療が中心で、保険診療より高収入になりやすい分野です。"
+  },
+  {
+    "section": "診療科と報酬",
+    "q": "同じ常勤でも、年収が比較的抑えられがちな勤務先はどれ？",
+    "options": [
+      "僻地の中核病院",
+      "離島部の診療所",
+      "地方の民間病院",
+      "都市の人気病院"
+    ],
+    "answer": 3,
+    "hint": "人気の都市部病院は応募が集まりやすく、僻地より年収は抑えめになる傾向があります。"
+  },
+  {
+    "section": "勤務形態の基礎",
+    "q": "医師の勤務形態「オンコール」の説明として正しいものはどれ？",
+    "options": [
+      "完全な終日在宅勤務",
+      "月1回の当直のみ",
+      "待機し緊急時に出勤",
+      "外来だけの軽勤務"
+    ],
+    "answer": 2,
+    "hint": "オンコールは自宅等で待機し、緊急時に呼び出される勤務。手当が付くのが一般的です。"
+  },
+  {
+    "section": "業界・競合",
+    "q": "国内医師の大多数が会員登録するプラットフォームを持つ最大手はどれ？",
+    "options": [
+      "エムスリー",
+      "日本医師会",
+      "厚生労働省",
+      "国立医療機構"
+    ],
+    "answer": 0,
+    "hint": "m3.comは国内医師の9割超が会員。求人・MR支援・キャリア事業の強い基盤です。"
+  },
+  {
+    "section": "資格・専門医制度",
+    "q": "専門医資格を一元的に認定・管理する機関はどこ？",
+    "options": [
+      "日本医師会",
+      "日本専門医機構",
+      "各診療科学会",
+      "厚生労働省本省"
+    ],
+    "answer": 1,
+    "hint": "2018年から日本専門医機構が一元管理。各学会と連携しつつ運用しています。"
+  },
+  {
+    "section": "資格・専門医制度",
+    "q": "医師免許に加え、所定の研修を修了して得られる資格はどれ？",
+    "options": [
+      "専門医資格",
+      "指導医資格",
+      "認定看護師",
+      "産業医資格"
+    ],
+    "answer": 3,
+    "hint": "産業医は日本医師会等の基礎研修50時間等を修了して取得。企業の健康管理を担います。"
+  },
+  {
+    "section": "医師転職市場",
+    "q": "医師が転職を考える理由として、上位に入りやすいものはどれ？",
+    "options": [
+      "人間関係や職場環境",
+      "病院の知名度の低さ",
+      "院内の設備の古さ",
+      "勤務地の天候の差"
+    ],
+    "answer": 0,
+    "hint": "給与と並び人間関係・職場環境は離職要因の上位。各種調査でも常に上位に挙がります。"
+  },
+  {
+    "section": "医師のキャリア",
+    "q": "医師免許取得後に義務づけられる「初期臨床研修」の期間はどれ？",
+    "options": [
+      "半年間",
+      "1年間",
+      "2年間",
+      "4年間"
+    ],
+    "answer": 2,
+    "hint": "初期臨床研修は原則2年間。複数の診療科をローテートして基本を身につけます。"
+  },
+  {
+    "section": "医師のキャリア",
+    "q": "初期研修後の「専攻医（後期研修）」で主に目指すものはどれ？",
+    "options": [
+      "医師免許の再取得",
+      "専門医資格の取得",
+      "病院長への就任",
+      "開業資金の確保"
+    ],
+    "answer": 1,
+    "hint": "専攻医は特定の診療科で研鑽を積み、専門医資格の取得を目指す段階です。"
+  },
+  {
+    "section": "転職支援の実務",
+    "q": "転職支援でレジメ（職務経歴書）の作成を重視する理由はどれ？",
+    "options": [
+      "法律上の作成の義務",
+      "医師が記入を嫌う",
+      "病院側が代筆要求",
+      "質が選考結果を左右"
+    ],
+    "answer": 3,
+    "hint": "レジメの質は第一印象を左右し、面接機会の獲得に直結する重要な書類です。"
+  },
+  {
+    "section": "転職支援の実務",
+    "q": "転職の場面で「カウンターオファー」が指すものはどれ？",
+    "options": [
+      "現職からの引き留め",
+      "紹介会社の値引き提案",
+      "病院同士の合併の打診",
+      "医師からの辞退の連絡"
+    ],
+    "answer": 0,
+    "hint": "カウンターオファーは現職が昇給等で引き留める提案。転職の最終局面で起こりがちです。"
+  },
+  {
+    "section": "医療機関の種類",
+    "q": "「医療法人」に関する説明として正しいものはどれ？",
+    "options": [
+      "株式上場が義務である",
+      "個人事業と同じ扱い",
+      "法人格を持つ組織形態",
+      "国が直接運営する組織"
+    ],
+    "answer": 2,
+    "hint": "医療法人は法人格を持つ組織。個人開業と異なり、事業承継や規模拡大がしやすい形態です。"
+  },
+  {
+    "section": "労働法・働き方改革",
+    "q": "2024年4月から医師に本格適用された働き方改革の規制はどれ？",
+    "options": [
+      "完全週休3日の義務化",
+      "当直の全面的な禁止",
+      "在宅勤務の原則化",
+      "時間外労働の上限規制"
+    ],
+    "answer": 3,
+    "hint": "2024年4月から医師の時間外労働に上限規制が本格適用。A水準は年960時間です。"
+  }
+],
+  entertainment: [
+  {
+    "section": "ディズニー",
+    "q": "ミッキーマウスが初めて公開された1928年の作品はどれ？",
+    "options": [
+      "蒸気船ウィリー",
+      "ファンタジア",
+      "メリー・ポピンズ",
+      "ピノキオ"
+    ],
+    "answer": 0,
+    "hint": "1928年公開の「蒸気船ウィリー」で、音と同期したミッキーが世界に登場しました。"
+  },
+  {
+    "section": "嵐",
+    "q": "嵐がCDデビューした年はどれ？",
+    "options": [
+      "1997年",
+      "1999年",
+      "2001年",
+      "2003年"
+    ],
+    "answer": 1,
+    "hint": "嵐は1999年にデビュー。ハワイでの記者会見で結成が発表されました。"
+  },
+  {
+    "section": "Snow Man",
+    "q": "Snow ManがCDデビューした年はどれ？",
+    "options": [
+      "2016年",
+      "2018年",
+      "2020年",
+      "2022年"
+    ],
+    "answer": 2,
+    "hint": "Snow Manは2020年1月にCDデビュー。9人体制でのスタートでした。"
+  },
+  {
+    "section": "ディズニー",
+    "q": "ミッキーマウスの飼い犬として知られるキャラクターはどれ？",
+    "options": [
+      "グーフィー",
+      "ドナルド",
+      "チップ",
+      "プルート"
+    ],
+    "answer": 3,
+    "hint": "ミッキーの忠実な愛犬がプルート。同じ犬でもグーフィーは二足歩行の友達キャラです。"
+  },
+  {
+    "section": "嵐",
+    "q": "嵐でリーダーを務めるメンバーは誰？",
+    "options": [
+      "大野智",
+      "櫻井翔",
+      "松本潤",
+      "二宮和也"
+    ],
+    "answer": 0,
+    "hint": "嵐のリーダーは大野智さん。絵画や創作活動の才能でも知られています。"
+  },
+  {
+    "section": "Snow Man",
+    "q": "Snow Manは何人組のグループ？",
+    "options": [
+      "6人",
+      "9人",
+      "7人",
+      "8人"
+    ],
+    "answer": 1,
+    "hint": "Snow Manは9人組。6人から3人が加入して現在の体制になりました。"
+  },
+  {
+    "section": "ディズニー",
+    "q": "東京ディズニーランドが開園した年はどれ？",
+    "options": [
+      "1980年",
+      "1990年",
+      "1983年",
+      "2001年"
+    ],
+    "answer": 2,
+    "hint": "東京ディズニーランドは1983年開園。2001年には東京ディズニーシーも誕生しました。"
+  },
+  {
+    "section": "嵐",
+    "q": "嵐は何人組のグループ？",
+    "options": [
+      "4人",
+      "6人",
+      "9人",
+      "5人"
+    ],
+    "answer": 3,
+    "hint": "嵐は5人組。大野・櫻井・相葉・二宮・松本の5人です。"
+  },
+  {
+    "section": "Snow Man",
+    "q": "Snow Manのメンバーで、気象予報士の資格を持つ「クイズ王」は誰？",
+    "options": [
+      "阿部亮平",
+      "渡辺翔太",
+      "深澤辰哉",
+      "向井康二"
+    ],
+    "answer": 0,
+    "hint": "阿部亮平さんは気象予報士の資格を持つ高学歴メンバー。クイズ番組でも活躍中です。"
+  },
+  {
+    "section": "ディズニー",
+    "q": "映画「アナと雪の女王」で氷の魔法の力を持つ姉の名前はどれ？",
+    "options": [
+      "ラプンツェル",
+      "エルサ",
+      "ベル",
+      "アナ"
+    ],
+    "answer": 1,
+    "hint": "氷の魔法を持つ姉がエルサ、妹がアナ。雪だるまのオラフも人気です。"
+  },
+  {
+    "section": "嵐",
+    "q": "2023年の大河ドラマ「どうする家康」で主演した嵐のメンバーは誰？",
+    "options": [
+      "二宮和也",
+      "相葉雅紀",
+      "松本潤",
+      "櫻井翔"
+    ],
+    "answer": 2,
+    "hint": "松本潤さんが徳川家康を演じました。ドラマ「花より男子」でも主演しています。"
+  },
+  {
+    "section": "Snow Man",
+    "q": "Snow Manでリーダーを務めるメンバーは誰？",
+    "options": [
+      "ラウール",
+      "目黒蓮",
+      "宮舘涼太",
+      "岩本照"
+    ],
+    "answer": 3,
+    "hint": "Snow Manのリーダーは岩本照さん。筋トレやアクロバットでも知られています。"
+  },
+  {
+    "section": "ディズニー",
+    "q": "世界初の長編カラーアニメ映画とされるディズニー作品はどれ？",
+    "options": [
+      "白雪姫",
+      "シンデレラ",
+      "ピノキオ",
+      "バンビ"
+    ],
+    "answer": 0,
+    "hint": "1937年公開の「白雪姫」が世界初の長編アニメ映画とされています。"
+  },
+  {
+    "section": "嵐",
+    "q": "映画「硫黄島からの手紙」に出演した嵐のメンバーは誰？",
+    "options": [
+      "相葉雅紀",
+      "二宮和也",
+      "櫻井翔",
+      "松本潤"
+    ],
+    "answer": 1,
+    "hint": "二宮和也さんがクリント・イーストウッド監督作品に出演し話題になりました。"
+  },
+  {
+    "section": "Snow Man",
+    "q": "Snow Manのメンバーで、大のアニメ・声優好きとして知られるのは誰？",
+    "options": [
+      "渡辺翔太",
+      "深澤辰哉",
+      "佐久間大介",
+      "向井康二"
+    ],
+    "answer": 2,
+    "hint": "佐久間大介さんは大のアニメ・声優好き。趣味全開のトークでも人気です。"
+  },
+  {
+    "section": "ディズニー",
+    "q": "1995年公開の世界初の長編フルCGアニメ映画はどれ？",
+    "options": [
+      "モンスターズ・インク",
+      "ファインディング・ニモ",
+      "カーズ",
+      "トイ・ストーリー"
+    ],
+    "answer": 3,
+    "hint": "1995年の「トイ・ストーリー」が世界初の長編フルCG映画。ウッディとバズが主人公です。"
+  },
+  {
+    "section": "嵐",
+    "q": "嵐がグループ活動を休止したのは何年の末？",
+    "options": [
+      "2020年末",
+      "2018年末",
+      "2019年末",
+      "2022年末"
+    ],
+    "answer": 0,
+    "hint": "嵐は2020年末をもって活動を休止しました。2019年にその発表がなされました。"
+  },
+  {
+    "section": "Snow Man",
+    "q": "2022年のドラマ「silent」で主演したSnow Manのメンバーは誰？",
+    "options": [
+      "ラウール",
+      "目黒蓮",
+      "宮舘涼太",
+      "向井康二"
+    ],
+    "answer": 1,
+    "hint": "目黒蓮さんが主演し大ヒット。俳優としても幅広く活躍しています。"
+  },
+  {
+    "section": "ディズニー",
+    "q": "東京ディズニーランドのシンボルとなっているお城はどれ？",
+    "options": [
+      "美女と野獣の城",
+      "眠れる森の城",
+      "シンデレラ城",
+      "白雪姫の城"
+    ],
+    "answer": 2,
+    "hint": "東京のシンボルはシンデレラ城。カリフォルニアやパリは眠れる森の美女の城です。"
+  },
+  {
+    "section": "嵐",
+    "q": "嵐の結成・デビューが発表された場所として知られるのはどこ？",
+    "options": [
+      "沖縄",
+      "グアム",
+      "東京ドーム",
+      "ハワイ"
+    ],
+    "answer": 3,
+    "hint": "1999年、ハワイでの記者会見で嵐の結成が発表されました。"
+  }
+]
+};
+const LETTERS = ['Ａ','Ｂ','Ｃ','Ｄ'];
+let currentSet = 'medical';
+let allShown = false;
+
+function switchSet(s) {
+  currentSet = s; allShown = false;
+  document.getElementById('tab-med').classList.toggle('active', s==='medical');
+  document.getElementById('tab-ent').classList.toggle('active', s==='entertainment');
+  const btn = document.getElementById('reveal-all');
+  btn.textContent = '👁 全部の答えを表示'; btn.classList.add('hide-mode');
+  render();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function render() {
+  const qs = SETS[currentSet];
+  const entCls = currentSet==='entertainment' ? ' ent' : '';
+  let html = '';
+  qs.forEach((q, idx) => {
+    const opts = q.options.map((o, oi) =>
+      `<div class="opt" id="opt-${idx}-${oi}">${LETTERS[oi]}．${o}</div>`
+    ).join('');
+    html += `
+      <div class="card">
+        <span class="badge${entCls}">📚 ${q.section}</span>
+        <div class="q-row">
+          <div class="q-num">Q${idx+1}</div>
+          <div class="q-text">${q.q}</div>
+        </div>
+        <div class="options">${opts}</div>
+        <button class="reveal-btn hide-mode" style="margin-top:18px;font-size:0.95em;padding:8px 20px;" onclick="toggleOne(${idx})" id="btn-${idx}">▶ 答えを表示</button>
+        <div class="answer-line" id="ans-${idx}">
+          <span class="ans-label">正解</span>${LETTERS[q.answer]}．${q.options[q.answer]}
+          <span class="exp">💡 ${q.hint}</span>
+        </div>
+      </div>`;
+  });
+  document.getElementById('list').innerHTML = html;
+}
+
+function showOne(idx, show) {
+  const q = SETS[currentSet][idx];
+  document.getElementById(`opt-${idx}-${q.answer}`).classList.toggle('correct', show);
+  document.getElementById(`ans-${idx}`).classList.toggle('show', show);
+  const b = document.getElementById(`btn-${idx}`);
+  b.textContent = show ? '◀ 答えを隠す' : '▶ 答えを表示';
+  b.classList.toggle('hide-mode', !show);
+}
+
+function toggleOne(idx) {
+  const shown = document.getElementById(`ans-${idx}`).classList.contains('show');
+  showOne(idx, !shown);
+}
+
+function toggleAll() {
+  allShown = !allShown;
+  const qs = SETS[currentSet];
+  qs.forEach((q, idx) => showOne(idx, allShown));
+  const btn = document.getElementById('reveal-all');
+  btn.textContent = allShown ? '🙈 全部の答えを隠す' : '👁 全部の答えを表示';
+  btn.classList.toggle('hide-mode', !allShown);
+}
+
+render();
+</script>
+</body>
+</html>
