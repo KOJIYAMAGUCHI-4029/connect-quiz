@@ -165,6 +165,40 @@ const QUESTION_SETS = { medical: [{"section": "消化器内科の用語", "q": "
 const LETTERS = ['Ａ','Ｂ','Ｃ','Ｄ'];
 const STORE_KEY = 'connect_hanki_scores_20260619';
 let currentName='', currentTheme='medical', questions=[], answered={};
+let participantMode=false, participantMember=null;
+
+/* ===== JSONBin（全端末の点数を集約する共有保存先） ===== */
+const BIN_ID = '6a33addff5f4af5e29075550';
+const MASTER_KEY = '$2a$10$dJotDlD41UHXS.q.BGOnk.UbcXxQFuGotWtUx4QEInIo9eULzpDwy';
+const JB_BASE = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
+
+async function fetchRemote(){
+  const res = await fetch(JB_BASE + '/latest', { headers: { 'X-MASTER-KEY': MASTER_KEY, 'X-Bin-Meta': 'false' } });
+  if(!res.ok) throw new Error('GET ' + res.status);
+  const data = await res.json();
+  const rec = (data && data.record !== undefined) ? data.record : data;
+  return (rec && typeof rec === 'object') ? rec : {};
+}
+async function putRemote(obj){
+  const res = await fetch(JB_BASE, { method:'PUT',
+    headers:{ 'Content-Type':'application/json', 'X-MASTER-KEY': MASTER_KEY, 'X-Bin-Versioning':'false' },
+    body: JSON.stringify(obj) });
+  if(!res.ok) throw new Error('PUT ' + res.status);
+  return true;
+}
+// 読み取り→自分の点数を足す→書き戻し（軽い再試行つき）
+async function pushScore(name, score){
+  let lastErr;
+  for(let i=0;i<3;i++){
+    try{
+      const remote = await fetchRemote();
+      remote[name] = score;
+      await putRemote(remote);
+      return true;
+    }catch(e){ lastErr=e; await new Promise(r=>setTimeout(r, 400 + Math.random()*500)); }
+  }
+  throw lastErr;
+}
 
 function loadScores(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
 function saveScore(name,score){ const s=loadScores(); s[name]=score; try{ localStorage.setItem(STORE_KEY,JSON.stringify(s)); }catch(e){} }
@@ -213,14 +247,21 @@ function updateProgress(){ const done=Object.keys(answered).length, total=questi
 function showResult(){
   const total=questions.length; let correct=0;
   for(let i=0;i<total;i++) if(answered[i]===questions[i].answer) correct++;
-  saveScore(currentName,correct); // スコアは裏で記録のみ（本人には表示しない）
+  saveScore(currentName,correct); // ローカルにも控える
   const el=document.getElementById('result'); el.classList.remove('hidden');
   el.innerHTML=`<div style="font-size:3em;margin-bottom:8px;">🎉</div>
     <div style="font-size:1.4em;color:#e0c97f;font-weight:bold;margin-bottom:12px;">回答おつかれさまでした！</div>
     <div style="color:#ddd;line-height:1.9;">${currentName} さん、全${total}問おわりました。<br>ご回答ありがとうございました。<br>結果は後ほどの発表をお楽しみに🏆</div>
-    <button class="btn-outline" id="back-top" style="margin-top:22px;">▶ 最初の画面にもどる</button>`;
-  document.getElementById('back-top').addEventListener('click',backToSelect);
+    <div id="send-status" style="margin-top:16px;font-size:0.85em;color:#9aa;">📡 回答を送信中…</div>`;
+  if(!participantMode){
+    el.innerHTML += `<button class="btn-outline" id="back-top" style="margin-top:18px;">▶ 最初の画面にもどる</button>`;
+    const bt=document.getElementById('back-top'); if(bt) bt.addEventListener('click',backToSelect);
+  }
   el.scrollIntoView({behavior:'smooth'});
+  // JSONBinへ送信（全端末で集約）
+  pushScore(currentName, correct)
+    .then(()=>{ const s=document.getElementById('send-status'); if(s){ s.textContent='✅ 送信が完了しました'; s.style.color='#a5d6a7'; } })
+    .catch(()=>{ const s=document.getElementById('send-status'); if(s){ s.innerHTML='⚠️ 送信に失敗しました。お手数ですが司会者にお声がけください。'; s.style.color='#ef9a9a'; } });
 }
 
 function showBoard(){
@@ -244,14 +285,26 @@ function showBoard(){
   show('board-screen');
 }
 
-function resetScores(){ if(!confirm('記録された全員のスコアを消去します。よろしいですか？')) return; try{ localStorage.removeItem(STORE_KEY); }catch(e){} showBoard(); }
+async function resetScores(){
+  if(!confirm('全員のスコアを消去します（この端末＋集約サーバーの両方）。よろしいですか？')) return;
+  try{ localStorage.removeItem(STORE_KEY); }catch(e){}
+  try{ await putRemote({}); }catch(e){ alert('サーバー側の消去に失敗しました。通信を確認してもう一度お試しください。'); }
+  showBoard();
+}
 
 let revealQueue=[], revealRows=[], revealDir='bottomUp';
 function tierOf(score){ return score>=14?{key:'pass',label:'合格',emoji:'🟢'}:score>=10?{key:'yellow',label:'イエローカード',emoji:'🟡'}:{key:'retake',label:'追試',emoji:'🔴'}; }
-function startReveal(){
-  const scores=loadScores();
+async function startReveal(){
+  // JSONBin（全端末）＋ローカル手入力をマージ。リモート優先、手入力で補完。
+  let scores = loadScores();
+  try{
+    const remote = await fetchRemote();
+    scores = Object.assign({}, scores, remote);
+  }catch(e){
+    if(!confirm('集約サーバーから取得できませんでした（通信エラー）。\nこの端末に手入力・記録された分だけで発表しますか？')) return;
+  }
   revealRows=members.filter(m=>scores[m.name]!==undefined).map(m=>({name:m.name,theme:m.theme,score:scores[m.name]})).sort((a,b)=>b.score-a.score);
-  if(revealRows.length===0){ alert('まだスコアが入力されていません。'); return; }
+  if(revealRows.length===0){ alert('まだスコアがありません。'); return; }
   let rank=0,prev=null; revealRows.forEach((r,i)=>{ if(r.score!==prev){ rank=i+1; prev=r.score; } r.rank=rank; });
   document.getElementById('reveal-sub').textContent='参加 '+revealRows.length+' 名 ／ 全20問';
   let cp=0,cy=0,cr=0; revealRows.forEach(r=>{ const t=tierOf(r.score).key; if(t==='pass')cp++; else if(t==='yellow')cy++; else cr++; });
@@ -338,7 +391,22 @@ document.getElementById('board-back').addEventListener('click',backToSelect);
 document.getElementById('reveal-back').addEventListener('click',backToSelect);
 document.getElementById('board-to-reveal').addEventListener('click',startReveal);
 document.getElementById('reset-scores').addEventListener('click',resetScores);
-buildNames();
+
+function initApp(){
+  buildNames();
+  let u='';
+  try{ u=(new URLSearchParams(location.search).get('user')||'').trim().toLowerCase(); }catch(e){}
+  if(u){
+    const m=members.find(x=> x.key.toLowerCase()===u);
+    if(m){
+      participantMode=true; participantMember=m;
+      const qb=document.getElementById('quiz-back'); if(qb) qb.style.display='none'; // 参加者は戻れないように
+      startQuiz(m); return;
+    }
+  }
+  show('select-screen'); // 個別指定なし＝司会用トップ
+}
+initApp();
 </script>
 </body>
 </html>
