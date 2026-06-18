@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>半期表彰式クイズ ／ CONNECT</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh; color: #fff; padding: 20px;
+  }
+  .container { max-width: 820px; margin: 0 auto; }
+  .header { text-align: center; padding: 30px 0 10px; }
+  .header h1 { font-size: 1.6em; letter-spacing: 2px; color: #e0c97f; text-shadow: 0 0 20px rgba(224,201,127,0.4); margin-bottom: 6px; }
+  .header .subtitle { font-size: 0.85em; color: #aaa; letter-spacing: 1px; }
+
+  .select-screen { text-align: center; padding: 10px 0 40px; }
+  .select-title { font-size: 1.05em; color: #e0c97f; margin: 24px 0 18px; letter-spacing: 1px; }
+  .name-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 560px; margin: 0 auto; }
+  .name-btn {
+    padding: 16px 12px; border: 2px solid #e0c97f; background: rgba(224,201,127,0.06);
+    color: #f3e6bf; border-radius: 14px; cursor: pointer; font-size: 1.05em; font-weight: bold;
+    letter-spacing: 1px; transition: all 0.18s; position: relative;
+  }
+  .name-btn:hover { background: #e0c97f; color: #1a1a2e; transform: translateY(-2px); }
+  .name-btn.ent { border-color: #e36bae; background: rgba(227,107,174,0.08); color: #f7c8e4; }
+  .name-btn.ent:hover { background: #e36bae; color: #1a1a2e; }
+  .name-btn .tag { display:block; font-size:0.6em; font-weight:normal; letter-spacing:0; margin-top:3px; opacity:0.75; }
+  .note { font-size: 0.78em; color: #888; margin-top: 22px; line-height: 1.7; }
+
+  .back-bar { margin-bottom: 14px; }
+  .back-btn { background: transparent; border: 1px solid rgba(224,201,127,0.5); color: #e0c97f; padding: 7px 18px; border-radius: 20px; cursor: pointer; font-size: 0.85em; }
+  .back-btn:hover { background: rgba(224,201,127,0.15); }
+  .who-badge { display:inline-block; margin-left:10px; font-size:0.9em; color:#f3e6bf; }
+  .progress-text { text-align: right; font-size: 0.8em; color: #aaa; margin-bottom: 6px; }
+  .progress-bar { background: rgba(255,255,255,0.1); border-radius: 8px; height: 6px; margin-bottom: 20px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #e0c97f, #c8a84b); border-radius: 8px; transition: width 0.3s; }
+  .quiz-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 22px 26px; margin-bottom: 16px; }
+  .section-badge { display: inline-block; background: rgba(224,201,127,0.15); border: 1px solid rgba(224,201,127,0.3); color: #e0c97f; font-size: 0.72em; padding: 2px 10px; border-radius: 20px; margin-bottom: 8px; letter-spacing: 1px; }
+  .section-badge.ent { background: rgba(227,107,174,0.15); border-color: rgba(227,107,174,0.4); color: #f7a8d4; }
+  .q-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+  .q-num { background: linear-gradient(135deg, #e0c97f, #c8a84b); color: #1a1a2e; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.82em; flex-shrink: 0; }
+  .q-text { font-size: 1.02em; line-height: 1.6; color: #f0f0f0; padding-top: 5px; }
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .option-btn { background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.2); color: #ddd; padding: 10px 14px; border-radius: 10px; cursor: pointer; text-align: left; font-size: 0.9em; line-height: 1.4; transition: all 0.15s; }
+  .option-btn:hover:not(:disabled) { background: rgba(224,201,127,0.15); border-color: #e0c97f; color: #fff; }
+  .option-btn.correct { background: rgba(76,175,80,0.25); border-color: #4caf50; color: #a5d6a7; }
+  .option-btn.wrong { background: rgba(244,67,54,0.2); border-color: #f44336; color: #ef9a9a; }
+  .feedback { margin-top: 10px; padding: 10px 14px; border-radius: 10px; font-size: 0.88em; line-height: 1.6; display: none; }
+  .feedback.show { display: block; }
+  .feedback.correct-fb { background: rgba(76,175,80,0.15); border-left: 3px solid #4caf50; color: #c8e6c9; }
+  .feedback.wrong-fb { background: rgba(244,67,54,0.1); border-left: 3px solid #f44336; color: #ffcdd2; }
+  .result-section { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 28px; margin-top: 24px; text-align: center; border: 1px solid rgba(224,201,127,0.3); }
+  .score-display { font-size: 3.5em; font-weight: bold; color: #e0c97f; text-shadow: 0 0 30px rgba(224,201,127,0.5); }
+  .score-label { font-size: 1em; color: #bbb; margin-bottom: 16px; }
+  .verdict { font-size: 1.4em; font-weight: bold; padding: 14px 28px; border-radius: 12px; display: inline-block; margin: 12px 0; letter-spacing: 2px; }
+  .verdict.pass { background: linear-gradient(135deg, #1b5e20, #2e7d32); color: #a5d6a7; border: 1px solid #4caf50; }
+  .verdict.retry { background: linear-gradient(135deg, #e65100, #bf360c); color: #ffccbc; border: 1px solid #ff7043; }
+  .verdict.red { background: linear-gradient(135deg, #7f0000, #b71c1c); color: #ffcdd2; border: 1px solid #f44336; }
+  .verdict-comment { font-size: 0.95em; color: #ccc; margin-top: 10px; line-height: 1.7; }
+  .reset-btn { margin-top: 18px; padding: 12px 30px; background: linear-gradient(135deg, #e0c97f, #c8a84b); color: #1a1a2e; border: none; border-radius: 30px; font-size: 0.95em; font-weight: bold; cursor: pointer; letter-spacing: 1px; }
+  .reselect-btn { margin-top: 10px; margin-left: 8px; padding: 12px 30px; background: transparent; color: #e0c97f; border: 1px solid #e0c97f; border-radius: 30px; font-size: 0.95em; font-weight: bold; cursor: pointer; letter-spacing: 1px; }
+  .hidden { display: none; }
+  @media (max-width: 520px) {
+    .options { grid-template-columns: 1fr; }
+    .header h1 { font-size: 1.3em; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🏆 半期表彰式クイズ</h1>
+    <div class="subtitle">CONNECT ／ 全20問 ／ 自分の名前を選んでスタート</div>
+  </div>
+
+  <div id="select-screen" class="select-screen">
+    <div class="select-title">▼ あなたのお名前をタップしてください</div>
+    <div class="name-grid" id="name-grid"></div>
+    <div class="note">営業メンバーは「医師紹介 基礎知識」、🎀の方は別ジャンルの問題です。<br>合格ライン：14問以上 ／ 🟠 追試：10〜13問 ／ 🔴 9問以下</div>
+  </div>
+
+  <div id="quiz-screen" class="hidden">
+    <div class="back-bar">
+      <button class="back-btn" onclick="backToSelect()">← 名前選択にもどる</button>
+      <span class="who-badge" id="who-badge"></span>
+    </div>
+    <div class="progress-text" id="prog-text">0 / 20 問回答済み</div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div id="quiz-body"></div>
+    <div class="result-section hidden" id="result"></div>
+  </div>
+</div>
+
+<script>
+const members = [
+  {
+    "key": "asami",
+    "name": "浅見隆之介",
+    "theme": "medical"
+  },
+  {
+    "key": "machida",
+    "name": "町田信宏",
+    "theme": "medical"
+  },
+  {
+    "key": "izumi",
+    "name": "和泉圭祐",
+    "theme": "medical"
+  },
+  {
+    "key": "kato",
+    "name": "加藤愛莉",
+    "theme": "medical"
+  },
+  {
+    "key": "sato",
+    "name": "佐藤勇治",
+    "theme": "medical"
+  },
+  {
+    "key": "adachi",
+    "name": "安達雄太郎",
+    "theme": "medical"
+  },
+  {
+    "key": "koguchi",
+    "name": "古口里奈",
+    "theme": "medical"
+  },
+  {
+    "key": "yamada",
+    "name": "山田一樹",
+    "theme": "medical"
+  },
+  {
+    "key": "kase",
+    "name": "加瀬裕仁",
+    "theme": "medical"
+  },
+  {
+    "key": "nobe",
+    "name": "野辺純子",
+    "theme": "medical"
+  },
+  {
+    "key": "nakahata",
+    "name": "中畑麻奈",
+    "theme": "entertainment"
+  }
+];
+
+const QUESTION_SETS = {
+  medical: [
+  {
+    "section": "有料職業紹介の仕組み",
+    "q": "医師の人材紹介サービスで、医師本人が紹介会社に支払う費用はどれ？",
+    "options": [
+      "想定年収の2割相当",
+      "毎月の登録料のみ",
+      "費用は一切不要",
+      "成功報酬の半額"
+    ],
+    "answer": 2,
+    "hint": "医師側の費用負担はゼロが原則。紹介手数料は採用する医療機関が支払います。"
+  },
+  {
+    "section": "有料職業紹介の仕組み",
+    "q": "紹介会社が医療機関から受け取る成功報酬の相場はどれ？",
+    "options": [
+      "想定年収の5%ほど",
+      "想定年収の2〜3割",
+      "一律50万円の固定",
+      "毎月10万円の定額"
+    ],
+    "answer": 1,
+    "hint": "成功報酬型が基本で、想定年収の20〜35%が相場。医師側の負担はありません。"
+  },
+  {
+    "section": "労働法・働き方改革",
+    "q": "医師の時間外労働の上限規制「A水準」で定められた年間上限はどれ？",
+    "options": [
+      "年720時間",
+      "年960時間",
+      "年1,200時間",
+      "年1,860時間"
+    ],
+    "answer": 1,
+    "hint": "A水準は年960時間。地域医療確保等のB・C水準は年1,860時間まで認められます。"
+  },
+  {
+    "section": "医療機関の種類",
+    "q": "医療法上、「病院」と「診療所（クリニック）」を分ける基準はどれ？",
+    "options": [
+      "診療科目の数",
+      "常勤医師の人数",
+      "外来患者の数",
+      "入院ベッドの数"
+    ],
+    "answer": 3,
+    "hint": "入院ベッド19床以下が診療所、20床以上が病院。医療法上の区分です。"
+  },
+  {
+    "section": "勤務形態の基礎",
+    "q": "医療機関における「常勤医師」の一般的な目安はどれ？",
+    "options": [
+      "週4日以上の勤務",
+      "当直を月1回以上",
+      "夜間対応が中心",
+      "外来のみ担当する"
+    ],
+    "answer": 0,
+    "hint": "常勤は概ね週4日以上のフルタイム勤務が目安。それ未満は非常勤として扱われます。"
+  },
+  {
+    "section": "非常勤・スポット",
+    "q": "医師のスポットアルバイトで、日当が高額になりやすい条件はどれ？",
+    "options": [
+      "都市部の日中外来",
+      "短時間の健診業務",
+      "僻地での当直勤務",
+      "人気病院の見学"
+    ],
+    "answer": 2,
+    "hint": "当直＋僻地の組み合わせが高単価の王道。離島の当直は日当15〜20万円超も。"
+  },
+  {
+    "section": "面談・見学",
+    "q": "医師紹介で入職前の「見学」を設定する主な目的はどれ？",
+    "options": [
+      "給与条件を交渉する",
+      "相互の不一致を防ぐ",
+      "書類選考の代替手段",
+      "入職日程を確定する"
+    ],
+    "answer": 1,
+    "hint": "見学は病院と医師双方のミスマッチ防止が最大の目的。雰囲気を確かめる機会です。"
+  },
+  {
+    "section": "診療科と報酬",
+    "q": "自由診療が中心で、医師の収入が高くなりやすい診療科はどれ？",
+    "options": [
+      "美容外科",
+      "小児科",
+      "産婦人科",
+      "総合内科"
+    ],
+    "answer": 0,
+    "hint": "美容外科・美容皮膚科は自由診療が中心で、保険診療より高収入になりやすい分野です。"
+  },
+  {
+    "section": "診療科と報酬",
+    "q": "同じ常勤でも、年収が比較的抑えられがちな勤務先はどれ？",
+    "options": [
+      "僻地の中核病院",
+      "離島部の診療所",
+      "地方の民間病院",
+      "都市の人気病院"
+    ],
+    "answer": 3,
+    "hint": "人気の都市部病院は応募が集まりやすく、僻地より年収は抑えめになる傾向があります。"
+  },
+  {
+    "section": "勤務形態の基礎",
+    "q": "医師の勤務形態「オンコール」の説明として正しいものはどれ？",
+    "options": [
+      "完全な終日在宅勤務",
+      "月1回の当直のみ",
+      "待機し緊急時に出勤",
+      "外来だけの軽勤務"
+    ],
+    "answer": 2,
+    "hint": "オンコールは自宅等で待機し、緊急時に呼び出される勤務。手当が付くのが一般的です。"
+  },
+  {
+    "section": "業界・競合",
+    "q": "国内医師の大多数が会員登録するプラットフォームを持つ最大手はどれ？",
+    "options": [
+      "エムスリー",
+      "日本医師会",
+      "厚生労働省",
+      "国立医療機構"
+    ],
+    "answer": 0,
+    "hint": "m3.comは国内医師の9割超が会員。求人・MR支援・キャリア事業の強い基盤です。"
+  },
+  {
+    "section": "資格・専門医制度",
+    "q": "専門医資格を一元的に認定・管理する機関はどこ？",
+    "options": [
+      "日本医師会",
+      "日本専門医機構",
+      "各診療科学会",
+      "厚生労働省本省"
+    ],
+    "answer": 1,
+    "hint": "2018年から日本専門医機構が一元管理。各学会と連携しつつ運用しています。"
+  },
+  {
+    "section": "資格・専門医制度",
+    "q": "医師免許に加え、所定の研修を修了して得られる資格はどれ？",
+    "options": [
+      "専門医資格",
+      "指導医資格",
+      "認定看護師",
+      "産業医資格"
+    ],
+    "answer": 3,
+    "hint": "産業医は日本医師会等の基礎研修50時間等を修了して取得。企業の健康管理を担います。"
+  },
+  {
+    "section": "医師転職市場",
+    "q": "医師が転職を考える理由として、上位に入りやすいものはどれ？",
+    "options": [
+      "人間関係や職場環境",
+      "病院の知名度の低さ",
+      "院内の設備の古さ",
+      "勤務地の天候の差"
+    ],
+    "answer": 0,
+    "hint": "給与と並び人間関係・職場環境は離職要因の上位。各種調査でも常に上位に挙がります。"
+  },
+  {
+    "section": "医師のキャリア",
+    "q": "医師免許取得後に義務づけられる「初期臨床研修」の期間はどれ？",
+    "options": [
+      "半年間",
+      "1年間",
+      "2年間",
+      "4年間"
+    ],
+    "answer": 2,
+    "hint": "初期臨床研修は原則2年間。複数の診療科をローテートして基本を身につけます。"
+  },
+  {
+    "section": "医師のキャリア",
+    "q": "初期研修後の「専攻医（後期研修）」で主に目指すものはどれ？",
+    "options": [
+      "医師免許の再取得",
+      "専門医資格の取得",
+      "病院長への就任",
+      "開業資金の確保"
+    ],
+    "answer": 1,
+    "hint": "専攻医は特定の診療科で研鑽を積み、専門医資格の取得を目指す段階です。"
+  },
+  {
+    "section": "転職支援の実務",
+    "q": "転職支援でレジメ（職務経歴書）の作成を重視する理由はどれ？",
+    "options": [
+      "法律上の作成の義務",
+      "医師が記入を嫌う",
+      "病院側が代筆要求",
+      "質が選考結果を左右"
+    ],
+    "answer": 3,
+    "hint": "レジメの質は第一印象を左右し、面接機会の獲得に直結する重要な書類です。"
+  },
+  {
+    "section": "転職支援の実務",
+    "q": "転職の場面で「カウンターオファー」が指すものはどれ？",
+    "options": [
+      "現職からの引き留め",
+      "紹介会社の値引き提案",
+      "病院同士の合併の打診",
+      "医師からの辞退の連絡"
+    ],
+    "answer": 0,
+    "hint": "カウンターオファーは現職が昇給等で引き留める提案。転職の最終局面で起こりがちです。"
+  },
+  {
+    "section": "医療機関の種類",
+    "q": "「医療法人」に関する説明として正しいものはどれ？",
+    "options": [
+      "株式上場が義務である",
+      "個人事業と同じ扱い",
+      "法人格を持つ組織形態",
+      "国が直接運営する組織"
+    ],
+    "answer": 2,
+    "hint": "医療法人は法人格を持つ組織。個人開業と異なり、事業承継や規模拡大がしやすい形態です。"
+  },
+  {
+    "section": "労働法・働き方改革",
+    "q": "2024年4月から医師に本格適用された働き方改革の規制はどれ？",
+    "options": [
+      "完全週休3日の義務化",
+      "当直の全面的な禁止",
+      "在宅勤務の原則化",
+      "時間外労働の上限規制"
+    ],
+    "answer": 3,
+    "hint": "2024年4月から医師の時間外労働に上限規制が本格適用。A水準は年960時間です。"
+  }
+],
+  entertainment: [
+  {
+    "section": "ディズニー",
+    "q": "ミッキーマウスが初めて公開された1928年の作品はどれ？",
+    "options": [
+      "蒸気船ウィリー",
+      "ファンタジア",
+      "メリー・ポピンズ",
+      "ピノキオ"
+    ],
+    "answer": 0,
+    "hint": "1928年公開の「蒸気船ウィリー」で、音と同期したミッキーが世界に登場しました。"
+  },
+  {
+    "section": "嵐",
+    "q": "嵐がCDデビューした年はどれ？",
+    "options": [
+      "1997年",
+      "1999年",
+      "2001年",
+      "2003年"
+    ],
+    "answer": 1,
+    "hint": "嵐は1999年にデビュー。ハワイでの記者会見で結成が発表されました。"
+  },
+  {
+    "section": "Snow Man",
+    "q": "Snow ManがCDデビューした年はどれ？",
+    "options": [
+      "2016年",
+      "2018年",
+      "2020年",
+      "2022年"
+    ],
+    "answer": 2,
+    "hint": "Snow Manは2020年1月にCDデビュー。9人体制でのスタートでした。"
+  },
+  {
+    "section": "ディズニー",
+    "q": "ミッキーマウスの飼い犬として知られるキャラクターはどれ？",
+    "options": [
+      "グーフィー",
+      "ドナルド",
+      "チップ",
+      "プルート"
+    ],
+    "answer": 3,
+    "hint": "ミッキーの忠実な愛犬がプルート。同じ犬でもグーフィーは二足歩行の友達キャラです。"
+  },
+  {
+    "section": "嵐",
+    "q": "嵐でリーダーを務めるメンバーは誰？",
+    "options": [
+      "大野智",
+      "櫻井翔",
+      "松本潤",
+      "二宮和也"
+    ],
+    "answer": 0,
+    "hint": "嵐のリーダーは大野智さん。絵画や創作活動の才能でも知られています。"
+  },
+  {
+    "section": "Snow Man",
+    "q": "Snow Manは何人組のグループ？",
+    "options": [
+      "6人",
+      "9人",
+      "7人",
+      "8人"
+    ],
+    "answer": 1,
+    "hint": "Snow Manは9人組。6人から3人が加入して現在の体制になりました。"
+  },
+  {
+    "section": "ディズニー",
+    "q": "東京ディズニーランドが開園した年はどれ？",
+    "options": [
+      "1980年",
+      "1990年",
+      "1983年",
+      "2001年"
+    ],
+    "answer": 2,
+    "hint": "東京ディズニーランドは1983年開園。2001年には東京ディズニーシーも誕生しました。"
+  },
+  {
+    "section": "嵐",
+    "q": "嵐は何人組のグループ？",
+    "options": [
+      "4人",
+      "6人",
+      "9人",
+      "5人"
+    ],
+    "answer": 3,
+    "hint": "嵐は5人組。大野・櫻井・相葉・二宮・松本の5人です。"
+  },
+  {
+    "section": "Snow Man",
+    "q": "Snow Manのメンバーで、気象予報士の資格を持つ「クイズ王」は誰？",
+    "options": [
+      "阿部亮平",
+      "渡辺翔太",
+      "深澤辰哉",
+      "向井康二"
+    ],
+    "answer": 0,
+    "hint": "阿部亮平さんは気象予報士の資格を持つ高学歴メンバー。クイズ番組でも活躍中です。"
+  },
+  {
+    "section": "ディズニー",
+    "q": "映画「アナと雪の女王」で氷の魔法の力を持つ姉の名前はどれ？",
+    "options": [
+      "ラプンツェル",
+      "エルサ",
+      "ベル",
+      "アナ"
+    ],
+    "answer": 1,
+    "hint": "氷の魔法を持つ姉がエルサ、妹がアナ。雪だるまのオラフも人気です。"
+  },
+  {
+    "section": "嵐",
+    "q": "2023年の大河ドラマ「どうする家康」で主演した嵐のメンバーは誰？",
+    "options": [
+      "二宮和也",
+      "相葉雅紀",
+      "松本潤",
+      "櫻井翔"
+    ],
+    "answer": 2,
+    "hint": "松本潤さんが徳川家康を演じました。ドラマ「花より男子」でも主演しています。"
+  },
+  {
+    "section": "Snow Man",
+    "q": "Snow Manでリーダーを務めるメンバーは誰？",
+    "options": [
+      "ラウール",
+      "目黒蓮",
+      "宮舘涼太",
+      "岩本照"
+    ],
+    "answer": 3,
+    "hint": "Snow Manのリーダーは岩本照さん。筋トレやアクロバットでも知られています。"
+  },
+  {
+    "section": "ディズニー",
+    "q": "世界初の長編カラーアニメ映画とされるディズニー作品はどれ？",
+    "options": [
+      "白雪姫",
+      "シンデレラ",
+      "ピノキオ",
+      "バンビ"
+    ],
+    "answer": 0,
+    "hint": "1937年公開の「白雪姫」が世界初の長編アニメ映画とされています。"
+  },
+  {
+    "section": "嵐",
+    "q": "映画「硫黄島からの手紙」に出演した嵐のメンバーは誰？",
+    "options": [
+      "相葉雅紀",
+      "二宮和也",
+      "櫻井翔",
+      "松本潤"
+    ],
+    "answer": 1,
+    "hint": "二宮和也さんがクリント・イーストウッド監督作品に出演し話題になりました。"
+  },
+  {
+    "section": "Snow Man",
+    "q": "Snow Manのメンバーで、大のアニメ・声優好きとして知られるのは誰？",
+    "options": [
+      "渡辺翔太",
+      "深澤辰哉",
+      "佐久間大介",
+      "向井康二"
+    ],
+    "answer": 2,
+    "hint": "佐久間大介さんは大のアニメ・声優好き。趣味全開のトークでも人気です。"
+  },
+  {
+    "section": "ディズニー",
+    "q": "1995年公開の世界初の長編フルCGアニメ映画はどれ？",
+    "options": [
+      "モンスターズ・インク",
+      "ファインディング・ニモ",
+      "カーズ",
+      "トイ・ストーリー"
+    ],
+    "answer": 3,
+    "hint": "1995年の「トイ・ストーリー」が世界初の長編フルCG映画。ウッディとバズが主人公です。"
+  },
+  {
+    "section": "嵐",
+    "q": "嵐がグループ活動を休止したのは何年の末？",
+    "options": [
+      "2020年末",
+      "2018年末",
+      "2019年末",
+      "2022年末"
+    ],
+    "answer": 0,
+    "hint": "嵐は2020年末をもって活動を休止しました。2019年にその発表がなされました。"
+  },
+  {
+    "section": "Snow Man",
+    "q": "2022年のドラマ「silent」で主演したSnow Manのメンバーは誰？",
+    "options": [
+      "ラウール",
+      "目黒蓮",
+      "宮舘涼太",
+      "向井康二"
+    ],
+    "answer": 1,
+    "hint": "目黒蓮さんが主演し大ヒット。俳優としても幅広く活躍しています。"
+  },
+  {
+    "section": "ディズニー",
+    "q": "東京ディズニーランドのシンボルとなっているお城はどれ？",
+    "options": [
+      "美女と野獣の城",
+      "眠れる森の城",
+      "シンデレラ城",
+      "白雪姫の城"
+    ],
+    "answer": 2,
+    "hint": "東京のシンボルはシンデレラ城。カリフォルニアやパリは眠れる森の美女の城です。"
+  },
+  {
+    "section": "嵐",
+    "q": "嵐の結成・デビューが発表された場所として知られるのはどこ？",
+    "options": [
+      "沖縄",
+      "グアム",
+      "東京ドーム",
+      "ハワイ"
+    ],
+    "answer": 3,
+    "hint": "1999年、ハワイでの記者会見で嵐の結成が発表されました。"
+  }
+]
+};
+
+const LETTERS = ['Ａ','Ｂ','Ｃ','Ｄ'];
+let currentName = '';
+let currentTheme = 'medical';
+let questions = [];
+let answered = {};
+
+(function initNames() {
+  const grid = document.getElementById('name-grid');
+  members.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'name-btn' + (m.theme === 'entertainment' ? ' ent' : '');
+    btn.innerHTML = m.name + (m.theme === 'entertainment'
+      ? '<span class="tag">🎀 ディズニー / 嵐 / Snow Man</span>'
+      : '<span class="tag">💼 医師紹介 基礎知識</span>');
+    btn.onclick = () => startQuiz(m);
+    grid.appendChild(btn);
+  });
+})();
+
+function startQuiz(m) {
+  currentName = m.name;
+  currentTheme = m.theme;
+  questions = QUESTION_SETS[m.theme];
+  answered = {};
+  document.getElementById('select-screen').classList.add('hidden');
+  document.getElementById('quiz-screen').classList.remove('hidden');
+  document.getElementById('who-badge').textContent = '👤 ' + m.name + ' さん';
+  renderQuiz();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function backToSelect() {
+  document.getElementById('quiz-screen').classList.add('hidden');
+  document.getElementById('select-screen').classList.remove('hidden');
+  document.getElementById('result').classList.add('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderQuiz() {
+  const body = document.getElementById('quiz-body');
+  const entCls = currentTheme === 'entertainment' ? ' ent' : '';
+  let html = '';
+  questions.forEach((q, idx) => {
+    const opts = q.options.map((o, oi) =>
+      `<button class="option-btn" id="opt-${idx}-${oi}" onclick="answer(${idx},${oi})">${LETTERS[oi]}．${o}</button>`
+    ).join('');
+    html += `
+      <div class="quiz-card" id="card-${idx}">
+        <div class="section-badge${entCls}">📚 ${q.section}</div>
+        <div class="q-header">
+          <div class="q-num">Q${idx+1}</div>
+          <div class="q-text">${q.q}</div>
+        </div>
+        <div class="options">${opts}</div>
+        <div class="feedback" id="fb-${idx}"></div>
+      </div>`;
+  });
+  body.innerHTML = html;
+  document.getElementById('result').classList.add('hidden');
+  updateProgress();
+}
+
+function answer(qIdx, optIdx) {
+  if (answered[qIdx] !== undefined) return;
+  answered[qIdx] = optIdx;
+  const q = questions[qIdx];
+  const isCorrect = optIdx === q.answer;
+  for (let i = 0; i < q.options.length; i++) {
+    const btn = document.getElementById(`opt-${qIdx}-${i}`);
+    btn.disabled = true;
+    if (i === q.answer) btn.classList.add('correct');
+    else if (i === optIdx && !isCorrect) btn.classList.add('wrong');
+  }
+  const fb = document.getElementById(`fb-${qIdx}`);
+  fb.className = `feedback show ${isCorrect ? 'correct-fb' : 'wrong-fb'}`;
+  fb.innerHTML = isCorrect
+    ? `✅ <strong>正解！</strong> ${q.hint}`
+    : `❌ <strong>不正解…</strong> 正解は「${LETTERS[q.answer]}．${q.options[q.answer]}」<br>${q.hint}`;
+  updateProgress();
+  if (Object.keys(answered).length === questions.length) showResult();
+}
+
+function updateProgress() {
+  const done = Object.keys(answered).length;
+  const total = questions.length;
+  document.getElementById('prog-text').textContent = `${done} / ${total} 問回答済み`;
+  document.getElementById('prog-fill').style.width = `${(done/total)*100}%`;
+}
+
+function showResult() {
+  const total = questions.length;
+  let correct = 0;
+  for (let i = 0; i < total; i++) if (answered[i] === questions[i].answer) correct++;
+
+  let vClass, vText, comment;
+  const ent = currentTheme === 'entertainment';
+  if (correct >= 14) {
+    vClass = 'pass'; vText = '🟢 合格！おめでとう🎉';
+    comment = ent
+      ? `${currentName}さん、${correct}問正解！さすがの知識量です✨\n大好きなジャンル、ばっちりですね！\nCONNECTへようこそ。これからよろしくお願いします😊`
+      : `${currentName}さん、${correct}問正解！見事合格です！✨\n医師紹介のプロとしての基礎、しっかり身についていますね。\nこの調子で、医療機関・医師双方に頼られるコンサルタントへ！`;
+  } else if (correct >= 10) {
+    vClass = 'retry'; vText = ent ? '🟠 あと一歩！' : '🟠 追試決定…';
+    comment = ent
+      ? `${currentName}さん、${correct}問正解。惜しい！あと一歩で完全制覇でした😆\n推し活パワーでリベンジしましょう！`
+      : `${currentName}さん、${correct}問正解。惜しい！でも合格ラインには届かず😅\n14問の壁は厚かった…。\n追試に向けて、苦手分野を重点的に復習してください！`;
+  } else {
+    vClass = 'red'; vText = ent ? '🔵 ここからが伸びしろ！' : '🔴 赤伝確定！';
+    comment = ent
+      ? `${currentName}さん、${correct}問正解。ここからが伸びしろですね😉\nもう一度チャレンジしてみましょう！`
+      : `${currentName}さん、${correct}問正解…。\nこれは由々しき事態です😱\n医師紹介の基礎から、もう一度しっかり叩き直しましょう！\n山口社長より「赤伝」の通達が届きました。覚悟してください。`;
+  }
+
+  const el = document.getElementById('result');
+  el.classList.remove('hidden');
+  el.innerHTML = `
+    <div class="score-display">${correct} <span style="font-size:0.45em;color:#bbb">/ ${total}</span></div>
+    <div class="score-label">${currentName} さんの正解数</div>
+    <div class="verdict ${vClass}">${vText}</div>
+    <div class="verdict-comment" style="white-space:pre-line">${comment}</div>
+    <div style="margin-top:16px;font-size:0.8em;color:#888;">
+      🟢 14問以上 ／ 🟠 10〜13問 ／ ${ent ? '🔵' : '🔴'} 9問以下
+    </div>
+    <button class="reset-btn" onclick="startQuiz(members.find(x=>x.name==='${currentName}'))">🔄 もう一度</button>
+    <button class="reselect-btn" onclick="backToSelect()">👥 名前を選び直す</button>
+  `;
+  el.scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
