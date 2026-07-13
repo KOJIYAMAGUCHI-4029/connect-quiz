@@ -1,1 +1,220 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>【確認用】消化器内科クイズ 20問 ／ 社内勉強会</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background: linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%); min-height:100vh; color:#fff; padding:20px; }
+  .container { max-width:920px; margin:0 auto; }
+  .header { text-align:center; padding:26px 0 8px; }
+  .header h1 { font-size:1.6em; letter-spacing:2px; color:#e0c97f; text-shadow:0 0 20px rgba(224,201,127,0.4); margin-bottom:6px; }
+  .header .subtitle { font-size:0.85em; color:#aaa; letter-spacing:1px; }
+  .review-banner { background:rgba(224,201,127,0.1); border:1px solid rgba(224,201,127,0.45); border-radius:14px; padding:16px 20px; margin:18px 0 22px; font-size:0.88em; line-height:1.85; color:#e8ddc0; }
+  .review-banner strong { color:#ffd54f; }
+  .mode-tabs { display:flex; gap:10px; justify-content:center; margin-bottom:22px; flex-wrap:wrap; }
+  .tab-btn { padding:11px 24px; border-radius:26px; border:1px solid #e0c97f; background:transparent; color:#e0c97f; font-size:0.92em; font-weight:bold; cursor:pointer; transition:all 0.15s; }
+  .tab-btn.active { background:linear-gradient(135deg,#e0c97f,#c8a84b); color:#1a1a2e; }
+  .tab-btn:hover:not(.active) { background:rgba(224,201,127,0.15); }
+  .quiz-card { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:22px 26px; margin-bottom:16px; }
+  .section-badge { display:inline-block; background:rgba(224,201,127,0.15); border:1px solid rgba(224,201,127,0.3); color:#e0c97f; font-size:0.72em; padding:2px 10px; border-radius:20px; margin-bottom:8px; letter-spacing:1px; }
+  .q-header { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+  .q-num { background:linear-gradient(135deg,#e0c97f,#c8a84b); color:#1a1a2e; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:0.82em; flex-shrink:0; }
+  .q-text { font-size:1.02em; line-height:1.6; color:#f0f0f0; padding-top:5px; }
+  .options { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+  .option-btn { background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.2); color:#ddd; padding:10px 14px; border-radius:10px; cursor:pointer; text-align:left; font-size:0.9em; line-height:1.4; transition:all 0.15s; }
+  .option-btn:hover:not(:disabled) { background:rgba(224,201,127,0.15); border-color:#e0c97f; color:#fff; }
+  .option-btn.correct { background:rgba(76,175,80,0.25); border-color:#4caf50; color:#a5d6a7; }
+  .option-btn.wrong { background:rgba(244,67,54,0.2); border-color:#f44336; color:#ef9a9a; }
+  /* 一覧モード用（ボタンではなく表示のみ） */
+  .opt-line { background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.14); color:#ccc; padding:10px 14px; border-radius:10px; text-align:left; font-size:0.9em; line-height:1.4; }
+  .opt-line.answer { background:rgba(76,175,80,0.22); border-color:#4caf50; color:#c8e6c9; font-weight:bold; }
+  .opt-line.answer::after { content:' ✓ 正解'; font-size:0.78em; color:#a5d6a7; }
+  .explain { margin-top:12px; padding:11px 15px; border-radius:10px; font-size:0.87em; line-height:1.7; background:rgba(255,213,79,0.08); border-left:3px solid #ffd54f; color:#e8ddc0; }
+  .feedback { margin-top:10px; padding:10px 14px; border-radius:10px; font-size:0.88em; line-height:1.6; display:none; }
+  .feedback.show { display:block; }
+  .feedback.correct-fb { background:rgba(76,175,80,0.15); border-left:3px solid #4caf50; color:#c8e6c9; }
+  .feedback.wrong-fb { background:rgba(244,67,54,0.1); border-left:3px solid #f44336; color:#ffcdd2; }
+  .progress-text { text-align:right; font-size:0.8em; color:#aaa; margin-bottom:6px; }
+  .progress-bar { background:rgba(255,255,255,0.1); border-radius:8px; height:6px; margin-bottom:20px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,#e0c97f,#c8a84b); border-radius:8px; transition:width 0.3s; }
+  .answer-key { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.14); border-radius:14px; padding:16px 20px; margin-bottom:20px; font-size:0.85em; line-height:2; color:#ccc; }
+  .answer-key strong { color:#e0c97f; }
+  .result-section { background:rgba(255,255,255,0.05); border-radius:16px; padding:28px; margin-top:24px; text-align:center; border:1px solid rgba(224,201,127,0.3); display:none; }
+  .result-section.show { display:block; }
+  .score-display { font-size:3.2em; font-weight:bold; color:#e0c97f; }
+  .btn-outline { padding:11px 26px; background:transparent; color:#e0c97f; border:1px solid #e0c97f; border-radius:30px; font-size:0.92em; font-weight:bold; cursor:pointer; margin-top:14px; }
+  .footer-note { text-align:center; font-size:0.8em; color:#888; margin:30px 0 40px; line-height:1.9; }
+  .hidden { display:none; }
+  @media (max-width:560px){ .options{grid-template-columns:1fr;} .header h1{font-size:1.25em;} }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🩺【確認用】消化器内科クイズ 20問</h1>
+    <div class="subtitle">社内勉強会 ／ 問題内容レビュー版</div>
+  </div>
+
+  <div class="review-banner">
+    <strong>加藤さんへ</strong><br>
+    次回の社内勉強会（テーマ：消化器内科）で出題する<strong>全20問</strong>です。内容のご確認をお願いします。<br>
+    上のタブで、<strong>「📋 答え・解説つき一覧」</strong>（全問の正解と解説をまとめて確認）と、<strong>「✏️ 実際に解いてみる」</strong>（当日と同じ画面を体験）を切り替えられます。<br>
+    ご意見は<strong>問題番号（Q◯）</strong>でご指摘いただけると助かります。<br>
+    <span style="color:#9aa;">※これは確認用のファイルです。点数は記録・送信されません。</span>
+  </div>
+
+  <div class="mode-tabs">
+    <button class="tab-btn active" id="tab-list">📋 答え・解説つき一覧</button>
+    <button class="tab-btn" id="tab-play">✏️ 実際に解いてみる</button>
+  </div>
+
+  <!-- 一覧モード -->
+  <div id="list-mode">
+    <div class="answer-key" id="answer-key"></div>
+    <div id="list-body"></div>
+  </div>
+
+  <!-- 体験モード -->
+  <div id="play-mode" class="hidden">
+    <div class="progress-text" id="prog-text">0 / 20 問回答済み</div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div id="play-body"></div>
+    <div class="result-section" id="result"></div>
+  </div>
+
+  <div class="footer-note">
+    🟢 14問以上：合格 ／ 🟡 10〜13問：イエローカード ／ 🔴 9問以下：追試<br>
+    本番は同じURLを全員に配り、各自が名前をタップして回答 → 点数が自動集約されます。
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {"section":"消化器内科の基礎","q":"消化器内科が扱う「肝胆膵（かんたんすい）」が指す3つの臓器の組み合わせはどれ？","options":["肝臓・胆道・膵臓","肝臓・胆のう・脾臓","肝臓・腎臓・膵臓","胆道・膵臓・脾臓"],"answer":0,"hint":"「肝胆膵」は肝臓・胆道・膵臓の3領域の総称。脾臓や腎臓は含みません。消化器内科の重要な守備範囲です。"},
+  {"section":"内視鏡の用語","q":"一般に「胃カメラ」と呼ばれる上部消化管内視鏡で、通常観察するのはどこまで？","options":["食道・胃・空腸","食道・胃・十二指腸","咽頭・食道・胃のみ","胃・十二指腸・回腸"],"answer":1,"hint":"上部内視鏡は食道・胃・十二指腸まで。空腸・回腸（小腸の奥）は通常届かず、小腸はカプセル内視鏡やバルーン内視鏡で観察します。"},
+  {"section":"内視鏡の施術","q":"食道静脈瘤の破裂を防ぐため、内視鏡で静脈瘤をゴムのバンドで縛る処置の略称はどれ？","options":["ESD","ERCP","EVL（内視鏡的静脈瘤結紮術）","PEG"],"answer":2,"hint":"EVLは静脈瘤を専用のゴムバンドで縛って血流を止める処置。硬化剤を注入するEIS（硬化療法）と並ぶ、静脈瘤の代表的な内視鏡治療です。"},
+  {"section":"内視鏡の施術","q":"飲み込みが難しい患者さんのお腹に、内視鏡を使って栄養用の管（胃ろう）を作る処置の略称はどれ？","options":["EMR","EUS","GERD","PEG（経皮内視鏡的胃ろう造設術）"],"answer":3,"hint":"PEG（ペグ）は内視鏡でお腹に小さな穴を開け、胃ろうカテーテルを留置して直接栄養を入れる処置。「胃ろう造設」として現場でよく使われる用語です。"},
+  {"section":"内視鏡の施術","q":"胃・十二指腸潰瘍などからの出血を、内視鏡で止める「止血術」に含まれないのはどれ？","options":["血液をサラサラにする点滴を落として止める","クリップで血管を挟んで止める","薬剤を局所に注射して止める","電気で焼いて凝固させる"],"answer":0,"hint":"内視鏡的止血術はクリップ・局注・焼灼（凝固）などで出血点を直接処置します。抗凝固の点滴はむしろ出血を助長する方向で、止血術とは逆の考え方です。"},
+  {"section":"内視鏡の施術","q":"胆管に結石が詰まって黄疸が出たとき、ERCPで行う処置として適切なのはどれ？","options":["心臓の血管を広げる","胆管の出口を切開して結石を取り出し、必要なら管（ステント）を入れる","大腸を切除する","骨を固定する"],"answer":1,"hint":"ERCPでは胆管の出口を切開（EST）して結石を除去したり、胆汁の通り道を確保するステント留置を行います。胆管結石・胆道閉塞の重要な治療です。"},
+  {"section":"内視鏡の検査・処置","q":"早期の消化管がんに対し、内視鏡で病変を大きく一括切除する「ESD」の説明として正しいのはどれ？","options":["お腹を大きく切って胃を取り出す","抗がん剤を点滴する","病変の下（粘膜下層）をはがし、大きな早期がんも一括で切除する","放射線を体の外から当てる"],"answer":2,"hint":"ESD（内視鏡的粘膜下層剥離術）は粘膜下層を剥離して大きな早期がんも一括切除できる高度な内視鏡治療。お腹を切らずに済むのが大きな利点です。"},
+  {"section":"病気の種類（勤務内容の把握）","q":"次のうち、消化器内科が主に診療する病気はどれ？","options":["心筋梗塞","気管支ぜんそく","変形性膝関節症","潰瘍性大腸炎"],"answer":3,"hint":"潰瘍性大腸炎は消化器内科の代表的な対象。心筋梗塞は循環器、ぜんそくは呼吸器、膝の関節は整形外科など、担当科の切り分けは紹介実務でも役立ちます。"},
+  {"section":"膵臓・胆道の検査","q":"内視鏡を十二指腸まで進め、胆管・膵管に造影して結石除去などの治療も行う検査の略称はどれ？","options":["ERCP","ESD","CT","MRI"],"answer":0,"hint":"ERCP（内視鏡的逆行性胆管膵管造影）は胆管・膵管を調べ、胆管結石の除去やステント留置などの治療も行います。"},
+  {"section":"胆石の知識","q":"胆のうや胆管にできる「胆石」で、痛みの発作が起きやすいのはどんなとき？","options":["起床直後の空腹時のみ","脂っこい食事のあと","運動中だけ","水を飲んだ直後のみ"],"answer":1,"hint":"胆石発作は脂肪の多い食事のあとに右上腹部などが痛むのが典型。胆のう炎になると手術が必要なことも。"},
+  {"section":"大腸がん検診","q":"大腸がん検診で最初のふるい分けとして広く行われる、便を用いた検査はどれ？","options":["胃透視（バリウム）","尿検査","便潜血検査","血糖検査"],"answer":2,"hint":"便潜血検査は大腸がん検診の一次スクリーニング。陽性なら大腸内視鏡で精密検査します。"},
+  {"section":"内視鏡治療の用語","q":"大腸ポリープや早期がんを内視鏡で切除する治療のうち、大きな病変を「はぎ取る」高度な手技はどれ？","options":["EMR（内視鏡的粘膜切除術）","生検","洗腸","ESD（内視鏡的粘膜下層剥離術）"],"answer":3,"hint":"EMRはスネアで切除する簡便な方法、ESDは粘膜下層をはがして大きな病変も一括切除できる高度な手技です。"},
+  {"section":"大腸の病気","q":"大腸の壁の一部が外側に袋状に飛び出したもので、出血や炎症の原因になることがあるのはどれ？","options":["大腸憩室","大腸ポリープ","痔核","大腸メラノーシス"],"answer":0,"hint":"大腸憩室は腸壁が袋状に突出したもの。憩室出血や憩室炎を起こすことがあり、消化器内科でよく診ます。"},
+  {"section":"小腸の検査","q":"通常の内視鏡が届きにくい小腸を、飲み込んだカメラで撮影して調べる検査はどれ？","options":["ERCP","カプセル内視鏡","注腸造影","腹腔鏡"],"answer":1,"hint":"カプセル内視鏡はカメラ内蔵のカプセルを飲み込み小腸などを撮影する検査。原因不明の消化管出血などで使われます。"},
+  {"section":"血液検査の用語","q":"健康診断で肝臓の状態を反映し、飲酒の影響でも上がりやすい血液検査項目はどれ？","options":["白血球数","尿酸","γ-GTP（ガンマGTP）","中性脂肪"],"answer":2,"hint":"γ-GTPは肝・胆道の状態を反映し、アルコールで上昇しやすい指標。AST・ALTとあわせて肝機能の評価に使われます。"},
+  {"section":"専門医資格（医師紹介の視点）","q":"消化器を専門とする医師の専門医資格について、正しいのはどれ？","options":["消化器病専門医は初期研修修了だけで自動的に付与される","消化器内視鏡専門医は外科医しか取得できない","消化器病専門医と消化器内視鏡専門医は同一で名称が違うだけ","「消化器病専門医」は消化器全般、「消化器内視鏡専門医」は内視鏡診療を対象とし、いずれも内科などの基本領域の専門医を基盤に取得するサブスペシャルティ資格"],"answer":3,"hint":"消化器病専門医（日本消化器病学会）と消化器内視鏡専門医（日本消化器内視鏡学会）は別資格。どちらも内科等の基本領域の上に積み上げるサブスペシャルティで、両方持つ医師も多く、紹介時の評価ポイントになります。"},
+  {"section":"専門医制度（医師紹介の視点）","q":"現在の専門医制度で、医師が「消化器」を専門にする一般的な流れとして正しいのはどれ？","options":["まず内科専門医を取り、その後サブスペシャルティとして消化器の専門医を目指す","医学部を出たら即日で消化器専門医になれる","外科専門医の取得が必須である","専門的な資格は一切不要である"],"answer":0,"hint":"多くは初期研修→内科専門医（基本領域）→サブスペシャルティの消化器病・消化器内視鏡専門医という流れ。紹介時のキャリア把握に役立ちます。"},
+  {"section":"勤務内容（医師紹介の実務）","q":"消化器内科医の求人で「内視鏡○件／日」と書かれることが多いのはなぜ？","options":["内視鏡の件数と給与は全く無関係だから","内視鏡の実施件数がその医師の主な業務量・スキルの目安になるから","内視鏡は消化器内科では行わないから","件数を書くことが法律で義務づけられているから"],"answer":1,"hint":"消化器内科の勤務は内視鏡が業務の中心になりやすく、「1日の内視鏡件数」が業務量やスキルの目安として求人票によく明記されます。面談時の重要な確認ポイントです。"},
+  {"section":"重要な症状","q":"皮膚や白目が黄色くなる「黄疸」の原因として、消化器内科で特に重要なのはどれ？","options":["日焼けのしすぎ","視力の低下","胆管が詰まる・肝臓の障害など胆汁の流れの異常","骨密度の低下"],"answer":2,"hint":"黄疸はビリルビンが体にたまって起こる。胆管の閉塞（胆管がん・胆石など）や肝障害が原因のことが多く、消化器内科の重要な所見です。"},
+  {"section":"勤務先・求人（医師紹介の視点）","q":"消化器内科医の勤務先・求人について、正しい説明はどれ？","options":["勤務先は大学病院にほぼ限られる","内視鏡の技術は開業時にはあまり役立たない","健診・人間ドックでは消化器内科医はほとんど必要とされない","内視鏡ができると、総合病院・クリニック・健診センターのいずれでも需要が高い"],"answer":3,"hint":"消化器内科は内視鏡ニーズが病院・クリニック・健診に共通して高いのが特徴で、勤務先の選択肢も幅広い科です。ほかの3つはいずれも実態と逆の説明です。"}
+];
+const LETTERS = ['Ａ','Ｂ','Ｃ','Ｄ'];
+let answered = {};
+
+/* ===== 一覧モード（答え・解説つき） ===== */
+function renderList(){
+  // 正解キー一覧
+  const key = QUESTIONS.map((q,i)=>`Q${i+1}:${LETTERS[q.answer]}`).join('　');
+  document.getElementById('answer-key').innerHTML = `<strong>■ 正解一覧</strong><br>${key}<br><span style="color:#9aa;font-size:0.92em;">※正解はＡ〜Ｄが各5問ずつになるよう均等に配置しています。</span>`;
+
+  let html='';
+  QUESTIONS.forEach((q,idx)=>{
+    const opts=q.options.map((o,oi)=>
+      `<div class="opt-line${oi===q.answer?' answer':''}">${LETTERS[oi]}．${o}</div>`).join('');
+    html+=`<div class="quiz-card">
+      <div class="section-badge">📚 ${q.section}</div>
+      <div class="q-header"><div class="q-num">Q${idx+1}</div><div class="q-text">${q.q}</div></div>
+      <div class="options">${opts}</div>
+      <div class="explain">💡 <strong>解説：</strong>${q.hint}</div>
+    </div>`;
+  });
+  document.getElementById('list-body').innerHTML=html;
+}
+
+/* ===== 体験モード（当日と同じ画面／点数は送信しません） ===== */
+function renderPlay(){
+  answered={};
+  let html='';
+  QUESTIONS.forEach((q,idx)=>{
+    const opts=q.options.map((o,oi)=>
+      `<button class="option-btn" id="opt-${idx}-${oi}" data-q="${idx}" data-o="${oi}">${LETTERS[oi]}．${o}</button>`).join('');
+    html+=`<div class="quiz-card">
+      <div class="section-badge">📚 ${q.section}</div>
+      <div class="q-header"><div class="q-num">Q${idx+1}</div><div class="q-text">${q.q}</div></div>
+      <div class="options">${opts}</div>
+      <div class="feedback" id="fb-${idx}"></div>
+    </div>`;
+  });
+  const body=document.getElementById('play-body');
+  body.innerHTML=html;
+  body.querySelectorAll('.option-btn').forEach(b=>
+    b.addEventListener('click',()=> answer(parseInt(b.dataset.q,10), parseInt(b.dataset.o,10))));
+  document.getElementById('result').classList.remove('show');
+  updateProgress();
+}
+
+function answer(qIdx,optIdx){
+  if(answered[qIdx]!==undefined) return;
+  answered[qIdx]=optIdx;
+  const q=QUESTIONS[qIdx]; const ok=optIdx===q.answer;
+  for(let i=0;i<q.options.length;i++){
+    const btn=document.getElementById(`opt-${qIdx}-${i}`);
+    btn.disabled=true;
+    if(i===q.answer) btn.classList.add('correct');
+    else if(i===optIdx && !ok) btn.classList.add('wrong');
+  }
+  const fb=document.getElementById(`fb-${qIdx}`);
+  fb.className='feedback show '+(ok?'correct-fb':'wrong-fb');
+  fb.innerHTML = ok
+    ? `✅ <strong>正解！</strong> ${q.hint}`
+    : `❌ <strong>不正解…</strong> 正解は「${LETTERS[q.answer]}．${q.options[q.answer]}」<br>${q.hint}`;
+  updateProgress();
+  if(Object.keys(answered).length===QUESTIONS.length) showResult();
+}
+
+function updateProgress(){
+  const done=Object.keys(answered).length, total=QUESTIONS.length;
+  document.getElementById('prog-text').textContent=`${done} / ${total} 問回答済み`;
+  document.getElementById('prog-fill').style.width=(done/total*100)+'%';
+}
+
+function showResult(){
+  let correct=0;
+  QUESTIONS.forEach((q,i)=>{ if(answered[i]===q.answer) correct++; });
+  const tier = correct>=14 ? '🟢 合格' : correct>=10 ? '🟡 イエローカード' : '🔴 追試';
+  const el=document.getElementById('result');
+  el.classList.add('show');
+  el.innerHTML=`<div class="score-display">${correct}<span style="font-size:0.4em;color:#999;">/20</span></div>
+    <div style="font-size:1.15em;color:#e0c97f;font-weight:bold;margin:8px 0 4px;">${tier}</div>
+    <div style="color:#9aa;font-size:0.85em;line-height:1.8;margin-top:10px;">確認用のため、点数は記録・送信されません。<br>気になった問題は <strong style="color:#e0c97f;">Q番号</strong> でお知らせください。</div>
+    <button class="btn-outline" id="retry">↺ もう一度解く</button>`;
+  document.getElementById('retry').addEventListener('click',()=>{ renderPlay(); window.scrollTo({top:0,behavior:'smooth'}); });
+  el.scrollIntoView({behavior:'smooth'});
+}
+
+/* ===== タブ切り替え ===== */
+const tabList=document.getElementById('tab-list'), tabPlay=document.getElementById('tab-play');
+tabList.addEventListener('click',()=>{
+  tabList.classList.add('active'); tabPlay.classList.remove('active');
+  document.getElementById('list-mode').classList.remove('hidden');
+  document.getElementById('play-mode').classList.add('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+tabPlay.addEventListener('click',()=>{
+  tabPlay.classList.add('active'); tabList.classList.remove('active');
+  document.getElementById('play-mode').classList.remove('hidden');
+  document.getElementById('list-mode').classList.add('hidden');
+  renderPlay();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+renderList();
+</script>
+</body>
+</html>
