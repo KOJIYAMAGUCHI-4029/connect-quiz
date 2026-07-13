@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社内勉強会クイズ ／ 消化器内科</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background: linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%); min-height:100vh; color:#fff; padding:20px; }
+  .container { max-width:920px; margin:0 auto; }
+  .header { text-align:center; padding:26px 0 8px; }
+  .header h1 { font-size:1.7em; letter-spacing:2px; color:#e0c97f; text-shadow:0 0 20px rgba(224,201,127,0.4); margin-bottom:6px; }
+  .header .subtitle { font-size:0.85em; color:#aaa; letter-spacing:1px; }
+  .select-screen { text-align:center; padding:10px 0 40px; }
+  .select-title { font-size:1.05em; color:#e0c97f; margin:22px 0 16px; letter-spacing:1px; }
+  .name-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:600px; margin:0 auto; }
+  .name-btn { padding:15px 12px; border:2px solid #e0c97f; background:rgba(224,201,127,0.06); color:#f3e6bf; border-radius:14px; cursor:pointer; font-size:1.05em; font-weight:bold; letter-spacing:1px; transition:all 0.18s; position:relative; }
+  .name-btn:hover { background:#e0c97f; color:#1a1a2e; transform:translateY(-2px); }
+  .name-btn.done { opacity:0.55; }
+  .name-btn .tag { display:block; font-size:0.6em; font-weight:normal; letter-spacing:0; margin-top:3px; opacity:0.8; }
+  .name-btn .score-chip { position:absolute; top:8px; right:10px; font-size:0.7em; background:#4caf50; color:#fff; padding:1px 8px; border-radius:12px; }
+  .big-board-btn { margin:26px auto 0; display:inline-block; padding:16px 40px; border:none; border-radius:30px; cursor:pointer; font-size:1.15em; font-weight:bold; letter-spacing:1px; background:linear-gradient(135deg,#ffd54f,#ff8f00); color:#3e2723; box-shadow:0 6px 20px rgba(255,143,0,0.35); }
+  .big-board-btn:hover { transform:translateY(-2px); }
+  .host-controls { margin-top:30px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .host-btn { background:transparent; border:1px solid rgba(255,255,255,0.18); color:#7e8aa0; padding:6px 14px; border-radius:18px; font-size:0.72em; cursor:pointer; }
+  .host-btn:hover { color:#e0c97f; border-color:rgba(224,201,127,0.5); }
+  .note { font-size:0.78em; color:#888; margin-top:20px; line-height:1.7; }
+  .back-bar { margin-bottom:14px; }
+  .back-btn { background:transparent; border:1px solid rgba(224,201,127,0.5); color:#e0c97f; padding:7px 18px; border-radius:20px; cursor:pointer; font-size:0.85em; }
+  .back-btn:hover { background:rgba(224,201,127,0.15); }
+  .who-badge { display:inline-block; margin-left:10px; font-size:0.9em; color:#f3e6bf; }
+  .progress-text { text-align:right; font-size:0.8em; color:#aaa; margin-bottom:6px; }
+  .progress-bar { background:rgba(255,255,255,0.1); border-radius:8px; height:6px; margin-bottom:20px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,#e0c97f,#c8a84b); border-radius:8px; transition:width 0.3s; }
+  .quiz-card { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:22px 26px; margin-bottom:16px; }
+  .section-badge { display:inline-block; background:rgba(224,201,127,0.15); border:1px solid rgba(224,201,127,0.3); color:#e0c97f; font-size:0.72em; padding:2px 10px; border-radius:20px; margin-bottom:8px; letter-spacing:1px; }
+  .q-header { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+  .q-num { background:linear-gradient(135deg,#e0c97f,#c8a84b); color:#1a1a2e; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:0.82em; flex-shrink:0; }
+  .q-text { font-size:1.02em; line-height:1.6; color:#f0f0f0; padding-top:5px; }
+  .options { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+  .option-btn { background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.2); color:#ddd; padding:10px 14px; border-radius:10px; cursor:pointer; text-align:left; font-size:0.9em; line-height:1.4; transition:all 0.15s; }
+  .option-btn:hover:not(:disabled) { background:rgba(224,201,127,0.15); border-color:#e0c97f; color:#fff; }
+  .option-btn.correct { background:rgba(76,175,80,0.25); border-color:#4caf50; color:#a5d6a7; }
+  .option-btn.wrong { background:rgba(244,67,54,0.2); border-color:#f44336; color:#ef9a9a; }
+  .feedback { margin-top:10px; padding:10px 14px; border-radius:10px; font-size:0.88em; line-height:1.6; display:none; }
+  .feedback.show { display:block; }
+  .feedback.correct-fb { background:rgba(76,175,80,0.15); border-left:3px solid #4caf50; color:#c8e6c9; }
+  .feedback.wrong-fb { background:rgba(244,67,54,0.1); border-left:3px solid #f44336; color:#ffcdd2; }
+  .result-section { background:rgba(255,255,255,0.05); border-radius:16px; padding:28px; margin-top:24px; text-align:center; border:1px solid rgba(224,201,127,0.3); }
+  .score-display { font-size:3.5em; font-weight:bold; color:#e0c97f; text-shadow:0 0 30px rgba(224,201,127,0.5); }
+  .score-label { font-size:1em; color:#bbb; margin-bottom:16px; }
+  .verdict { font-size:1.4em; font-weight:bold; padding:14px 28px; border-radius:12px; display:inline-block; margin:12px 0; letter-spacing:2px; }
+  .verdict.pass { background:linear-gradient(135deg,#1b5e20,#2e7d32); color:#a5d6a7; border:1px solid #4caf50; }
+  .verdict.yellow { background:linear-gradient(135deg,#f9a825,#f57f17); color:#fff8e1; border:1px solid #ffca28; }
+  .verdict.red { background:linear-gradient(135deg,#7f0000,#b71c1c); color:#ffcdd2; border:1px solid #f44336; }
+  .tier-legend { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:20px 0 2px; }
+  .tl { font-size:0.85em; font-weight:bold; padding:9px 18px; border-radius:24px; }
+  .tl.pass { background:rgba(76,175,80,0.18); color:#a5d6a7; border:1px solid rgba(76,175,80,0.6); }
+  .tl.yellow { background:rgba(255,193,7,0.16); color:#ffe082; border:1px solid rgba(255,193,7,0.6); }
+  .tl.retake { background:rgba(244,67,54,0.15); color:#ef9a9a; border:1px solid rgba(244,67,54,0.6); }
+  .verdict-comment { font-size:0.95em; color:#ccc; margin-top:10px; line-height:1.7; }
+  .btn-gold { padding:12px 30px; background:linear-gradient(135deg,#e0c97f,#c8a84b); color:#1a1a2e; border:none; border-radius:30px; font-size:0.95em; font-weight:bold; cursor:pointer; letter-spacing:1px; margin:8px 6px 0; }
+  .btn-outline { padding:12px 30px; background:transparent; color:#e0c97f; border:1px solid #e0c97f; border-radius:30px; font-size:0.95em; font-weight:bold; cursor:pointer; letter-spacing:1px; margin:8px 6px 0; }
+  .board-wrap { padding:6px 0 40px; }
+  .board-title { text-align:center; font-size:1.5em; color:#e0c97f; margin:10px 0 6px; }
+  .board-sub { text-align:center; color:#aaa; font-size:0.85em; margin-bottom:20px; }
+  table.entry { width:100%; border-collapse:collapse; margin-bottom:20px; }
+  table.entry th, table.entry td { padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:left; }
+  table.entry th { color:#e0c97f; font-size:0.85em; }
+  .entry-name { font-size:1.05em; }
+  .mini { font-size:0.72em; color:#999; }
+  .num-ctrl { display:flex; align-items:center; gap:8px; }
+  .num-ctrl button { width:30px; height:30px; border-radius:50%; border:1px solid #e0c97f; background:transparent; color:#e0c97f; font-size:1.1em; cursor:pointer; }
+  .num-ctrl input { width:60px; padding:6px; text-align:center; border-radius:8px; border:1px solid rgba(255,255,255,0.25); background:rgba(255,255,255,0.08); color:#fff; font-size:1em; }
+  .board-actions { text-align:center; }
+  .reveal-wrap { padding:4px 0 50px; }
+  .reveal-title { text-align:center; font-size:2em; color:#ffd54f; text-shadow:0 0 24px rgba(255,213,79,0.5); margin:8px 0 4px; letter-spacing:3px; }
+  .reveal-sub { text-align:center; color:#bbb; font-size:0.9em; margin-bottom:22px; }
+  .rank-list { max-width:760px; margin:0 auto; }
+  .rank-row { display:flex; align-items:center; gap:16px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:16px 22px; margin-bottom:12px; opacity:0; transform:translateY(18px); transition:all 0.5s; }
+  .rank-row.shown { opacity:1; transform:translateY(0); }
+  .rank-row.top1 { background:linear-gradient(135deg,rgba(255,213,79,0.25),rgba(255,143,0,0.18)); border-color:#ffd54f; box-shadow:0 0 28px rgba(255,213,79,0.35); }
+  .rank-row.top2 { background:linear-gradient(135deg,rgba(207,216,220,0.2),rgba(144,164,174,0.14)); border-color:#cfd8dc; }
+  .rank-row.top3 { background:linear-gradient(135deg,rgba(215,140,90,0.2),rgba(160,90,50,0.14)); border-color:#d7a07a; }
+  .rank-row.tier-pass { border-left:7px solid #4caf50; }
+  .rank-row.tier-yellow { border-left:7px solid #ffc107; }
+  .rank-row.tier-retake { border-left:7px solid #f44336; }
+  .tier-pill { font-size:0.5em; font-weight:bold; padding:3px 11px; border-radius:20px; margin-left:10px; vertical-align:middle; white-space:nowrap; }
+  .tier-pill.pass { background:rgba(76,175,80,0.28); color:#c8e6c9; border:1px solid #4caf50; }
+  .tier-pill.yellow { background:rgba(255,193,7,0.25); color:#ffe082; border:1px solid #ffc107; }
+  .tier-pill.retake { background:rgba(244,67,54,0.22); color:#ef9a9a; border:1px solid #f44336; }
+  .sc-pass { color:#a5d6a7 !important; }
+  .sc-yellow { color:#ffe082 !important; }
+  .sc-retake { color:#ef9a9a !important; }
+  .tier-summary { text-align:center; margin:-8px 0 20px; font-size:1.05em; }
+  .tier-summary span { margin:0 12px; font-weight:bold; }
+  .rank-medal { font-size:1.9em; min-width:54px; text-align:center; }
+  .rank-name { flex:1; font-size:1.45em; font-weight:bold; }
+  .rank-bar-wrap { flex:1.4; }
+  .rank-bar-bg { background:rgba(255,255,255,0.1); border-radius:8px; height:14px; overflow:hidden; }
+  .rank-bar-fill { height:100%; background:linear-gradient(90deg,#e0c97f,#c8a84b); border-radius:8px; width:0%; transition:width 0.8s; }
+  .rank-score { min-width:96px; text-align:right; font-size:1.5em; font-weight:bold; color:#e0c97f; }
+  .rank-score small { font-size:0.5em; color:#999; }
+  .reveal-controls { text-align:center; margin-top:24px; }
+  .hidden { display:none; }
+  @media (max-width:560px){ .options{grid-template-columns:1fr;} .header h1{font-size:1.3em;} .rank-bar-wrap{display:none;} .rank-name{font-size:1.15em;} .reveal-title{font-size:1.4em;} }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>🩺 消化器内科クイズ</h1><div class="subtitle">社内勉強会 ／ 消化器内科 ／ 全20問</div></div>
+
+  <div id="select-screen" class="select-screen">
+    <div class="select-title">▼ 名前をタップしてスタート</div>
+    <div class="name-grid" id="name-grid"></div>
+    <div class="host-controls">
+      <button class="host-btn" id="to-reveal">🏆 結果発表（司会用）</button>
+      <button class="host-btn" id="to-board">📋 スコア手入力（司会用）</button>
+    </div>
+    <div class="tier-legend">
+      <span class="tl pass">🟢 14問以上：合格</span>
+      <span class="tl yellow">🟡 10〜13問：イエローカード</span>
+      <span class="tl retake">🔴 9問以下：追試</span>
+    </div>
+    <div class="note">各自、自分の名前をタップして全20問に回答してください。<br>回答後、スコアは自動で記録されます（結果は後ほど発表）。</div>
+  </div>
+
+  <div id="quiz-screen" class="hidden">
+    <div class="back-bar"><button class="back-btn" id="quiz-back">← 名前選択にもどる</button><span class="who-badge" id="who-badge"></span></div>
+    <div class="progress-text" id="prog-text">0 / 20 問回答済み</div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div id="quiz-body"></div>
+    <div class="result-section hidden" id="result"></div>
+  </div>
+
+  <div id="board-screen" class="hidden board-wrap">
+    <div class="back-bar"><button class="back-btn" id="board-back">← もどる</button></div>
+    <div class="board-title">📋 スコア入力・確認</div>
+    <div class="board-sub">自動記録された点数を確認・修正できます（スマホ受験分はここで手入力もOK）</div>
+    <table class="entry"><thead><tr><th>名前</th><th>ジャンル</th><th>スコア（0〜20）</th></tr></thead><tbody id="entry-body"></tbody></table>
+    <div class="board-actions">
+      <button class="btn-gold" id="board-to-reveal">🏆 ランキング発表へ</button>
+      <button class="btn-outline" id="reset-scores">🗑 スコアを全消去</button>
+    </div>
+  </div>
+
+  <div id="reveal-screen" class="hidden reveal-wrap">
+    <div class="back-bar"><button class="back-btn" id="reveal-back">← 名前選択へ</button></div>
+    <div class="reveal-title">🏆 結果発表 🏆</div>
+    <div class="reveal-sub" id="reveal-sub"></div>
+    <div class="tier-summary" id="tier-summary"></div>
+    <div class="rank-list" id="rank-list"></div>
+    <div class="reveal-controls" id="reveal-controls"></div>
+  </div>
+</div>
+
+<script>
+/* ===== 参加メンバー（← ここの名前を今回の参加者に書き換えてください） ===== */
+const members = [
+  {"key": "asami",    "name": "浅見隆之介", "theme": "medical"},
+  {"key": "machida",  "name": "町田信宏",   "theme": "medical"},
+  {"key": "izumi",    "name": "和泉圭祐",   "theme": "medical"},
+  {"key": "kato",     "name": "加藤愛莉",   "theme": "medical"},
+  {"key": "sato",     "name": "佐藤勇治",   "theme": "medical"},
+  {"key": "adachi",   "name": "安達雄太郎", "theme": "medical"},
+  {"key": "koguchi",  "name": "古口里奈",   "theme": "medical"},
+  {"key": "yamada",   "name": "山田一樹",   "theme": "medical"},
+  {"key": "kase",     "name": "加瀬裕仁",   "theme": "medical"},
+  {"key": "nobe",     "name": "野辺純子",   "theme": "medical"},
+  {"key": "nakahata", "name": "中畑麻奈",   "theme": "medical"}
+];
+
+/* ===== 出題（消化器内科20問。正解はA〜D各5問ずつに均等配分） ===== */
+const QUESTION_SETS = {
+  medical: [
+    {"section":"消化器内科の基礎","q":"消化器内科が扱う「肝胆膵（かんたんすい）」が指す3つの臓器の組み合わせはどれ？","options":["肝臓・胆道・膵臓","肝臓・胆のう・脾臓","肝臓・腎臓・膵臓","胆道・膵臓・脾臓"],"answer":0,"hint":"「肝胆膵」は肝臓・胆道・膵臓の3領域の総称。脾臓や腎臓は含みません。消化器内科の重要な守備範囲です。"},
+    {"section":"内視鏡の用語","q":"一般に「胃カメラ」と呼ばれる上部消化管内視鏡で、通常観察するのはどこまで？","options":["食道・胃・空腸","食道・胃・十二指腸","咽頭・食道・胃のみ","胃・十二指腸・回腸"],"answer":1,"hint":"上部内視鏡は食道・胃・十二指腸まで。空腸・回腸（小腸の奥）は通常届かず、小腸はカプセル内視鏡やバルーン内視鏡で観察します。"},
+    {"section":"内視鏡の施術","q":"食道静脈瘤の破裂を防ぐため、内視鏡で静脈瘤をゴムのバンドで縛る処置の略称はどれ？","options":["ESD","ERCP","EVL","PEG"],"answer":2,"hint":"EVLは静脈瘤を専用のゴムバンドで縛って血流を止める処置。硬化剤を注入するEIS（硬化療法）と並ぶ、静脈瘤の代表的な内視鏡治療です。"},
+    {"section":"内視鏡の施術","q":"飲み込みが難しい患者さんのお腹に、内視鏡を使って栄養用の管（胃ろう）を作る処置の略称はどれ？","options":["EMR","EUS","GERD","PEG"],"answer":3,"hint":"PEG（ペグ）は内視鏡でお腹に小さな穴を開け、胃ろうカテーテルを留置して直接栄養を入れる処置。「胃ろう造設」として現場でよく使われる用語です。"},
+    {"section":"内視鏡の施術","q":"胃・十二指腸潰瘍などからの出血を、内視鏡で止める「止血術」に含まれないのはどれ？","options":["血液をサラサラにする薬を点滴して止める","出血している血管をクリップで挟んで止める","出血点の周りに薬剤を局所注射して止める","出血部を電気で焼いて凝固させて止める"],"answer":0,"hint":"内視鏡的止血術はクリップ・局注・焼灼（凝固）などで出血点を直接処置します。抗凝固の点滴はむしろ出血を助長する方向で、止血術とは逆の考え方です。"},
+    {"section":"内視鏡の施術","q":"胆管に結石が詰まって黄疸が出たとき、ERCPで行う処置として適切なのはどれ？","options":["胃の粘膜を下からはがして早期がんを切除する","胆管の出口を切開して結石を取り出し、管を入れる","食道の静脈瘤をゴムのバンドで縛って止血する","大腸のポリープを根元から切り取って回収する"],"answer":1,"hint":"ERCPでは胆管の出口を切開（EST）して結石を除去したり、胆汁の通り道を確保するステント留置を行います。胆管結石・胆道閉塞の重要な治療です。"},
+    {"section":"内視鏡の検査・処置","q":"早期の消化管がんに対し、内視鏡で病変を大きく一括切除する「ESD」の説明として正しいのはどれ？","options":["お腹を切開して胃の一部を切り取る手術である","抗がん剤を点滴し、がんを小さくする治療である","粘膜下層をはがし、大きな早期がんも一括で切除する","体の外から放射線を当ててがんを縮小させる治療である"],"answer":2,"hint":"ESD（内視鏡的粘膜下層剥離術）は粘膜下層を剥離して大きな早期がんも一括切除できる高度な内視鏡治療。お腹を切らずに済むのが大きな利点です。"},
+    {"section":"病気の種類（勤務内容の把握）","q":"次のうち、消化器内科が主に診療する病気はどれ？","options":["心筋梗塞","気管支ぜんそく","変形性膝関節症","潰瘍性大腸炎"],"answer":3,"hint":"潰瘍性大腸炎は消化器内科の代表的な対象。心筋梗塞は循環器、ぜんそくは呼吸器、膝の関節は整形外科など、担当科の切り分けは紹介実務でも役立ちます。"},
+    {"section":"膵臓・胆道の検査","q":"内視鏡を十二指腸まで進め、胆管・膵管に造影して結石除去などの治療も行う検査の略称はどれ？","options":["ERCP","ESD","CT","MRI"],"answer":0,"hint":"ERCP（内視鏡的逆行性胆管膵管造影）は胆管・膵管を調べ、胆管結石の除去やステント留置などの治療も行います。"},
+    {"section":"胆石の知識","q":"胆のうや胆管にできる「胆石」で、痛みの発作が起きやすいのはどんなとき？","options":["起床直後の空腹時のみ","脂っこい食事のあと","運動中だけ","水を飲んだ直後のみ"],"answer":1,"hint":"胆石発作は脂肪の多い食事のあとに右上腹部などが痛むのが典型。胆のう炎になると手術が必要なことも。"},
+    {"section":"大腸がん検診","q":"大腸がん検診で最初のふるい分けとして広く行われる、便を用いた検査はどれ？","options":["胃透視（バリウム）","尿検査","便潜血検査","血糖検査"],"answer":2,"hint":"便潜血検査は大腸がん検診の一次スクリーニング。陽性なら大腸内視鏡で精密検査します。"},
+    {"section":"内視鏡治療の用語","q":"大腸ポリープや早期がんを内視鏡で切除する治療のうち、大きな病変を「はぎ取る」高度な手技はどれ？","options":["EMR","生検","洗腸","ESD"],"answer":3,"hint":"EMRはスネアで切除する簡便な方法、ESDは粘膜下層をはがして大きな病変も一括切除できる高度な手技です。"},
+    {"section":"大腸の病気","q":"大腸の壁の一部が外側に袋状に飛び出したもので、出血や炎症の原因になることがあるのはどれ？","options":["大腸憩室","大腸ポリープ","痔核","大腸メラノーシス"],"answer":0,"hint":"大腸憩室は腸壁が袋状に突出したもの。憩室出血や憩室炎を起こすことがあり、消化器内科でよく診ます。"},
+    {"section":"小腸の検査","q":"通常の内視鏡が届きにくい小腸を、飲み込んだカメラで撮影して調べる検査はどれ？","options":["ERCP","カプセル内視鏡","注腸造影","腹腔鏡"],"answer":1,"hint":"カプセル内視鏡はカメラ内蔵のカプセルを飲み込み小腸などを撮影する検査。原因不明の消化管出血などで使われます。"},
+    {"section":"血液検査の用語","q":"健康診断で肝臓の状態を反映し、飲酒の影響でも上がりやすい血液検査項目はどれ？","options":["白血球数","尿酸値","γ-GTP","中性脂肪"],"answer":2,"hint":"γ-GTPは肝・胆道の状態を反映し、アルコールで上昇しやすい指標。AST・ALTとあわせて肝機能の評価に使われます。"},
+    {"section":"専門医資格（医師紹介の視点）","q":"消化器を専門とする医師の専門医資格について、正しいのはどれ？","options":["消化器病専門医は、初期研修を修了した時点で自動的に付与される資格である","消化器内視鏡専門医は、外科を専門とする医師のみが取得できる資格である","消化器病専門医と消化器内視鏡専門医は、名称が異なるだけの同じ資格である","消化器病専門医と消化器内視鏡専門医は別の資格で、いずれもサブスペである"],"answer":3,"hint":"消化器病専門医（日本消化器病学会）と消化器内視鏡専門医（日本消化器内視鏡学会）は別資格。どちらも内科等の基本領域の上に積み上げるサブスペシャルティで、両方持つ医師も多く、紹介時の評価ポイントになります。"},
+    {"section":"専門医制度（医師紹介の視点）","q":"現在の専門医制度で、医師が「消化器」を専門にする一般的な流れとして正しいのはどれ？","options":["まず内科専門医を取り、その後サブスペとして消化器の専門医を目指す","医学部を卒業して医師免許を取れば、そのまま消化器専門医と認定される","消化器を専門とするには、先に外科専門医を取得することが必須である","消化器の診療に専門医資格は不要で、誰でも自由に名乗ることができる"],"answer":0,"hint":"多くは初期研修→内科専門医（基本領域）→サブスペシャルティの消化器病・消化器内視鏡専門医という流れ。紹介時のキャリア把握に役立ちます。"},
+    {"section":"勤務内容（医師紹介の実務）","q":"消化器内科医の求人で「内視鏡○件／日」と書かれることが多いのはなぜ？","options":["内視鏡の件数は医師の業務量とは関係なく、給与にも影響しないから","内視鏡の実施件数が、その医師の主な業務量やスキルの目安になるから","内視鏡は外科が担当するため、件数は消化器内科では意味がないから","求人票に検査件数を記載することが、法律で義務づけられているから"],"answer":1,"hint":"消化器内科の勤務は内視鏡が業務の中心になりやすく、「1日の内視鏡件数」が業務量やスキルの目安として求人票によく明記されます。面談時の重要な確認ポイントです。"},
+    {"section":"重要な症状","q":"皮膚や白目が黄色くなる「黄疸」の原因として、消化器内科で特に重要なのはどれ？","options":["長時間の日焼けによる皮膚の色素沈着","加齢にともなう視力の低下と目の乾燥","胆管の閉塞や肝障害による胆汁の異常","運動不足や加齢による骨密度の低下"],"answer":2,"hint":"黄疸はビリルビンが体にたまって起こる。胆管の閉塞（胆管がん・胆石など）や肝障害が原因のことが多く、消化器内科の重要な所見です。"},
+    {"section":"勤務先・求人（医師紹介の視点）","q":"消化器内科医の勤務先・求人について、正しい説明はどれ？","options":["勤務先は大学病院に限られ、市中病院やクリニックの求人はほとんどない","内視鏡の技術は開業時には役立たず、開業する医師もほとんどいない","健診・人間ドックの分野では、消化器内科医が必要とされることは少ない","内視鏡ができると、病院・クリニック・健診のいずれでも需要が高い"],"answer":3,"hint":"消化器内科は内視鏡ニーズが病院・クリニック・健診に共通して高いのが特徴で、勤務先の選択肢も幅広い科です。ほかの3つはいずれも実態と逆の説明です。"}
+  ],
+  entertainment: []
+};
+const LETTERS = ['Ａ','Ｂ','Ｃ','Ｄ'];
+const STORE_KEY = 'connect_shokaki_scores_20260710';
+let currentName='', currentTheme='medical', questions=[], answered={};
+let participantMode=false, participantMember=null;
+
+/* ============================================================
+   ★★★ 本番前にここだけ設定してください（JSONBin＝点数の集約先）★★★
+
+   【やること】今回用の「新しいBin」を1つ作り、そのIDを下の BIN_ID に貼るだけ。
+     1) https://jsonbin.io/ にログイン（前回と同じアカウントでOK）
+     2) 「CREATE BIN」を押す
+     3) 中身を  {}  だけにする（空の波かっこ2文字）
+     4) 「SAVE / CREATE」を押す
+     5) 出てきた BIN ID（例：68f1a2b3c4d5e6f7a8b9c0d1）をコピー
+     6) 下の BIN_ID の '　　' の中を、そのIDに差し替える
+
+   ※ MASTER_KEY はアカウント共通のキーなので、同じアカウントなら変更不要です。
+     （もし別アカウントを使う場合のみ、API KEYS 画面の X-MASTER-KEY に差し替え）
+   ※ BIN_ID を新しくすれば、前回の点数と混ざることはありません。
+   ============================================================ */
+const BIN_ID = '6a54919ef5f4af5e2986c91e';
+const MASTER_KEY = '$2a$10$dJotDlD41UHXS.q.BGOnk.UbcXxQFuGotWtUx4QEInIo9eULzpDwy';
+const JB_BASE = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
+
+async function fetchRemote(){
+  const res = await fetch(JB_BASE + '/latest', { headers: { 'X-MASTER-KEY': MASTER_KEY, 'X-Bin-Meta': 'false' } });
+  if(!res.ok) throw new Error('GET ' + res.status);
+  const data = await res.json();
+  const rec = (data && data.record !== undefined) ? data.record : data;
+  return (rec && typeof rec === 'object') ? rec : {};
+}
+async function putRemote(obj){
+  const res = await fetch(JB_BASE, { method:'PUT',
+    headers:{ 'Content-Type':'application/json', 'X-MASTER-KEY': MASTER_KEY, 'X-Bin-Versioning':'false' },
+    body: JSON.stringify(obj) });
+  if(!res.ok) throw new Error('PUT ' + res.status);
+  return true;
+}
+// 読み取り→自分の点数を足す→書き戻し（軽い再試行つき）
+async function pushScore(name, score){
+  let lastErr;
+  for(let i=0;i<3;i++){
+    try{
+      const remote = await fetchRemote();
+      remote[name] = score;
+      await putRemote(remote);
+      return true;
+    }catch(e){ lastErr=e; await new Promise(r=>setTimeout(r, 400 + Math.random()*500)); }
+  }
+  throw lastErr;
+}
+
+function loadScores(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
+function saveScore(name,score){ const s=loadScores(); s[name]=score; try{ localStorage.setItem(STORE_KEY,JSON.stringify(s)); }catch(e){} }
+function setScoreManual(name,val){ let v=parseInt(val,10); const s=loadScores(); if(isNaN(v)){ delete s[name]; } else { v=Math.max(0,Math.min(20,v)); s[name]=v; } try{ localStorage.setItem(STORE_KEY,JSON.stringify(s)); }catch(e){} }
+
+function show(id){ ['select-screen','quiz-screen','board-screen','reveal-screen'].forEach(s=> document.getElementById(s).classList.toggle('hidden', s!==id)); window.scrollTo({top:0,behavior:'smooth'}); }
+function backToSelect(){ buildNames(); show('select-screen'); }
+
+function buildNames(){
+  const grid=document.getElementById('name-grid'); grid.innerHTML='';
+  members.forEach(m=>{
+    const btn=document.createElement('button');
+    btn.className='name-btn';
+    btn.innerHTML=m.name+`<span class="tag">🩺 消化器内科 20問</span>`;
+    btn.addEventListener('click',()=>startQuiz(m));
+    grid.appendChild(btn);
+  });
+}
+
+function startQuiz(m){ currentName=m.name; currentTheme=m.theme; questions=QUESTION_SETS[m.theme]; answered={}; document.getElementById('who-badge').textContent='👤 '+m.name+' さん'; renderQuiz(); show('quiz-screen'); }
+
+function renderQuiz(){
+  const body=document.getElementById('quiz-body'); let html='';
+  questions.forEach((q,idx)=>{
+    const opts=q.options.map((o,oi)=>`<button class="option-btn" id="opt-${idx}-${oi}" data-q="${idx}" data-o="${oi}">${LETTERS[oi]}．${o}</button>`).join('');
+    html+=`<div class="quiz-card"><div class="section-badge">📚 ${q.section}</div><div class="q-header"><div class="q-num">Q${idx+1}</div><div class="q-text">${q.q}</div></div><div class="options">${opts}</div><div class="feedback" id="fb-${idx}"></div></div>`;
+  });
+  body.innerHTML=html;
+  body.querySelectorAll('.option-btn').forEach(b=> b.addEventListener('click',()=> answer(parseInt(b.dataset.q,10), parseInt(b.dataset.o,10))));
+  document.getElementById('result').classList.add('hidden'); updateProgress();
+}
+
+function answer(qIdx,optIdx){
+  if(answered[qIdx]!==undefined) return; answered[qIdx]=optIdx;
+  const q=questions[qIdx]; const ok=optIdx===q.answer;
+  for(let i=0;i<q.options.length;i++){ const btn=document.getElementById(`opt-${qIdx}-${i}`); btn.disabled=true; if(i===q.answer) btn.classList.add('correct'); else if(i===optIdx&&!ok) btn.classList.add('wrong'); }
+  const fb=document.getElementById(`fb-${qIdx}`); fb.className='feedback show '+(ok?'correct-fb':'wrong-fb');
+  fb.innerHTML= ok ? `✅ <strong>正解！</strong> ${q.hint}` : `❌ <strong>不正解…</strong> 正解は「${LETTERS[q.answer]}．${q.options[q.answer]}」<br>${q.hint}`;
+  updateProgress();
+  if(Object.keys(answered).length===questions.length) showResult();
+}
+
+function updateProgress(){ const done=Object.keys(answered).length, total=questions.length; document.getElementById('prog-text').textContent=`${done} / ${total} 問回答済み`; document.getElementById('prog-fill').style.width=(done/total*100)+'%'; }
+
+function showResult(){
+  const total=questions.length; let correct=0;
+  for(let i=0;i<total;i++) if(answered[i]===questions[i].answer) correct++;
+  saveScore(currentName,correct); // ローカルにも控える
+  const el=document.getElementById('result'); el.classList.remove('hidden');
+  el.innerHTML=`<div style="font-size:3em;margin-bottom:8px;">🎉</div>
+    <div style="font-size:1.4em;color:#e0c97f;font-weight:bold;margin-bottom:12px;">回答おつかれさまでした！</div>
+    <div style="color:#ddd;line-height:1.9;">${currentName} さん、全${total}問おわりました。<br>ご回答ありがとうございました。<br>結果は後ほどの発表をお楽しみに🏆</div>
+    <div id="send-status" style="margin-top:16px;font-size:0.85em;color:#9aa;">📡 回答を送信中…</div>`;
+  if(!participantMode){
+    el.innerHTML += `<button class="btn-outline" id="back-top" style="margin-top:18px;">▶ 最初の画面にもどる</button>`;
+    const bt=document.getElementById('back-top'); if(bt) bt.addEventListener('click',backToSelect);
+  }
+  el.scrollIntoView({behavior:'smooth'});
+  // JSONBinへ送信（全端末で集約）
+  pushScore(currentName, correct)
+    .then(()=>{ const s=document.getElementById('send-status'); if(s){ s.textContent='✅ 送信が完了しました'; s.style.color='#a5d6a7'; } })
+    .catch(()=>{ const s=document.getElementById('send-status'); if(s){ s.innerHTML='⚠️ 送信に失敗しました。お手数ですが司会者にお声がけください。'; s.style.color='#ef9a9a'; } });
+}
+
+function showBoard(){
+  const scores=loadScores(); const tb=document.getElementById('entry-body'); tb.innerHTML='';
+  members.forEach(m=>{
+    const val=scores[m.name];
+    const tr=document.createElement('tr');
+    const td1=document.createElement('td'); td1.className='entry-name'; td1.textContent=m.name;
+    const td2=document.createElement('td'); td2.innerHTML=`<span class="mini">🩺 消化器内科</span>`;
+    const td3=document.createElement('td');
+    const wrap=document.createElement('div'); wrap.className='num-ctrl';
+    const minus=document.createElement('button'); minus.textContent='−';
+    const input=document.createElement('input'); input.type='number'; input.min='0'; input.max='20'; input.placeholder='未'; input.value=(val===undefined?'':val);
+    const plus=document.createElement('button'); plus.textContent='＋';
+    minus.addEventListener('click',()=>{ let v=parseInt(input.value,10); if(isNaN(v))v=0; v=Math.max(0,v-1); input.value=v; setScoreManual(m.name,v); });
+    plus.addEventListener('click',()=>{ let v=parseInt(input.value,10); if(isNaN(v))v=-1; v=Math.min(20,v+1); input.value=v; setScoreManual(m.name,v); });
+    input.addEventListener('input',()=> setScoreManual(m.name,input.value));
+    wrap.appendChild(minus); wrap.appendChild(input); wrap.appendChild(plus); td3.appendChild(wrap);
+    tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3); tb.appendChild(tr);
+  });
+  show('board-screen');
+}
+
+async function resetScores(){
+  if(!confirm('全員のスコアを消去します（この端末＋集約サーバーの両方）。よろしいですか？')) return;
+  try{ localStorage.removeItem(STORE_KEY); }catch(e){}
+  // JSONBinは空データ（{}）を拒否するため、無害な初期値を書き込んでリセットする
+  try{ await putRemote({ _init: true }); }catch(e){ alert('サーバー側の消去に失敗しました。通信を確認してもう一度お試しください。'); }
+  showBoard();
+}
+
+let revealQueue=[], revealRows=[], revealDir='bottomUp';
+function tierOf(score){ return score>=14?{key:'pass',label:'合格',emoji:'🟢'}:score>=10?{key:'yellow',label:'イエローカード',emoji:'🟡'}:{key:'retake',label:'追試',emoji:'🔴'}; }
+async function startReveal(){
+  // JSONBin（全端末）＋ローカル手入力をマージ。リモート優先、手入力で補完。
+  let scores = loadScores();
+  try{
+    const remote = await fetchRemote();
+    scores = Object.assign({}, scores, remote);
+  }catch(e){
+    if(!confirm('集約サーバーから取得できませんでした（通信エラー）。\nこの端末に手入力・記録された分だけで発表しますか？')) return;
+  }
+  revealRows=members.filter(m=>scores[m.name]!==undefined).map(m=>({name:m.name,theme:m.theme,score:scores[m.name]})).sort((a,b)=>b.score-a.score);
+  if(revealRows.length===0){ alert('まだスコアがありません。'); return; }
+  let rank=0,prev=null; revealRows.forEach((r,i)=>{ if(r.score!==prev){ rank=i+1; prev=r.score; } r.rank=rank; });
+  document.getElementById('reveal-sub').textContent='参加 '+revealRows.length+' 名 ／ 全20問';
+  let cp=0,cy=0,cr=0; revealRows.forEach(r=>{ const t=tierOf(r.score).key; if(t==='pass')cp++; else if(t==='yellow')cy++; else cr++; });
+  document.getElementById('tier-summary').innerHTML='<span class="sc-pass">🟢 合格 '+cp+'</span><span class="sc-yellow">🟡 イエロー '+cy+'</span><span class="sc-retake">🔴 追試 '+cr+'</span>';
+  const list=document.getElementById('rank-list'); list.innerHTML='';
+  revealRows.forEach((r,i)=>{
+    const t=tierOf(r.score);
+    const cls=(r.rank===1?'top1':r.rank===2?'top2':r.rank===3?'top3':'')+' tier-'+t.key;
+    const medal=r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':(r.rank+'位');
+    const div=document.createElement('div'); div.className='rank-row '+cls; div.id='rr-'+i; div.dataset.score=r.score;
+    div.innerHTML=`<div class="rank-medal">${medal}</div><div class="rank-name">${r.name}<span class="tier-pill ${t.key}">${t.emoji} ${t.label}</span></div><div class="rank-bar-wrap"><div class="rank-bar-bg"><div class="rank-bar-fill" id="bar-${i}"></div></div></div><div class="rank-score sc-${t.key}">${r.score}<small>/20</small></div>`;
+    list.appendChild(div);
+  });
+  // 発表方向の選択
+  const ctrl=document.getElementById('reveal-controls');
+  ctrl.innerHTML='<button class="btn-gold" id="rv-bottom">👇 最下位から1人ずつ</button><button class="btn-gold" id="rv-top3">🏅 4位以下 → 3位・2位・1位</button><button class="btn-outline" id="rv-all2">✨ 一気に全員表示</button>';
+  document.getElementById('rv-bottom').addEventListener('click',()=>beginReveal('bottomUp'));
+  document.getElementById('rv-top3').addEventListener('click',beginRevealTop3);
+  document.getElementById('rv-all2').addEventListener('click',revealAll);
+  show('reveal-screen');
+}
+function resetRowsHidden(){
+  revealRows.forEach((r,i)=>{ const row=document.getElementById('rr-'+i); if(row) row.classList.remove('shown'); const bar=document.getElementById('bar-'+i); if(bar) bar.style.width='0%'; });
+}
+function beginReveal(dir){
+  revealDir='bottomUp'; resetRowsHidden();
+  revealQueue = revealRows.map((r,i)=>i).reverse();
+  const ctrl=document.getElementById('reveal-controls');
+  ctrl.innerHTML='<button class="btn-gold" id="rv-next">👇 最下位から発表！</button><button class="btn-outline" id="rv-restart">↺ スタイルを選び直す</button>';
+  document.getElementById('rv-next').addEventListener('click',revealNext);
+  document.getElementById('rv-restart').addEventListener('click',startReveal);
+}
+function top3BtnText(idx){ return idx===2?'🥉 第3位を発表！':idx===1?'🥈 第2位を発表！':'🥇 第1位を発表！！'; }
+function beginRevealTop3(){
+  revealDir='top3'; resetRowsHidden();
+  const n=revealRows.length;
+  let delay=0;
+  for(let i=n-1;i>=3;i--){ setTimeout(((idx)=>()=>revealRow(idx))(i), delay); delay+=380; }
+  revealQueue=[2,1,0].filter(i=>i>=0 && i<n);
+  const ctrl=document.getElementById('reveal-controls');
+  ctrl.innerHTML='<button class="btn-gold" id="rv-next">'+top3BtnText(revealQueue[0])+'</button><button class="btn-outline" id="rv-restart">↺ スタイルを選び直す</button>';
+  document.getElementById('rv-next').addEventListener('click',revealTop3Next);
+  document.getElementById('rv-restart').addEventListener('click',startReveal);
+}
+function revealTop3Next(){
+  if(revealQueue.length===0) return;
+  const i=revealQueue.shift(); revealRow(i);
+  const row=document.getElementById('rr-'+i); if(row) row.scrollIntoView({behavior:'smooth',block:'center'});
+  const btn=document.getElementById('rv-next');
+  if(revealQueue.length===0){ btn.textContent='🎉 発表おわり！おめでとう🎊'; btn.disabled=true; btn.style.opacity=0.6; }
+  else { btn.textContent=top3BtnText(revealQueue[0]); }
+}
+function revealAll(){
+  resetRowsHidden();
+  const n=revealRows.length;
+  revealRows.forEach((r,i)=> setTimeout(()=>revealRow(i),(n-1-i)*380));
+  const ctrl=document.getElementById('reveal-controls');
+  ctrl.innerHTML='<button class="btn-outline" id="rv-restart2">↺ 方向を選び直す</button>';
+  document.getElementById('rv-restart2').addEventListener('click',startReveal);
+}
+function revealRow(i){
+  const row=document.getElementById('rr-'+i); if(!row) return; row.classList.add('shown');
+  const bar=document.getElementById('bar-'+i); const score=parseInt(row.dataset.score,10);
+  if(bar) setTimeout(()=>{ bar.style.width=(score/20*100)+'%'; },120);
+}
+function revealNext(){
+  if(revealQueue.length===0) return;
+  const i=revealQueue.shift(); revealRow(i);
+  document.getElementById('rr-'+i).scrollIntoView({behavior:'smooth',block:'center'});
+  const btn=document.getElementById('rv-next');
+  if(revealQueue.length===0){ btn.textContent='🎉 発表おわり！'; btn.disabled=true; btn.style.opacity=0.6; }
+  else if(revealDir==='bottomUp' && revealQueue.length===1){ btn.textContent='👑 いよいよ1位！'; }
+  else { btn.textContent='▶ 次を発表（残り'+revealQueue.length+'人）'; }
+}
+
+document.getElementById('to-reveal').addEventListener('click',startReveal);
+document.getElementById('to-board').addEventListener('click',showBoard);
+document.getElementById('quiz-back').addEventListener('click',backToSelect);
+document.getElementById('board-back').addEventListener('click',backToSelect);
+document.getElementById('reveal-back').addEventListener('click',backToSelect);
+document.getElementById('board-to-reveal').addEventListener('click',startReveal);
+document.getElementById('reset-scores').addEventListener('click',resetScores);
+
+function initApp(){
+  buildNames();
+  let u='';
+  try{ u=(new URLSearchParams(location.search).get('user')||'').trim().toLowerCase(); }catch(e){}
+  if(u){
+    const m=members.find(x=> x.key.toLowerCase()===u);
+    if(m){
+      participantMode=true; participantMember=m;
+      const qb=document.getElementById('quiz-back'); if(qb) qb.style.display='none';
+      startQuiz(m); return;
+    }
+  }
+  show('select-screen');
+}
+initApp();
+</script>
+</body>
+</html>
