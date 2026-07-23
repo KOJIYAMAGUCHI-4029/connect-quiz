@@ -94,6 +94,23 @@
   .sc-retake { color:#ef9a9a !important; }
   .tier-summary { text-align:center; margin:-8px 0 20px; font-size:1.05em; }
   .tier-summary span { margin:0 12px; font-weight:bold; }
+  /* チーム対抗 */
+  .team-box { max-width:760px; margin:0 auto 26px; }
+  .team-head { text-align:center; font-size:1.15em; color:#ffd54f; letter-spacing:2px; margin-bottom:14px; }
+  .team-cards { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .team-card { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.16); border-radius:16px; padding:18px 16px; text-align:center; opacity:0; transform:translateY(14px); transition:all 0.5s; }
+  .team-card.shown { opacity:1; transform:translateY(0); }
+  .team-card.win { background:linear-gradient(135deg,rgba(255,213,79,0.24),rgba(255,143,0,0.16)); border-color:#ffd54f; box-shadow:0 0 26px rgba(255,213,79,0.3); }
+  .team-card .tname { font-size:1.25em; font-weight:bold; color:#f3e6bf; letter-spacing:2px; }
+  .team-card .tmembers { font-size:0.72em; color:#9aa; margin:4px 0 10px; }
+  .team-card .ttotal { font-size:2.6em; font-weight:bold; color:#e0c97f; line-height:1.1; }
+  .team-card .ttotal small { font-size:0.32em; color:#999; }
+  .team-card .tavg { font-size:0.8em; color:#bbb; margin-top:6px; }
+  .team-card .tcrown { font-size:1.6em; height:1.6em; }
+  .team-detail { font-size:0.78em; color:#aab; margin-top:10px; line-height:1.8; text-align:left; padding:0 4px; }
+  .team-verdict { text-align:center; font-size:1.15em; font-weight:bold; color:#ffd54f; margin-top:16px; letter-spacing:1px; opacity:0; transition:opacity 0.6s; }
+  .team-verdict.shown { opacity:1; }
+  @media (max-width:560px){ .team-cards{grid-template-columns:1fr;} }
   .rank-medal { font-size:1.9em; min-width:54px; text-align:center; }
   .rank-name { flex:1; font-size:1.45em; font-weight:bold; }
   .rank-bar-wrap { flex:1.4; }
@@ -137,7 +154,7 @@
     <div class="back-bar"><button class="back-btn" id="board-back">← もどる</button></div>
     <div class="board-title">📋 スコア入力・確認</div>
     <div class="board-sub">自動記録された点数を確認・修正できます（スマホ受験分はここで手入力もOK）</div>
-    <table class="entry"><thead><tr><th>名前</th><th>ジャンル</th><th>スコア（0〜20）</th></tr></thead><tbody id="entry-body"></tbody></table>
+    <table class="entry"><thead><tr><th>名前</th><th>チーム</th><th>スコア（0〜20）</th></tr></thead><tbody id="entry-body"></tbody></table>
     <div class="board-actions">
       <button class="btn-gold" id="board-to-reveal">🏆 ランキング発表へ</button>
       <button class="btn-outline" id="reset-scores">🗑 スコアを全消去</button>
@@ -149,6 +166,7 @@
     <div class="reveal-title">🏆 結果発表 🏆</div>
     <div class="reveal-sub" id="reveal-sub"></div>
     <div class="tier-summary" id="tier-summary"></div>
+    <div class="team-box hidden" id="team-box"></div>
     <div class="rank-list" id="rank-list"></div>
     <div class="reveal-controls" id="reveal-controls"></div>
   </div>
@@ -156,19 +174,21 @@
 
 <script>
 /* ===== 参加メンバー（← ここの名前を今回の参加者に書き換えてください） ===== */
+/* team: "A" / "B" / ""（無所属＝個人成績のみ集計） */
 const members = [
-  {"key": "asami",    "name": "浅見隆之介", "theme": "medical"},
-  {"key": "machida",  "name": "町田信宏",   "theme": "medical"},
-  {"key": "izumi",    "name": "和泉圭祐",   "theme": "medical"},
-  {"key": "kato",     "name": "加藤愛莉",   "theme": "medical"},
-  {"key": "sato",     "name": "佐藤勇治",   "theme": "medical"},
-  {"key": "adachi",   "name": "安達雄太郎", "theme": "medical"},
-  {"key": "koguchi",  "name": "古口里奈",   "theme": "medical"},
-  {"key": "yamada",   "name": "山田一樹",   "theme": "medical"},
-  {"key": "kase",     "name": "加瀬裕仁",   "theme": "medical"},
-  {"key": "nobe",     "name": "野辺純子",   "theme": "medical"},
-  {"key": "nakahata", "name": "中畑麻奈",   "theme": "medical"}
+  {"key": "asami",    "name": "浅見隆之介", "theme": "medical", "team": "A"},
+  {"key": "yamada",   "name": "山田一樹",   "theme": "medical", "team": "A"},
+  {"key": "adachi",   "name": "安達雄太郎", "theme": "medical", "team": "A"},
+  {"key": "kase",     "name": "加瀬裕仁",   "theme": "medical", "team": "A"},
+  {"key": "koguchi",  "name": "古口里奈",   "theme": "medical", "team": "A"},
+  {"key": "machida",  "name": "町田信宏",   "theme": "medical", "team": "B"},
+  {"key": "izumi",    "name": "和泉圭祐",   "theme": "medical", "team": "B"},
+  {"key": "sato",     "name": "佐藤勇治",   "theme": "medical", "team": "B"},
+  {"key": "nobe",     "name": "野辺純子",   "theme": "medical", "team": "B"},
+  {"key": "kato",     "name": "加藤愛莉",   "theme": "medical", "team": ""},
+  {"key": "nakahata", "name": "中畑麻奈",   "theme": "medical", "team": ""}
 ];
+const TEAM_LABEL = { "A": "チームA", "B": "チームB" };
 
 /* ===== 出題（消化器内科20問。正解はA〜D各5問ずつに均等配分） ===== */
 const QUESTION_SETS = {
@@ -235,16 +255,30 @@ async function putRemote(obj){
   return true;
 }
 // 読み取り→自分の点数を足す→書き戻し（軽い再試行つき）
+// 実際にサーバーへ保存できたかを読み直して確認する
+async function verifySaved(name, score){
+  try{
+    const remote = await fetchRemote();
+    return remote[name] === score;
+  }catch(e){ return false; }
+}
 async function pushScore(name, score){
   let lastErr;
-  for(let i=0;i<3;i++){
+  for(let i=0;i<4;i++){
     try{
       const remote = await fetchRemote();
       remote[name] = score;
       await putRemote(remote);
       return true;
-    }catch(e){ lastErr=e; await new Promise(r=>setTimeout(r, 400 + Math.random()*500)); }
+    }catch(e){
+      lastErr = e;
+      // 通信エラーに見えても実際は保存できている場合があるため、書き込み結果を確認する
+      if(await verifySaved(name, score)) return true;
+      await new Promise(r=>setTimeout(r, 600 + Math.random()*700));
+    }
   }
+  // 最後にもう一度だけ確認（他の人の送信と重なった直後などの取りこぼし対策）
+  if(await verifySaved(name, score)) return true;
   throw lastErr;
 }
 
@@ -295,10 +329,18 @@ function showResult(){
   const total=questions.length; let correct=0;
   for(let i=0;i<total;i++) if(answered[i]===questions[i].answer) correct++;
   saveScore(currentName,correct); // ローカルにも控える
+  const t = tierOf(correct);
+  const me = members.find(m=>m.name===currentName);
+  const teamLine = (me && me.team)
+    ? `<div style="margin-top:10px;font-size:0.95em;color:#e0c97f;">🚩 ${TEAM_LABEL[me.team]} のメンバーとして加算されました</div>` : '';
   const el=document.getElementById('result'); el.classList.remove('hidden');
-  el.innerHTML=`<div style="font-size:3em;margin-bottom:8px;">🎉</div>
-    <div style="font-size:1.4em;color:#e0c97f;font-weight:bold;margin-bottom:12px;">回答おつかれさまでした！</div>
-    <div style="color:#ddd;line-height:1.9;">${currentName} さん、全${total}問おわりました。<br>ご回答ありがとうございました。<br>結果は後ほどの発表をお楽しみに🏆</div>
+  el.innerHTML=`<div style="font-size:2.4em;margin-bottom:4px;">🎉</div>
+    <div style="font-size:1.25em;color:#e0c97f;font-weight:bold;margin-bottom:6px;">回答おつかれさまでした！</div>
+    <div style="color:#ddd;font-size:0.92em;">${currentName} さんの結果</div>
+    <div class="score-display">${correct}<span style="font-size:0.32em;color:#999;"> / ${total} 問正解</span></div>
+    <div class="verdict ${t.key==='pass'?'pass':t.key==='yellow'?'yellow':'red'}">${t.emoji} ${t.label}</div>
+    ${teamLine}
+    <div style="color:#bbb;line-height:1.9;margin-top:12px;font-size:0.9em;">ご回答ありがとうございました。<br>チームの合計点と順位は、後ほどの発表をお楽しみに🏆</div>
     <div id="send-status" style="margin-top:16px;font-size:0.85em;color:#9aa;">📡 回答を送信中…</div>`;
   if(!participantMode){
     el.innerHTML += `<button class="btn-outline" id="back-top" style="margin-top:18px;">▶ 最初の画面にもどる</button>`;
@@ -308,7 +350,7 @@ function showResult(){
   // JSONBinへ送信（全端末で集約）
   pushScore(currentName, correct)
     .then(()=>{ const s=document.getElementById('send-status'); if(s){ s.textContent='✅ 送信が完了しました'; s.style.color='#a5d6a7'; } })
-    .catch(()=>{ const s=document.getElementById('send-status'); if(s){ s.innerHTML='⚠️ 送信に失敗しました。お手数ですが司会者にお声がけください。'; s.style.color='#ef9a9a'; } });
+    .catch(()=>{ const s=document.getElementById('send-status'); if(s){ s.innerHTML='⚠️ 自動送信がうまくいきませんでした。<br>お手数ですが「'+correct+'問正解」と司会者にお伝えください。'; s.style.color='#ef9a9a'; } });
 }
 
 function showBoard(){
@@ -317,7 +359,7 @@ function showBoard(){
     const val=scores[m.name];
     const tr=document.createElement('tr');
     const td1=document.createElement('td'); td1.className='entry-name'; td1.textContent=m.name;
-    const td2=document.createElement('td'); td2.innerHTML=`<span class="mini">🩺 消化器内科</span>`;
+    const td2=document.createElement('td'); td2.innerHTML=`<span class="mini">${m.team? '🚩 '+TEAM_LABEL[m.team] : '－'}</span>`;
     const td3=document.createElement('td');
     const wrap=document.createElement('div'); wrap.className='num-ctrl';
     const minus=document.createElement('button'); minus.textContent='−';
@@ -351,7 +393,7 @@ async function startReveal(){
   }catch(e){
     if(!confirm('集約サーバーから取得できませんでした（通信エラー）。\nこの端末に手入力・記録された分だけで発表しますか？')) return;
   }
-  revealRows=members.filter(m=>scores[m.name]!==undefined).map(m=>({name:m.name,theme:m.theme,score:scores[m.name]})).sort((a,b)=>b.score-a.score);
+  revealRows=members.filter(m=>scores[m.name]!==undefined).map(m=>({name:m.name,theme:m.theme,team:m.team||'',score:scores[m.name]})).sort((a,b)=>b.score-a.score);
   if(revealRows.length===0){ alert('まだスコアがありません。'); return; }
   let rank=0,prev=null; revealRows.forEach((r,i)=>{ if(r.score!==prev){ rank=i+1; prev=r.score; } r.rank=rank; });
   document.getElementById('reveal-sub').textContent='参加 '+revealRows.length+' 名 ／ 全20問';
@@ -363,16 +405,66 @@ async function startReveal(){
     const cls=(r.rank===1?'top1':r.rank===2?'top2':r.rank===3?'top3':'')+' tier-'+t.key;
     const medal=r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':(r.rank+'位');
     const div=document.createElement('div'); div.className='rank-row '+cls; div.id='rr-'+i; div.dataset.score=r.score;
-    div.innerHTML=`<div class="rank-medal">${medal}</div><div class="rank-name">${r.name}<span class="tier-pill ${t.key}">${t.emoji} ${t.label}</span></div><div class="rank-bar-wrap"><div class="rank-bar-bg"><div class="rank-bar-fill" id="bar-${i}"></div></div></div><div class="rank-score sc-${t.key}">${r.score}<small>/20</small></div>`;
+    const teamTag = r.team ? `<span class="tier-pill" style="background:rgba(224,201,127,0.2);color:#f3e6bf;border:1px solid rgba(224,201,127,0.6);">🚩 ${TEAM_LABEL[r.team]}</span>` : '';
+    div.innerHTML=`<div class="rank-medal">${medal}</div><div class="rank-name">${r.name}${teamTag}<span class="tier-pill ${t.key}">${t.emoji} ${t.label}</span></div><div class="rank-bar-wrap"><div class="rank-bar-bg"><div class="rank-bar-fill" id="bar-${i}"></div></div></div><div class="rank-score sc-${t.key}">${r.score}<small>/20</small></div>`;
     list.appendChild(div);
   });
   // 発表方向の選択
   const ctrl=document.getElementById('reveal-controls');
-  ctrl.innerHTML='<button class="btn-gold" id="rv-bottom">👇 最下位から1人ずつ</button><button class="btn-gold" id="rv-top3">🏅 4位以下 → 3位・2位・1位</button><button class="btn-outline" id="rv-all2">✨ 一気に全員表示</button>';
+  ctrl.innerHTML='<button class="btn-gold" id="rv-bottom">👇 最下位から1人ずつ</button><button class="btn-gold" id="rv-top3">🏅 4位以下 → 3位・2位・1位</button><button class="btn-outline" id="rv-all2">✨ 一気に全員表示</button>'
+    +'<div style="margin-top:14px;"><button class="btn-gold" id="rv-team">🚩 チーム対抗の結果を発表</button></div>';
   document.getElementById('rv-bottom').addEventListener('click',()=>beginReveal('bottomUp'));
   document.getElementById('rv-top3').addEventListener('click',beginRevealTop3);
   document.getElementById('rv-all2').addEventListener('click',revealAll);
+  document.getElementById('rv-team').addEventListener('click',showTeamResult);
+  document.getElementById('team-box').classList.add('hidden');
   show('reveal-screen');
+}
+/* ===== チーム対抗（合計点で勝負） ===== */
+function computeTeams(){
+  const res = {};
+  ['A','B'].forEach(k=>{
+    const roster = members.filter(m=>m.team===k);
+    const done = revealRows.filter(r=>r.team===k);
+    const total = done.reduce((s,r)=>s+r.score,0);
+    res[k] = {
+      key: k, label: TEAM_LABEL[k], roster: roster.length,
+      done: done.length, total: total,
+      avg: done.length ? (total/done.length) : 0,
+      members: done.slice().sort((a,b)=>b.score-a.score)
+    };
+  });
+  return res;
+}
+function showTeamResult(){
+  const t = computeTeams();
+  const box = document.getElementById('team-box');
+  box.classList.remove('hidden');
+  const win = t.A.total===t.B.total ? null : (t.A.total>t.B.total ? 'A' : 'B');
+  const card = (d)=>{
+    const isWin = win===d.key;
+    const detail = d.members.map(m=>`${m.name}　${m.score}`).join('<br>') || '（未回答）';
+    const pending = d.done < d.roster ? `<div style="font-size:0.72em;color:#ef9a9a;margin-top:6px;">※ ${d.roster - d.done}名 未回答</div>` : '';
+    return `<div class="team-card${isWin?' win':''}" id="tc-${d.key}">
+      <div class="tcrown">${isWin?'👑':''}</div>
+      <div class="tname">🚩 ${d.label}</div>
+      <div class="tmembers">${d.done} / ${d.roster} 名 回答済み</div>
+      <div class="ttotal">${d.total}<small> 点</small></div>
+      <div class="tavg">1人あたり平均 ${d.avg.toFixed(1)} 点</div>
+      <div class="team-detail">${detail}</div>
+      ${pending}
+    </div>`;
+  };
+  const verdict = win
+    ? `🎉 ${TEAM_LABEL[win]} の勝利！（${Math.abs(t.A.total-t.B.total)}点差）`
+    : `🤝 同点！ ${t.A.total}点 対 ${t.B.total}点`;
+  box.innerHTML = `<div class="team-head">🚩 チーム対抗 結果 🚩</div>
+    <div class="team-cards">${card(t.A)}${card(t.B)}</div>
+    <div class="team-verdict" id="team-verdict">${verdict}</div>`;
+  setTimeout(()=>{ const a=document.getElementById('tc-A'); if(a) a.classList.add('shown'); },100);
+  setTimeout(()=>{ const b=document.getElementById('tc-B'); if(b) b.classList.add('shown'); },500);
+  setTimeout(()=>{ const v=document.getElementById('team-verdict'); if(v) v.classList.add('shown'); },1100);
+  box.scrollIntoView({behavior:'smooth',block:'center'});
 }
 function resetRowsHidden(){
   revealRows.forEach((r,i)=>{ const row=document.getElementById('rr-'+i); if(row) row.classList.remove('shown'); const bar=document.getElementById('bar-'+i); if(bar) bar.style.width='0%'; });
@@ -381,9 +473,11 @@ function beginReveal(dir){
   revealDir='bottomUp'; resetRowsHidden();
   revealQueue = revealRows.map((r,i)=>i).reverse();
   const ctrl=document.getElementById('reveal-controls');
-  ctrl.innerHTML='<button class="btn-gold" id="rv-next">👇 最下位から発表！</button><button class="btn-outline" id="rv-restart">↺ スタイルを選び直す</button>';
+  ctrl.innerHTML='<button class="btn-gold" id="rv-next">👇 最下位から発表！</button><button class="btn-outline" id="rv-restart">↺ スタイルを選び直す</button>'
+    +'<div style="margin-top:12px;"><button class="btn-outline" id="rv-team2">🚩 チーム対抗の結果</button></div>';
   document.getElementById('rv-next').addEventListener('click',revealNext);
   document.getElementById('rv-restart').addEventListener('click',startReveal);
+  document.getElementById('rv-team2').addEventListener('click',showTeamResult);
 }
 function top3BtnText(idx){ return idx===2?'🥉 第3位を発表！':idx===1?'🥈 第2位を発表！':'🥇 第1位を発表！！'; }
 function beginRevealTop3(){
@@ -393,9 +487,11 @@ function beginRevealTop3(){
   for(let i=n-1;i>=3;i--){ setTimeout(((idx)=>()=>revealRow(idx))(i), delay); delay+=380; }
   revealQueue=[2,1,0].filter(i=>i>=0 && i<n);
   const ctrl=document.getElementById('reveal-controls');
-  ctrl.innerHTML='<button class="btn-gold" id="rv-next">'+top3BtnText(revealQueue[0])+'</button><button class="btn-outline" id="rv-restart">↺ スタイルを選び直す</button>';
+  ctrl.innerHTML='<button class="btn-gold" id="rv-next">'+top3BtnText(revealQueue[0])+'</button><button class="btn-outline" id="rv-restart">↺ スタイルを選び直す</button>'
+    +'<div style="margin-top:12px;"><button class="btn-outline" id="rv-team3">🚩 チーム対抗の結果</button></div>';
   document.getElementById('rv-next').addEventListener('click',revealTop3Next);
   document.getElementById('rv-restart').addEventListener('click',startReveal);
+  document.getElementById('rv-team3').addEventListener('click',showTeamResult);
 }
 function revealTop3Next(){
   if(revealQueue.length===0) return;
@@ -410,8 +506,9 @@ function revealAll(){
   const n=revealRows.length;
   revealRows.forEach((r,i)=> setTimeout(()=>revealRow(i),(n-1-i)*380));
   const ctrl=document.getElementById('reveal-controls');
-  ctrl.innerHTML='<button class="btn-outline" id="rv-restart2">↺ 方向を選び直す</button>';
+  ctrl.innerHTML='<button class="btn-gold" id="rv-team4">🚩 チーム対抗の結果</button><button class="btn-outline" id="rv-restart2">↺ 方向を選び直す</button>';
   document.getElementById('rv-restart2').addEventListener('click',startReveal);
+  document.getElementById('rv-team4').addEventListener('click',showTeamResult);
 }
 function revealRow(i){
   const row=document.getElementById('rr-'+i); if(!row) return; row.classList.add('shown');
