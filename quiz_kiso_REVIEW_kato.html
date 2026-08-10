@@ -80,6 +80,11 @@ h1{
 .tab:hover{color:var(--ink)}
 .tab.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
 .tab:focus-visible{outline:2px solid var(--seal);outline-offset:2px}
+.tab.locked{color:#A8B4B8;cursor:not-allowed}
+.tab.locked:hover{color:#A8B4B8}
+.tab .lock{font-size:11px;margin-right:5px;opacity:.75}
+.tab.unlocked-now{animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.05)}100%{transform:scale(1)}}
 .pane{display:none}
 .pane.on{display:block;animation:fade .3s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -188,6 +193,10 @@ h1{
 .v-gold{background:#FBF3E2;color:var(--gold);border:1.5px solid #E8D3A4}
 .v-seal{background:var(--seal-soft);color:var(--seal);border:1.5px solid #BFDCD7}
 .v-plain{background:#EEF2F2;color:var(--ink-soft);border:1.5px solid var(--line)}
+.unlock-note{
+  margin-top:22px;padding-top:20px;border-top:1px solid var(--line);
+  font-size:13.5px;color:var(--ink-soft);line-height:1.8;
+}
 
 footer{
   text-align:center;font-size:12px;color:#8698A3;
@@ -213,20 +222,20 @@ footer{
 <div class="wrap">
 
   <div class="notice">
-    加藤さん、事前確認をお願いします。<b>「解答・解説を見る」</b>タブで全問の正解と解説を確認できます。<b>「実際に解いてみる」</b>タブでは本番と同じ形式で回答でき、最後に自分の点数が出ます。<br>
-    この版は<b>集計に送信されません</b>ので、何度でも試せます。難易度・表現・出題バランスで気になる点があれば教えてください。
+    加藤さん、事前確認をお願いします。まずは本番と同じ形式で<b>全20問を解いてみてください</b>。1問ごとに正誤が表示され、最後に点数が出ます。<br>
+    <b>全問終えると「解答・解説を見る」が開き</b>、全問の正解と解説をまとめて確認できます。この版は<b>集計に送信されません</b>ので、何度でも試せます。難易度・表現・出題バランスで気になる点があれば教えてください。
   </div>
 
   <div class="tabs" role="tablist">
-    <button class="tab on" id="t1" role="tab" aria-selected="true" onclick="tab(1)">解答・解説を見る</button>
-    <button class="tab" id="t2" role="tab" aria-selected="false" onclick="tab(2)">実際に解いてみる</button>
+    <button class="tab on" id="t2" role="tab" aria-selected="true" onclick="tab(2)">実際に解いてみる</button>
+    <button class="tab locked" id="t1" role="tab" aria-selected="false" onclick="tab(1)"><span class="lock" id="lockIcon">🔒</span>解答・解説を見る</button>
   </div>
 
   <!-- ========== PANE 1 : ANSWER KEY ========== -->
-  <div class="pane on" id="p1"></div>
+  <div class="pane" id="p1"></div>
 
   <!-- ========== PANE 2 : PLAY ========== -->
-  <div class="pane" id="p2">
+  <div class="pane on" id="p2">
     <div class="progress-bar">
       <div class="pmeta">
         <span id="pnum">第1問 / 全20問</span>
@@ -346,7 +355,16 @@ const QUESTIONS = [
 const LETTER = ["A","B","C","D"];
 
 /* ---------- tabs ---------- */
+let keyUnlocked = false;
+
 function tab(n){
+  if(n===1 && !keyUnlocked){
+    const t=document.getElementById("t1");
+    t.classList.remove("unlocked-now");
+    void t.offsetWidth;
+    t.classList.add("unlocked-now");
+    return;
+  }
   for(let i=1;i<=2;i++){
     const t=document.getElementById("t"+i), p=document.getElementById("p"+i);
     t.classList.toggle("on", i===n);
@@ -354,6 +372,15 @@ function tab(n){
     p.classList.toggle("on", i===n);
   }
   window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function unlockKey(){
+  if(keyUnlocked) return;
+  keyUnlocked = true;
+  const t=document.getElementById("t1");
+  t.classList.remove("locked");
+  document.getElementById("lockIcon").textContent="✓";
+  t.classList.add("unlocked-now");
 }
 
 /* ---------- PANE 1 : answer key ---------- */
@@ -435,13 +462,16 @@ function showResult(){
   else if(rate>=50){cls="v-plain";label="あと一歩 ／ 復習で伸びます";}
   else{cls="v-plain";label="復習推奨 ／ 解説タブで確認を";}
 
+  unlockKey();
+
   document.getElementById("playArea").innerHTML=`
     <div class="result">
       <div class="score-num">${score}<small> / ${total}</small></div>
       <div class="rate">正答率 ${rate}%</div>
       <div class="verdict-big ${cls}">${label}</div>
-      <button class="btn" onclick="restart()">もう一度解く</button>
-      <button class="btn ghost" onclick="tab(1)">解答・解説を見る</button>
+      <p class="unlock-note">おつかれさまでした。全20問の正解と解説が確認できるようになりました。</p>
+      <button class="btn" onclick="tab(1)">解答・解説を見る</button>
+      <button class="btn ghost" onclick="restart()">もう一度解く</button>
     </div>`;
   document.getElementById("fill").style.width="100%";
   window.scrollTo({top:0,behavior:"smooth"});
