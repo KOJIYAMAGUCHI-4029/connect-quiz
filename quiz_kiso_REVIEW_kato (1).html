@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医師紹介 基礎知識テスト｜レビュー版（加藤愛莉さん）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#12263A;
+  --ink-soft:#3E566B;
+  --paper:#F5F7F6;
+  --card:#FFFFFF;
+  --line:#DCE3E4;
+  --seal:#0F6E63;
+  --seal-soft:#E4F0EE;
+  --alert:#B4472F;
+  --alert-soft:#FBEBE7;
+  --gold:#B8892B;
+  --shadow:0 1px 2px rgba(18,38,58,.06),0 8px 24px rgba(18,38,58,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Noto Sans JP",system-ui,-apple-system,sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  line-height:1.85;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:80px;
+}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px}
+
+/* ---------- header ---------- */
+header{
+  background:var(--ink);
+  color:#fff;
+  padding:34px 0 30px;
+  border-bottom:4px solid var(--seal);
+}
+.eyebrow{
+  font-size:11px;letter-spacing:.22em;font-weight:700;
+  color:#8FB4B0;margin-bottom:12px;
+}
+h1{
+  font-family:"Zen Kaku Gothic New","Noto Sans JP",sans-serif;
+  font-size:clamp(21px,5vw,29px);font-weight:900;
+  letter-spacing:.02em;line-height:1.45;
+}
+.meta{
+  margin-top:14px;font-size:13px;color:#B9CBD4;
+  display:flex;flex-wrap:wrap;gap:8px 18px;
+}
+.meta span{display:flex;align-items:center;gap:6px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--seal);display:inline-block}
+
+/* ---------- notice ---------- */
+.notice{
+  background:var(--seal-soft);
+  border:1px solid #BFDCD7;
+  border-radius:10px;
+  padding:16px 18px;
+  margin:22px 0 6px;
+  font-size:13.5px;
+  color:#0C5249;
+}
+.notice b{font-weight:700}
+
+/* ---------- tabs ---------- */
+.tabs{
+  display:flex;gap:8px;margin:22px 0 26px;
+  background:#E7ECEB;padding:5px;border-radius:12px;
+}
+.tab{
+  flex:1;border:none;background:transparent;cursor:pointer;
+  font-family:inherit;font-size:14px;font-weight:700;color:var(--ink-soft);
+  padding:12px 8px;border-radius:9px;transition:.18s;
+}
+.tab:hover{color:var(--ink)}
+.tab.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.tab:focus-visible{outline:2px solid var(--seal);outline-offset:2px}
+.pane{display:none}
+.pane.on{display:block;animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- question card ---------- */
+.q{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:22px 20px;margin-bottom:16px;
+  box-shadow:var(--shadow);
+}
+.qhead{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px}
+.qno{
+  flex-shrink:0;width:34px;height:34px;border-radius:8px;
+  background:var(--ink);color:#fff;
+  font-size:13px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+.qtext{font-size:15.5px;font-weight:700;line-height:1.75;padding-top:3px}
+
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{
+  display:flex;gap:11px;align-items:flex-start;
+  border:1.5px solid var(--line);border-radius:10px;
+  padding:12px 14px;font-size:14.5px;background:#fff;
+  text-align:left;font-family:inherit;color:var(--ink);
+  width:100%;cursor:pointer;transition:.15s;line-height:1.65;
+}
+.opt:hover:not(:disabled){border-color:#9CB3BC;background:#FAFCFC}
+.opt:disabled{cursor:default}
+.opt:focus-visible{outline:2px solid var(--seal);outline-offset:2px}
+.mark{
+  flex-shrink:0;width:23px;height:23px;border-radius:6px;
+  background:#EDF1F1;color:var(--ink-soft);
+  font-size:12px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+}
+.opt.correct{border-color:var(--seal);background:var(--seal-soft)}
+.opt.correct .mark{background:var(--seal);color:#fff}
+.opt.wrong{border-color:var(--alert);background:var(--alert-soft)}
+.opt.wrong .mark{background:var(--alert);color:#fff}
+
+.exp{
+  margin-top:15px;padding:14px 16px;
+  background:#F7F9F9;border-left:3px solid var(--seal);
+  border-radius:0 8px 8px 0;font-size:13.5px;
+  color:var(--ink-soft);line-height:1.85;
+}
+.exp .lbl{
+  display:block;font-size:10.5px;letter-spacing:.16em;font-weight:900;
+  color:var(--seal);margin-bottom:5px;
+}
+.ans-badge{
+  display:inline-block;background:var(--seal);color:#fff;
+  font-size:11.5px;font-weight:900;letter-spacing:.06em;
+  padding:3px 10px;border-radius:5px;margin-bottom:11px;
+}
+
+/* ---------- play mode ---------- */
+.progress-bar{
+  position:sticky;top:0;z-index:10;
+  background:rgba(245,247,246,.94);backdrop-filter:blur(8px);
+  padding:14px 0 12px;margin-bottom:18px;
+  border-bottom:1px solid var(--line);
+}
+.pmeta{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:8px}
+.track{height:5px;background:#E1E7E6;border-radius:99px;overflow:hidden}
+.fill{height:100%;background:var(--seal);border-radius:99px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+.fb{
+  margin-top:15px;padding:13px 15px;border-radius:9px;
+  font-size:13.5px;line-height:1.8;display:none;
+}
+.fb.show{display:block;animation:fade .25s ease}
+.fb.ok{background:var(--seal-soft);color:#0C5249;border:1px solid #BFDCD7}
+.fb.ng{background:var(--alert-soft);color:#8E3722;border:1px solid #EFC9BF}
+.fb .verdict{font-weight:900;font-size:14.5px;display:block;margin-bottom:6px}
+
+.btn{
+  display:block;width:100%;border:none;cursor:pointer;
+  font-family:inherit;font-size:15px;font-weight:700;
+  background:var(--ink);color:#fff;
+  padding:15px;border-radius:11px;margin-top:14px;transition:.18s;
+}
+.btn:hover{background:#1B3A57}
+.btn:focus-visible{outline:2px solid var(--seal);outline-offset:2px}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn.ghost:hover{background:#F0F4F3}
+
+/* ---------- result ---------- */
+.result{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:34px 24px;text-align:center;box-shadow:var(--shadow);
+}
+.score-num{
+  font-family:"Zen Kaku Gothic New",sans-serif;
+  font-size:64px;font-weight:900;line-height:1;
+  color:var(--ink);font-variant-numeric:tabular-nums;
+}
+.score-num small{font-size:22px;color:var(--ink-soft);font-weight:700}
+.rate{margin-top:10px;font-size:14px;color:var(--ink-soft);font-weight:700}
+.verdict-big{
+  display:inline-block;margin-top:20px;padding:9px 24px;
+  border-radius:99px;font-size:15px;font-weight:900;letter-spacing:.04em;
+}
+.v-gold{background:#FBF3E2;color:var(--gold);border:1.5px solid #E8D3A4}
+.v-seal{background:var(--seal-soft);color:var(--seal);border:1.5px solid #BFDCD7}
+.v-plain{background:#EEF2F2;color:var(--ink-soft);border:1.5px solid var(--line)}
+
+footer{
+  text-align:center;font-size:12px;color:#8698A3;
+  margin-top:34px;padding-top:20px;border-top:1px solid var(--line);
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">社内勉強会 ／ 事前レビュー用</div>
+    <h1>医師紹介における基礎知識テスト</h1>
+    <div class="meta">
+      <span><i class="dot"></i>2026年8月27日（木）15:00〜</span>
+      <span><i class="dot"></i>全20問</span>
+      <span><i class="dot"></i>レビュー：加藤愛莉さん</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="notice">
+    加藤さん、事前確認をお願いします。<b>「解答・解説を見る」</b>タブで全問の正解と解説を確認できます。<b>「実際に解いてみる」</b>タブでは本番と同じ形式で回答でき、最後に自分の点数が出ます。<br>
+    この版は<b>集計に送信されません</b>ので、何度でも試せます。難易度・表現・出題バランスで気になる点があれば教えてください。
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab on" id="t1" role="tab" aria-selected="true" onclick="tab(1)">解答・解説を見る</button>
+    <button class="tab" id="t2" role="tab" aria-selected="false" onclick="tab(2)">実際に解いてみる</button>
+  </div>
+
+  <!-- ========== PANE 1 : ANSWER KEY ========== -->
+  <div class="pane on" id="p1"></div>
+
+  <!-- ========== PANE 2 : PLAY ========== -->
+  <div class="pane" id="p2">
+    <div class="progress-bar">
+      <div class="pmeta">
+        <span id="pnum">第1問 / 全20問</span>
+        <span id="pscore">正解 0問</span>
+      </div>
+      <div class="track"><div class="fill" id="fill" style="width:5%"></div></div>
+    </div>
+    <div id="playArea"></div>
+  </div>
+
+  <footer>医師紹介 基礎知識テスト｜レビュー版 ｜ 内容の修正はご連絡ください</footer>
+</div>
+
+<script>
+const QUESTIONS = [
+{q:"医師の紹介事業を行うために必要な手続きはどれか。",
+ o:["厚生労働大臣の許可を受ける","都道府県知事の登録を受ける","労働基準監督署へ届出を行う","地方厚生局長の指定を受ける"],
+ a:0,
+ e:"職業安定法第30条により、有料職業紹介事業は厚生労働大臣の許可制。実際の申請窓口は都道府県労働局となる。届出制ではなく許可制である点が重要。"},
+
+{q:"日本国内にある大学医学部（医科大学を含む）の数はいくつか。",
+ o:["62校","72校","82校","92校"],
+ a:2,
+ e:"国立42校・公立8校・私立31校に防衛医科大学校を加えて計82校。うち防衛医大を除く81校が文部科学省所管の医学部にあたる。"},
+
+{q:"1年間に医師国家試験に合格し、新たに医師となる人数はおよそ何名か。",
+ o:["約9,000名","約12,000名","約15,000名","約18,000名"],
+ a:0,
+ e:"例年9,000名前後で推移。医学部の総定員が約9,400名であることとほぼ対応している。医師の供給規模を把握しておくと市場感覚がつかみやすい。"},
+
+{q:"医療法人の理事長について、正しい説明はどれか。",
+ o:["出資者であれば職種を問わず就任できる","都道府県が指名した者が理事長となる","医師以外は例外なく就任が認められない","原則として医師・歯科医師が就任する"],
+ a:3,
+ e:"原則は医師・歯科医師である理事の中から選出される。ただし都道府県知事の認可を受ければ非医師でも就任可能であり、「例外なく不可」ではない点に注意。"},
+
+{q:"最も新しく新設された医学部を有する大学はどこか。",
+ o:["国際医療福祉大学","東北医科薬科大学","順天堂大学医学部","産業医科大学医学部"],
+ a:0,
+ e:"2017年に千葉県成田市で開設。前年2016年開設の東北医科薬科大学と合わせ、この2校が約38年ぶりの医学部新設となった。"},
+
+{q:"麻酔科標榜医について、正しい説明はどれか。",
+ o:["麻酔科学会が認定する専門資格である","免許取得後ただちに標榜が認められる","厚生労働大臣の許可を受けて標榜する","都道府県知事へ届け出れば標榜できる"],
+ a:2,
+ e:"医療法第6条の6に基づき、麻酔科は唯一、標榜に厚生労働大臣の許可が必要。2年以上の麻酔科診療経験等が要件で、学会認定の「麻酔科専門医」とは別の資格である。"},
+
+{q:"精神保健指定医について、正しい説明はどれか。",
+ o:["厚生労働大臣が指定する法令上の資格","日本精神神経学会が認定する専門資格","精神科での勤務歴があれば自動付与","都道府県知事が独自基準で指定する"],
+ a:0,
+ e:"精神保健福祉法第18条に基づく資格。実務経験・症例レポート・研修を経て厚生労働大臣が指定する。措置入院や医療保護入院の判定を担うため、求人上の評価が非常に高い。"},
+
+{q:"新専門医制度における「基本領域」の数はいくつか。",
+ o:["12領域","15領域","19領域","23領域"],
+ a:2,
+ e:"内科・外科・小児科などの従来領域に総合診療科を加えた19領域。その上位にサブスペシャルティ領域が置かれる二層構造となっている。"},
+
+{q:"診療報酬の施設基準上、「常勤医師」の目安とされる週の所定労働時間はどれか。",
+ o:["週20時間以上","週24時間以上","週28時間以上","週32時間以上"],
+ a:3,
+ e:"週32時間が基準。求人票に「常勤」と記載があっても実労働時間の確認が必要で、非常勤の組み合わせで常勤換算する運用もある。"},
+
+{q:"2024年4月から適用された医師の時間外・休日労働の上限（A水準）はどれか。",
+ o:["年360時間","年960時間","年1,440時間","年1,860時間"],
+ a:1,
+ e:"A水準は年960時間。地域医療確保のB水準、集中的技能向上のC水準はいずれも年1,860時間が上限となる。医療機関がどの水準指定を受けているかは求人紹介時の確認事項。"},
+
+{q:"有料職業紹介事業者が選任すべき「職業紹介責任者」の基準はどれか。",
+ o:["会社全体で1人選任すれば足りる","従業者50人に1人以上を選任する","従業者100人に1人以上を選任する","選任は努力義務で法的義務ではない"],
+ a:1,
+ e:"事業所ごとに、職業紹介に従事する者50人につき1人以上の選任が必要。選任者は職業紹介責任者講習の受講が義務づけられている。"},
+
+{q:"介護報酬の改定は原則どの頻度で行われるか。",
+ o:["原則2年に1度改定される","原則3年に1度改定される","原則4年に1度改定される","原則6年に1度改定される"],
+ a:1,
+ e:"介護報酬は3年に1度、診療報酬は2年に1度の改定。両者が重なる6年に1度が「同時改定」と呼ばれ、直近では2024年度に実施された。"},
+
+{q:"救命救急センターが担う救急医療の区分はどれか。",
+ o:["初期（一次）救急医療","第二次救急医療","在宅当番医制による救急","第三次救急医療"],
+ a:3,
+ e:"重症・重篤患者に24時間対応する三次救急を担う。二次救急は入院・手術を要する患者への対応、初期救急は外来で対応可能な軽症患者が対象。"},
+
+{q:"事業場に産業医の選任義務が生じる労働者数の基準はどれか。",
+ o:["常時50人以上","常時100人以上","常時300人以上","常時1,000人以上"],
+ a:0,
+ e:"労働安全衛生法により常時50人以上で選任義務が発生する。専属産業医が必要となるのは1,000人以上（有害業務がある場合は500人以上）。"},
+
+{q:"新専門医制度（日本専門医機構による新たな専門医制度）が開始されたのは何年からか。",
+ o:["2014年（平成26年）","2016年（平成28年）","2018年（平成30年）","2020年（令和2年）"],
+ a:2,
+ e:"2018年度から専攻医の登録・研修が開始された。当初は2017年度開始予定だったが、地域偏在への懸念から1年延期された経緯がある。日本専門医機構の設立自体は2014年。"},
+
+{q:"母体保護法指定医について、正しい説明はどれか。",
+ o:["厚生労働大臣が全国一律に指定する","産婦人科専門医の取得で自動付与","日本産科婦人科学会が認定を与える","都道府県医師会が指定する制度である"],
+ a:3,
+ e:"母体保護法第14条に基づき、都道府県医師会が指定する。人工妊娠中絶や不妊手術を行うために必須であり、産婦人科の求人では確認が欠かせない資格。"},
+
+{q:"医学部4年次から5年次への進級時、臨床実習開始前に課される試験はどれか。",
+ o:["医師国家試験の予備試験にあたる","CBTとOSCEの2種類が課される","各大学が独自に行う進級試験のみ","臨床研修修了時の到達度評価試験"],
+ a:1,
+ e:"知識を問うCBTと、技能・態度を問うOSCEの2種類。合格者は「Student Doctor」として診療参加型臨床実習に進む。2023年から公的化された。"},
+
+{q:"医師国家試験の合格率（新卒・既卒合計）はおよそ何%か。",
+ o:["約85%","約90%","約95%","約99%"],
+ a:1,
+ e:"例年90%前後で推移し、新卒に限れば95%前後まで上がる。合格率が高い背景には、各大学が卒業試験で合格見込みの低い学生を絞り込む構造がある。"},
+
+{q:"医師法改正により、医師の臨床研修（初期研修）が必修化されたのは何年からか。",
+ o:["1998年（平成10年）","2000年（平成12年）","2004年（平成16年）","2010年（平成22年）"],
+ a:2,
+ e:"2004年度から2年間の臨床研修が必修化。マッチング制度により研修先を自由に選べるようになった結果、大学医局の人員減少と地方の医師偏在が加速した一因ともいわれる。"},
+
+{q:"DPCが表す日本語として正しいものはどれか。",
+ o:["包括医療費支払制度","診療行為別出来高評価","入院医療費定額算定","診断群分類包括評価"],
+ a:3,
+ e:"Diagnosis Procedure Combination の略で「診断群分類包括評価」。診断と診療行為の組み合わせで患者を分類し1日あたり定額で評価する。入院基本料・検査・投薬・画像診断等が包括、手術・麻酔・内視鏡等は出来高で算定される。"}
+];
+
+const LETTER = ["A","B","C","D"];
+
+/* ---------- tabs ---------- */
+function tab(n){
+  for(let i=1;i<=2;i++){
+    const t=document.getElementById("t"+i), p=document.getElementById("p"+i);
+    t.classList.toggle("on", i===n);
+    t.setAttribute("aria-selected", i===n);
+    p.classList.toggle("on", i===n);
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ---------- PANE 1 : answer key ---------- */
+(function buildKey(){
+  const box=document.getElementById("p1");
+  QUESTIONS.forEach((item,i)=>{
+    const card=document.createElement("div");
+    card.className="q";
+    let html=`<div class="qhead"><div class="qno">${i+1}</div><div class="qtext">${item.q}</div></div><div class="opts">`;
+    item.o.forEach((op,j)=>{
+      html+=`<div class="opt${j===item.a?" correct":""}"><span class="mark">${LETTER[j]}</span><span>${op}</span></div>`;
+    });
+    html+=`</div><div class="exp"><span class="ans-badge">正解 ${LETTER[item.a]}</span><span class="lbl">解説</span>${item.e}</div>`;
+    card.innerHTML=html;
+    box.appendChild(card);
+  });
+})();
+
+/* ---------- PANE 2 : play ---------- */
+let idx=0, score=0, answered=false;
+
+function renderQ(){
+  const item=QUESTIONS[idx];
+  document.getElementById("pnum").textContent=`第${idx+1}問 / 全${QUESTIONS.length}問`;
+  document.getElementById("pscore").textContent=`正解 ${score}問`;
+  document.getElementById("fill").style.width=((idx+1)/QUESTIONS.length*100)+"%";
+
+  const area=document.getElementById("playArea");
+  answered=false;
+  let html=`<div class="q"><div class="qhead"><div class="qno">${idx+1}</div><div class="qtext">${item.q}</div></div><div class="opts" id="optBox">`;
+  item.o.forEach((op,j)=>{
+    html+=`<button class="opt" data-i="${j}"><span class="mark">${LETTER[j]}</span><span>${op}</span></button>`;
+  });
+  html+=`</div><div class="fb" id="fb"></div><div id="nextBox"></div></div>`;
+  area.innerHTML=html;
+
+  document.querySelectorAll("#optBox .opt").forEach(b=>{
+    b.addEventListener("click",()=>choose(parseInt(b.dataset.i)));
+  });
+}
+
+function choose(pick){
+  if(answered) return;
+  answered=true;
+  const item=QUESTIONS[idx];
+  const ok = pick===item.a;
+  if(ok) score++;
+
+  document.querySelectorAll("#optBox .opt").forEach(b=>{
+    const j=parseInt(b.dataset.i);
+    b.disabled=true;
+    if(j===item.a) b.classList.add("correct");
+    else if(j===pick) b.classList.add("wrong");
+  });
+
+  const fb=document.getElementById("fb");
+  fb.className="fb show "+(ok?"ok":"ng");
+  fb.innerHTML=`<span class="verdict">${ok?"正解":"不正解"}　正解は ${LETTER[item.a]}</span>${item.e}`;
+  document.getElementById("pscore").textContent=`正解 ${score}問`;
+
+  const nb=document.getElementById("nextBox");
+  const btn=document.createElement("button");
+  btn.className="btn";
+  btn.textContent = (idx===QUESTIONS.length-1) ? "結果を見る" : "次の問題へ";
+  btn.onclick=()=>{
+    if(idx===QUESTIONS.length-1){ showResult(); }
+    else { idx++; renderQ(); window.scrollTo({top:0,behavior:"smooth"}); }
+  };
+  nb.appendChild(btn);
+  btn.focus();
+}
+
+function showResult(){
+  const total=QUESTIONS.length;
+  const rate=Math.round(score/total*100);
+  let cls,label;
+  if(rate>=90){cls="v-gold";label="満点級 ／ 文句なしの理解度";}
+  else if(rate>=70){cls="v-seal";label="合格ライン ／ 基礎は固まっています";}
+  else if(rate>=50){cls="v-plain";label="あと一歩 ／ 復習で伸びます";}
+  else{cls="v-plain";label="復習推奨 ／ 解説タブで確認を";}
+
+  document.getElementById("playArea").innerHTML=`
+    <div class="result">
+      <div class="score-num">${score}<small> / ${total}</small></div>
+      <div class="rate">正答率 ${rate}%</div>
+      <div class="verdict-big ${cls}">${label}</div>
+      <button class="btn" onclick="restart()">もう一度解く</button>
+      <button class="btn ghost" onclick="tab(1)">解答・解説を見る</button>
+    </div>`;
+  document.getElementById("fill").style.width="100%";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){ idx=0; score=0; renderQ(); }
+renderQ();
+</script>
+</body>
+</html>
