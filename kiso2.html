@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社内勉強会クイズ ／ 医師紹介の基礎知識</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E1D2B; --ink2:#16293C; --soft:#7D93A3; --pale:#C8D6DE;
+  --line:rgba(255,255,255,.10); --card:#16293C;
+  --A:#E0654A; --B:#3E9C8F; --C:#C9A227;
+  --ok:#4FB286; --ng:#D9694F;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Noto Sans JP",system-ui,sans-serif;
+  background:var(--ink); color:#EAF1F5; line-height:1.8;
+  -webkit-font-smoothing:antialiased; padding-bottom:60px;
+}
+.wrap{max-width:680px;margin:0 auto;padding:0 16px}
+.screen{display:none} .screen.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+header{padding:30px 0 24px;border-bottom:1px solid var(--line);margin-bottom:26px}
+.eyebrow{font-size:10.5px;letter-spacing:.24em;font-weight:700;color:var(--soft);margin-bottom:10px}
+h1{font-family:"Zen Kaku Gothic New",sans-serif;font-size:clamp(20px,5vw,27px);font-weight:900;line-height:1.45}
+.sub{margin-top:10px;font-size:12.5px;color:var(--soft)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 18px;margin-bottom:14px}
+.lead{font-size:14px;color:var(--pale);line-height:1.9}
+
+.who{text-align:center;padding:30px 18px}
+.who .nm{font-family:"Zen Kaku Gothic New",sans-serif;font-size:30px;font-weight:900;margin:6px 0 4px}
+.tag{display:inline-block;font-size:12px;font-weight:900;letter-spacing:.06em;padding:5px 16px;border-radius:99px;margin-top:6px}
+.tA{background:rgba(224,101,74,.15);color:var(--A);border:1.5px solid rgba(224,101,74,.4)}
+.tB{background:rgba(62,156,143,.15);color:var(--B);border:1.5px solid rgba(62,156,143,.4)}
+.tC{background:rgba(201,162,39,.15);color:var(--C);border:1.5px solid rgba(201,162,39,.4)}
+
+.btn{display:block;width:100%;border:none;cursor:pointer;font-family:inherit;
+  font-size:15px;font-weight:700;background:#EAF1F5;color:var(--ink);
+  padding:15px;border-radius:11px;margin-top:14px;transition:.18s}
+.btn:hover{background:#fff;transform:translateY(-1px)}
+.btn:focus-visible{outline:2px solid var(--B);outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--pale);border:1.5px solid var(--line)}
+.btn.ghost:hover{background:rgba(255,255,255,.05);transform:none}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+.pbar{position:sticky;top:0;z-index:9;background:rgba(14,29,43,.95);backdrop-filter:blur(8px);
+  padding:14px 0 12px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.pmeta{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--soft);margin-bottom:8px}
+.track{height:4px;background:rgba(255,255,255,.10);border-radius:99px;overflow:hidden}
+.fill{height:100%;background:var(--B);border-radius:99px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+.qno{display:inline-block;font-size:10.5px;letter-spacing:.18em;font-weight:900;color:var(--soft);margin-bottom:10px}
+.qtext{font-size:16px;font-weight:700;line-height:1.75;margin-bottom:18px}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;cursor:pointer;
+  border:1.5px solid var(--line);border-radius:10px;padding:13px 14px;
+  background:rgba(255,255,255,.03);color:#EAF1F5;font-family:inherit;font-size:14.5px;
+  line-height:1.65;transition:.15s}
+.opt:hover:not(:disabled){border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.07)}
+.opt:disabled{cursor:default}
+.opt:focus-visible{outline:2px solid var(--B);outline-offset:2px}
+.mk{flex-shrink:0;width:23px;height:23px;border-radius:6px;background:rgba(255,255,255,.10);
+  color:var(--pale);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.opt.correct{border-color:var(--ok);background:rgba(79,178,134,.13)}
+.opt.correct .mk{background:var(--ok);color:#0E1D2B}
+.opt.wrong{border-color:var(--ng);background:rgba(217,105,79,.13)}
+.opt.wrong .mk{background:var(--ng);color:#fff}
+
+.fb{margin-top:15px;padding:14px 15px;border-radius:9px;font-size:13.5px;line-height:1.85;display:none}
+.fb.show{display:block;animation:fade .25s ease}
+.fb.ok{background:rgba(79,178,134,.10);border:1px solid rgba(79,178,134,.35);color:#B6E3CE}
+.fb.ng{background:rgba(217,105,79,.10);border:1px solid rgba(217,105,79,.35);color:#F0C4B8}
+.fb .vd{font-weight:900;font-size:14.5px;display:block;margin-bottom:6px}
+
+.result{text-align:center;padding:34px 20px}
+.big{font-family:"Zen Kaku Gothic New",sans-serif;font-size:62px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-size:21px;color:var(--soft);font-weight:700}
+.rate{margin-top:8px;font-size:13.5px;color:var(--soft);font-weight:700}
+.vbig{display:inline-block;margin-top:18px;padding:8px 22px;border-radius:99px;font-size:14px;font-weight:900}
+.v1{background:rgba(201,162,39,.15);color:var(--C);border:1.5px solid rgba(201,162,39,.4)}
+.v2{background:rgba(62,156,143,.15);color:var(--B);border:1.5px solid rgba(62,156,143,.4)}
+.v3{background:rgba(255,255,255,.06);color:var(--pale);border:1.5px solid var(--line)}
+
+.status{margin-top:20px;padding:14px;border-radius:10px;font-size:13px;line-height:1.8}
+.st-send{background:rgba(255,255,255,.05);color:var(--soft)}
+.st-ok{background:rgba(79,178,134,.10);border:1px solid rgba(79,178,134,.35);color:#B6E3CE}
+.st-ng{background:rgba(217,105,79,.10);border:1px solid rgba(217,105,79,.35);color:#F0C4B8}
+.code{display:block;margin-top:10px;font-family:ui-monospace,monospace;font-size:19px;font-weight:900;
+  letter-spacing:.10em;background:rgba(0,0,0,.30);padding:11px;border-radius:8px;color:#fff}
+
+/* host */
+.hgrid{width:100%;border-collapse:collapse;font-size:13.5px}
+.hgrid th{text-align:left;font-size:10.5px;letter-spacing:.14em;color:var(--soft);
+  padding:8px 6px;border-bottom:1px solid var(--line);font-weight:900}
+.hgrid td{padding:9px 6px;border-bottom:1px solid rgba(255,255,255,.05)}
+.hgrid .nmc{font-weight:700}
+.chip{font-size:10.5px;font-weight:900;padding:2px 9px;border-radius:99px}
+.numc{display:flex;gap:5px;align-items:center;justify-content:flex-end}
+.numc button{width:27px;height:27px;border-radius:6px;border:1px solid var(--line);
+  background:rgba(255,255,255,.05);color:#EAF1F5;cursor:pointer;font-size:14px;font-weight:700}
+.numc button:hover{background:rgba(255,255,255,.12)}
+.numc input{width:48px;text-align:center;padding:5px;border-radius:6px;border:1px solid var(--line);
+  background:rgba(0,0,0,.25);color:#fff;font-family:inherit;font-size:14px;font-weight:700}
+.dotc{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px}
+.d-on{background:var(--ok)} .d-off{background:rgba(255,255,255,.18)}
+.syncline{font-size:12px;color:var(--soft);margin-top:12px;text-align:center}
+
+.tbar{display:flex;gap:7px;background:rgba(255,255,255,.05);padding:5px;border-radius:11px;margin-bottom:18px}
+.tbar button{flex:1;border:none;background:transparent;cursor:pointer;font-family:inherit;
+  font-size:13px;font-weight:700;color:var(--soft);padding:10px 6px;border-radius:8px}
+.tbar button.on{background:var(--card);color:#fff}
+
+.rvcard{border-radius:14px;padding:20px 18px;margin-bottom:12px;opacity:0;transform:translateY(16px);
+  transition:opacity .55s ease,transform .55s cubic-bezier(.34,1.4,.64,1)}
+.rvcard.in{opacity:1;transform:none}
+.rvA{background:linear-gradient(135deg,rgba(224,101,74,.20),rgba(224,101,74,.06));border:1.5px solid rgba(224,101,74,.45)}
+.rvB{background:linear-gradient(135deg,rgba(62,156,143,.20),rgba(62,156,143,.06));border:1.5px solid rgba(62,156,143,.45)}
+.rvC{background:linear-gradient(135deg,rgba(201,162,39,.20),rgba(201,162,39,.06));border:1.5px solid rgba(201,162,39,.45)}
+.rvhead{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.rvrank{font-family:"Zen Kaku Gothic New",sans-serif;font-size:30px;font-weight:900;line-height:1}
+.rvname{font-size:19px;font-weight:900}
+.rvavg{text-align:right}
+.rvavg b{font-family:"Zen Kaku Gothic New",sans-serif;font-size:30px;font-weight:900;font-variant-numeric:tabular-nums}
+.rvavg span{font-size:11px;color:var(--soft);display:block;letter-spacing:.1em}
+.rvmem{margin-top:13px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);
+  font-size:13px;color:var(--pale);display:flex;flex-wrap:wrap;gap:6px 14px}
+.rvmem span b{font-weight:900;color:#fff}
+
+footer{text-align:center;font-size:11.5px;color:#5C7284;margin-top:32px;padding-top:18px;border-top:1px solid var(--line)}
+.hostlink{text-align:center;margin-top:18px}
+.hostlink a{color:#3F5568;font-size:11px;text-decoration:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">社内勉強会 ／ 2026.10.22 14:30</div>
+  <h1>医師紹介における基礎知識テスト 第2回</h1>
+  <div class="sub">全20問 ／ 3チーム対抗</div>
+</header>
+
+<!-- ===== 参加者：スタート ===== -->
+<div class="screen on" id="s-start">
+  <div class="card who" id="whoBox"></div>
+  <div class="card">
+    <div class="lead">
+      全20問の4択です。1問ごとに正誤と解説が出ます。<br>
+      <b>回答は取り消せません</b>ので、選ぶ前にご確認ください。<br>
+      最後まで解き終えると、点数が自動で集計に送られます。
+    </div>
+  </div>
+  <button class="btn" id="btnStart">テストを始める</button>
+  <div class="hostlink"><a href="#" id="toHost">運営用</a></div>
+</div>
+
+<!-- ===== 参加者：出題 ===== -->
+<div class="screen" id="s-quiz">
+  <div class="pbar">
+    <div class="pmeta"><span id="pnum">第1問 / 20</span><span id="pname"></span></div>
+    <div class="track"><div class="fill" id="fill" style="width:5%"></div></div>
+  </div>
+  <div id="qArea"></div>
+</div>
+
+<!-- ===== 参加者：結果 ===== -->
+<div class="screen" id="s-done"><div class="card result" id="doneBox"></div></div>
+
+<!-- ===== 運営 ===== -->
+<div class="screen" id="s-host">
+  <div class="tbar">
+    <button class="on" id="hb1" onclick="hostTab(1)">集計状況</button>
+    <button id="hb2" onclick="hostTab(2)">結果発表</button>
+  </div>
+
+  <div id="hp1">
+    <div class="card">
+      <table class="hgrid"><thead><tr>
+        <th>参加者</th><th>チーム</th><th style="text-align:right">点数</th>
+      </tr></thead><tbody id="hbody"></tbody></table>
+      <div class="syncline" id="syncline">読み込み中…</div>
+    </div>
+    <button class="btn ghost" onclick="pullNow()">いますぐ最新に更新</button>
+    <button class="btn ghost" onclick="wipe()">スコアを全消去</button>
+    <button class="btn ghost" onclick="show('s-start')">参加者画面にもどる</button>
+  </div>
+
+  <div id="hp2" style="display:none">
+    <div class="card"><div class="lead">
+      1人あたりの平均点で順位を決めます。<br>
+      ボタンを押すと3位から順に発表されます。
+    </div></div>
+    <button class="btn" id="btnReveal">結果を発表する</button>
+    <div id="revealArea" style="margin-top:18px"></div>
+  </div>
+</div>
+
+<footer>医師紹介 基礎知識テスト ／ 社内勉強会</footer>
+</div>
+
+<script>
+/* ============ 設定 ============ */
+const BIN_ID    = '6ad6b3fcac6210605a40bf6f';
+const MASTER_KEY= '$2a$10$.NRSGmWyVd9o1MnVoYgwmOJXcor28r1yS5mMGz27dOm1WmPPKJdgC';
+const JB = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
+const STORE = 'kiso20261022';
+
+const MEMBERS = [
+  {id:'asami',    name:'浅見さん', team:'A'},
+  {id:'nakahata', name:'中畑さん', team:'A'},
+  {id:'adachi',   name:'安達さん', team:'A'},
+  {id:'nobe',     name:'野辺さん', team:'A'},
+  {id:'yamada',   name:'山田さん', team:'B'},
+  {id:'izumi',    name:'和泉さん', team:'B'},
+  {id:'mori',     name:'森さん',   team:'B'},
+  {id:'hino',     name:'日野さん', team:'B'},
+  {id:'sato',     name:'佐藤さん', team:'C'},
+  {id:'kimura',   name:'木村さん', team:'C'},
+  {id:'takahashi',name:'高橋さん', team:'C'}
+];
+const TEAM_NAME = {A:'チームA', B:'チームB', C:'チームC'};
+
+/* ============ 問題 ============ */
+const Q = [
+{q:"医師国家試験は例年いつ実施されるか。",o:["1月","2月","3月","11月"],a:1,e:"例年2月上旬に実施、3月中旬に合格発表。4月から初期研修がスタートする。"},
+{q:"女性医師の割合が最も高い診療科はどれか。",o:["内科","整形外科","皮膚科","外科"],a:2,e:"皮膚科は約半数が女性医師。眼科・産婦人科も高く、外科系は低い。"},
+{q:"有料職業紹介事業の許可の有効期間として正しいものはどれか。",o:["新規・更新とも一律1年","新規・更新とも一律3年","新規は3年、更新後は5年","期限はなく無期限に有効"],a:2,e:"職業安定法第32条の6。新規許可は3年、更新後は5年。"},
+{q:"医療施設で働く医師のうち、病院勤務の割合に最も近いものはどれか。",o:["約50%","約65%","約80%","約95%"],a:1,e:"厚労省「医師・歯科医師・薬剤師統計」（2022年）で、病院約21.6万人（約66%）、診療所約10.8万人（約33%）。"},
+{q:"主たる診療科別の医師数で、内科に次いで多い診療科はどれか。",o:["整形外科","外科","小児科","精神科"],a:0,e:"内科（約6万人）に次ぎ、整形外科が約2.2万人。"},
+{q:"新専門医制度で、基本領域の専門研修に必要な期間は原則どれか。",o:["1年以上","2年以上","3年以上","5年以上"],a:2,e:"初期研修2年＋専門研修3年以上で、専門医取得は最短で卒後5〜6年目。"},
+{q:"病床機能報告制度の4区分に含まれないものはどれか。",o:["高度急性期","回復期","慢性期","亜急性期"],a:3,e:"4区分は高度急性期・急性期・回復期・慢性期。求人先の病院特性を把握する基本用語。"},
+{q:"初期研修医のうち、大学病院で研修を行う割合に最も近いものはどれか。",o:["約2割","約4割","約6割","約8割"],a:1,e:"2004年の研修必修化前は約7割が大学病院だったが、現在は約4割で市中病院が多数派。医局に属さない医師が増え、医師紹介の需要が広がった背景の一つ。"},
+{q:"初期臨床研修で必修とされていない診療科はどれか。",o:["整形外科","外科","小児科","精神科"],a:0,e:"必修は内科・救急・外科・小児科・産婦人科・精神科・地域医療。"},
+{q:"医学系大学院（博士課程）の標準修業年限はどれか。",o:["1年","2年","3年","4年"],a:3,e:"医学部卒は修士を経ず4年の博士課程へ。大学院在籍中の医師は外勤（非常勤）ニーズが高い。"},
+{q:"「往診」と「訪問診療」の違いとして適切なものはどれか。",o:["往診は計画的・定期的に行う診療である","訪問診療は求めに応じ臨時に行う診療","両者は制度上まったく同じ意味である","往診は臨時、訪問診療は計画的に実施"],a:3,e:"往診は患者の求めに応じた臨時の訪問、訪問診療は計画に基づく定期訪問。在宅系求人では業務量が大きく異なるため要確認。"},
+{q:"大学医局で、医局員の人事や外勤先の調整など実務を取りまとめる役職はどれか。",o:["教授","医局長","病院長","医学部長"],a:1,e:"人事の最終決定権は教授だが、調整の実務窓口は医局長（講師クラスが多い）。"},
+{q:"日本医師会認定産業医の資格取得に必要な研修単位数はどれか。",o:["50単位","100単位","150単位","200単位"],a:0,e:"基礎研修50単位で取得、5年ごとに更新（生涯研修20単位）。"},
+{q:"日本の医師数に最も近いものはどれか。",o:["約24万人","約29万人","約34万人","約39万人"],a:2,e:"2022年末で約34.3万人。"},
+{q:"医師全体に占める女性医師の割合に最も近いものはどれか。",o:["約13%","約23%","約33%","約43%"],a:1,e:"2022年で約23.6%。若い世代ほど割合は高い。"},
+{q:"厚労省の「医師偏在指標」で全国最下位（最も医師少数）とされる都道府県はどれか。",o:["青森県","新潟県","秋田県","岩手県"],a:3,e:"最下位は岩手県、最上位は東京都。"},
+{q:"医学部の「地域枠」について、正しい説明はどれか。",o:["地元出身者のみが受験できる一般入試","出身地を問わず学費が全額免除される","臨床研修が免除される特別な制度である","卒後一定期間、指定地域での勤務が必要"],a:3,e:"卒後9年程度の義務年限が一般的。義務年限中の医師の転職相談では要確認。"},
+{q:"初期研修医のアルバイト診療について、正しいものはどれか。",o:["臨床研修の規定により禁止されている","週1回までなら自由に認められている","研修病院の許可があれば制限はない","2年目からは制限なく認められている"],a:0,e:"研修に専念する義務があるため。初期研修医は非常勤紹介の対象外。"},
+{q:"「専攻医」とは、どの段階にある医師を指すか。",o:["初期研修修了後、専門研修中の医師","医学部の臨床実習に参加している学生","初期臨床研修の1・2年目にある医師","専門医資格を取得し研鑽を続ける医師"],a:0,e:"旧「後期研修医」。"},
+{q:"B・C水準の医師に義務付けられる勤務間インターバル（始業から24時間以内）はどれか。",o:["6時間","8時間","9時間","11時間"],a:2,e:"2024年4月の働き方改革で義務化。連続勤務は28時間までが上限。"}
+];
+const L = ["A","B","C","D"];
+
+/* ============ 通信（衝突対策） ============ */
+async function getRemote(){
+  const r = await fetch(JB+'/latest?t='+Date.now(),
+    {headers:{'X-MASTER-KEY':MASTER_KEY,'X-Bin-Meta':'false'},cache:'no-store'});
+  if(!r.ok) throw new Error('GET '+r.status);
+  const d = await r.json();
+  const rec = (d && d.record!==undefined) ? d.record : d;
+  return (rec && typeof rec==='object') ? rec : {};
+}
+async function putRemote(obj){
+  const r = await fetch(JB,{method:'PUT',
+    headers:{'Content-Type':'application/json','X-MASTER-KEY':MASTER_KEY,'X-Bin-Versioning':'false'},
+    body:JSON.stringify(obj)});
+  if(!r.ok) throw new Error('PUT '+r.status);
+  return true;
+}
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+// 読む→自分を足す→書く→読み直して確認。消えていたら再挑戦（最大8回）
+async function pushScore(id,score){
+  let err;
+  for(let i=0;i<8;i++){
+    try{
+      await sleep(Math.floor(Math.random()*500)+i*350);
+      const rem = await getRemote();
+      const bag = (rem[STORE] && typeof rem[STORE]==='object') ? rem[STORE] : {};
+      bag[id] = score;
+      rem[STORE] = bag;
+      rem._init = true;
+      await putRemote(rem);
+      await sleep(450);
+      const chk = await getRemote();
+      if(chk[STORE] && chk[STORE][id] === score) return true;
+      err = new Error('上書きされました');
+    }catch(e){ err = e; }
+  }
+  throw err || new Error('送信できませんでした');
+}
+
+function loadLocal(){ try{ return JSON.parse(localStorage.getItem(STORE)||'{}'); }catch(e){ return {}; } }
+function saveLocal(o){ try{ localStorage.setItem(STORE,JSON.stringify(o)); }catch(e){} }
+
+/* ============ 画面制御 ============ */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============ 参加者 ============ */
+const params = new URLSearchParams(location.search);
+const pid = (params.get('p')||'').toLowerCase();
+let me = MEMBERS.find(m=>m.id===pid) || null;
+let idx=0, correct=0, locked=false;
+
+(function initStart(){
+  const box = document.getElementById('whoBox');
+  if(me){
+    box.innerHTML = `<div style="font-size:11px;letter-spacing:.2em;color:var(--soft)">参加者</div>
+      <div class="nm">${me.name}</div>
+      <div class="tag t${me.team}">${TEAM_NAME[me.team]}${me.lead?' ／ リーダー':''}</div>`;
+    document.getElementById('pname').textContent = me.name;
+  }else{
+    box.innerHTML = `<div class="nm" style="font-size:19px">参加者が指定されていません</div>
+      <div style="font-size:13px;color:var(--soft);margin-top:8px;line-height:1.9">
+      お配りしたご自身専用のURLから開いてください。<br>
+      分からない場合は司会者にお知らせください。</div>`;
+    document.getElementById('btnStart').disabled = true;
+  }
+})();
+
+document.getElementById('btnStart').addEventListener('click',()=>{ show('s-quiz'); renderQ(); });
+document.getElementById('toHost').addEventListener('click',e=>{
+  e.preventDefault();
+  const pw = prompt('運営用パスワードを入力してください');
+  if(pw==='connect') { show('s-host'); startPolling(); }
+  else if(pw!==null) alert('パスワードが違います。');
+});
+
+function renderQ(){
+  const it = Q[idx]; locked=false;
+  document.getElementById('pnum').textContent = `第${idx+1}問 / ${Q.length}`;
+  document.getElementById('fill').style.width = ((idx+1)/Q.length*100)+'%';
+  let h = `<div class="card"><div class="qno">QUESTION ${idx+1}</div>
+    <div class="qtext">${it.q}</div><div class="opts" id="ob">`;
+  it.o.forEach((o,j)=>{ h+=`<button class="opt" data-i="${j}"><span class="mk">${L[j]}</span><span>${o}</span></button>`; });
+  h += `</div><div class="fb" id="fb"></div><div id="nx"></div></div>`;
+  document.getElementById('qArea').innerHTML = h;
+  document.querySelectorAll('#ob .opt').forEach(b=>b.addEventListener('click',()=>pick(+b.dataset.i)));
+}
+
+function pick(j){
+  if(locked) return; locked=true;
+  const it=Q[idx], ok = j===it.a;
+  if(ok) correct++;
+  document.querySelectorAll('#ob .opt').forEach(b=>{
+    const k=+b.dataset.i; b.disabled=true;
+    if(k===it.a) b.classList.add('correct');
+    else if(k===j) b.classList.add('wrong');
+  });
+  const fb=document.getElementById('fb');
+  fb.className='fb show '+(ok?'ok':'ng');
+  fb.innerHTML=`<span class="vd">${ok?'正解':'不正解'}　正解は ${L[it.a]}</span>${it.e}`;
+  const btn=document.createElement('button');
+  btn.className='btn';
+  btn.textContent = (idx===Q.length-1) ? '結果を見る' : '次の問題へ';
+  btn.onclick = ()=>{ if(idx===Q.length-1) finish(); else { idx++; renderQ(); window.scrollTo({top:0,behavior:'smooth'}); } };
+  document.getElementById('nx').appendChild(btn); btn.focus();
+}
+
+function finish(){
+  const total=Q.length, rate=Math.round(correct/total*100);
+  let cls,label;
+  if(rate>=90){cls='v1';label='満点級 ／ 文句なしの理解度';}
+  else if(rate>=70){cls='v2';label='合格ライン ／ 基礎は固まっています';}
+  else {cls='v3';label='復習おすすめ ／ 伸びしろあり';}
+
+  document.getElementById('doneBox').innerHTML=`
+    <div class="big">${correct}<small> / ${total}</small></div>
+    <div class="rate">正答率 ${rate}%</div>
+    <div class="vbig ${cls}">${label}</div>
+    <div style="color:var(--soft);font-size:13px;margin-top:16px;line-height:1.9">
+      おつかれさまでした。<br>チームの順位は後ほどの発表をお楽しみに。</div>
+    <div class="status st-send" id="sendSt">点数を送信しています…</div>`;
+  show('s-done');
+
+  const lo=loadLocal(); lo[me.id]=correct; saveLocal(lo);
+
+  pushScore(me.id, correct)
+    .then(()=>{ const s=document.getElementById('sendSt');
+      s.className='status st-ok'; s.textContent='送信が完了しました。'; })
+    .catch(()=>{ const s=document.getElementById('sendSt');
+      s.className='status st-ng';
+      s.innerHTML='自動送信ができませんでした。<br>下のコードを司会者にお伝えください。'
+        +`<b class="code">${me.id.toUpperCase()}-${correct}</b>`; });
+}
+
+/* ============ 運営 ============ */
+let poll=null, hostScores={};
+
+function hostTab(n){
+  document.getElementById('hb1').classList.toggle('on',n===1);
+  document.getElementById('hb2').classList.toggle('on',n===2);
+  document.getElementById('hp1').style.display = n===1?'block':'none';
+  document.getElementById('hp2').style.display = n===2?'block':'none';
+}
+
+function startPolling(){ pullNow(); if(poll) clearInterval(poll); poll=setInterval(pullNow,5000); }
+
+async function pullNow(){
+  const line=document.getElementById('syncline');
+  try{
+    const rem = await getRemote();
+    const bag = (rem[STORE] && typeof rem[STORE]==='object') ? rem[STORE] : {};
+    hostScores = Object.assign({}, loadLocal(), bag);
+    saveLocal(hostScores);
+    const done = MEMBERS.filter(m=>hostScores[m.id]!==undefined).length;
+    line.textContent = `送信済み ${done} / ${MEMBERS.length} 名　（${new Date().toLocaleTimeString('ja-JP')} 更新）`;
+  }catch(e){
+    hostScores = loadLocal();
+    line.textContent = '接続できません。この端末の記録のみ表示しています。';
+  }
+  drawHost();
+}
+
+function drawHost(){
+  const tb=document.getElementById('hbody'); tb.innerHTML='';
+  MEMBERS.forEach(m=>{
+    const v=hostScores[m.id];
+    const tr=document.createElement('tr');
+
+    const t1=document.createElement('td'); t1.className='nmc';
+    t1.innerHTML=`<i class="dotc ${v===undefined?'d-off':'d-on'}"></i>${m.name}`;
+
+    const t2=document.createElement('td');
+    t2.innerHTML=`<span class="chip t${m.team}">${TEAM_NAME[m.team]}</span>`;
+
+    const t3=document.createElement('td');
+    const w=document.createElement('div'); w.className='numc';
+    const mi=document.createElement('button'); mi.textContent='−';
+    const inp=document.createElement('input'); inp.type='number'; inp.min='0'; inp.max='20';
+    inp.placeholder='—'; inp.value=(v===undefined?'':v);
+    const pl=document.createElement('button'); pl.textContent='＋';
+    const set=val=>{ hostScores[m.id]=val; saveLocal(hostScores); };
+    mi.onclick=()=>{ let x=parseInt(inp.value,10); if(isNaN(x))x=0; x=Math.max(0,x-1); inp.value=x; set(x); };
+    pl.onclick=()=>{ let x=parseInt(inp.value,10); if(isNaN(x))x=-1; x=Math.min(20,x+1); inp.value=x; set(x); };
+    inp.oninput=()=>{ const x=parseInt(inp.value,10); if(!isNaN(x)) set(Math.max(0,Math.min(20,x))); };
+    w.append(mi,inp,pl); t3.appendChild(w);
+
+    tr.append(t1,t2,t3); tb.appendChild(tr);
+  });
+}
+
+async function wipe(){
+  if(!confirm('全員のスコアを消去します。よろしいですか？')) return;
+  try{ localStorage.removeItem(STORE); }catch(e){}
+  hostScores={};
+  try{ await putRemote({_init:true}); }catch(e){ alert('サーバー側の消去に失敗しました。通信をご確認ください。'); }
+  pullNow();
+}
+
+document.getElementById('btnReveal').addEventListener('click',async()=>{
+  await pullNow();
+  const rows=['A','B','C'].map(t=>{
+    const ms=MEMBERS.filter(m=>m.team===t);
+    const got=ms.filter(m=>hostScores[m.id]!==undefined);
+    const sum=got.reduce((a,m)=>a+hostScores[m.id],0);
+    return {team:t, name:TEAM_NAME[t], members:ms, got:got,
+            sum:sum, avg: got.length? sum/got.length : 0};
+  });
+  if(rows.every(r=>r.got.length===0)){ alert('まだスコアが登録されていません。'); return; }
+
+  rows.sort((a,b)=> b.avg-a.avg || b.sum-a.sum);
+  let rank=0,prev=null;
+  rows.forEach((r,i)=>{ if(r.avg!==prev){ rank=i+1; prev=r.avg; } r.rank=rank; });
+
+  const area=document.getElementById('revealArea'); area.innerHTML='';
+  const order=[...rows].reverse();   // 3位から
+  order.forEach((r,i)=>{
+    const d=document.createElement('div');
+    d.className='rvcard rv'+r.team;
+    const mem=r.members.map(m=>{
+      const v=hostScores[m.id];
+      return `<span>${m.name} <b>${v===undefined?'—':v}</b></span>`;
+    }).join('');
+    d.innerHTML=`<div class="rvhead">
+        <div><div class="rvrank">${r.rank}位</div><div class="rvname">${r.name}</div></div>
+        <div class="rvavg"><b>${r.avg.toFixed(1)}</b><span>平均点</span></div>
+      </div>
+      <div class="rvmem">${mem}
+        <span style="margin-left:auto;color:var(--soft)">合計 <b>${r.sum}</b>点 ／ ${r.got.length}名</span>
+      </div>`;
+    area.appendChild(d);
+    setTimeout(()=>{ d.classList.add('in'); d.scrollIntoView({behavior:'smooth',block:'center'}); }, 1400*(i+1));
+  });
+});
+</script>
+</body>
+</html>
