@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>医師紹介基礎知識 補修テスト</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: 1カラムのカード。1問ずつ出題→即解説→最後に結果と復習 */
+:root{
+  --bg:#f3f6f8; --card:#ffffff; --fg:#14222e; --muted:#5d6d7a; --line:#d9e2e8;
+  --accent:#0f6e8c; --accent-soft:#e2f1f6; --ok:#1f8a4c; --ok-soft:#e5f4ea; --ng:#c0392b; --ng-soft:#fbe9e7;
+  --font:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f171d; --card:#17232b; --fg:#e6eef3; --muted:#9aabb7; --line:#2a3943;
+  --accent:#4cb3d4; --accent-soft:#16323d; --ok:#4cc27e; --ok-soft:#163222; --ng:#ef7a6c; --ng-soft:#3a1d1a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f171d; --card:#17232b; --fg:#e6eef3; --muted:#9aabb7; --line:#2a3943;
+  --accent:#4cb3d4; --accent-soft:#16323d; --ok:#4cc27e; --ok-soft:#163222; --ng:#ef7a6c; --ng-soft:#3a1d1a; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.7}
+.wrap{max-width:640px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-direction:column;gap:2px}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:700}
+h1{font-size:24px;font-weight:900;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:14px;margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.names{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:10px;padding:14px;font-weight:700;font-size:17px}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,.opt:focus-visible,.primary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.primary{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:14px 18px;font-weight:700;font-size:16px}
+.primary:disabled{opacity:.4;cursor:default}
+.progress{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.q{font-size:19px;font-weight:700;margin:0;text-wrap:balance}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:10px;padding:12px 14px;font-size:16px}
+.opt:hover:not(:disabled){border-color:var(--accent);background:var(--accent-soft)}
+.opt b{flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:14px}
+.opt.ok{border-color:var(--ok);background:var(--ok-soft)} .opt.ok b{background:var(--ok);color:#fff}
+.opt.ng{border-color:var(--ng);background:var(--ng-soft)} .opt.ng b{background:var(--ng);color:#fff}
+.opt:disabled{cursor:default}
+.exp{border-radius:10px;padding:12px 14px;font-size:15px}
+.exp.ok{background:var(--ok-soft)} .exp.ng{background:var(--ng-soft)}
+.exp strong{display:block}
+.score{font-size:56px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.score small{font-size:20px;color:var(--muted);font-weight:500}
+.review{display:flex;flex-direction:column;gap:10px;padding:0;margin:0;list-style:none}
+.review li{border-left:3px solid var(--ng);padding:4px 0 4px 12px;font-size:15px}
+.review .a{color:var(--ok);font-weight:700}
+.note{font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">CONNECT 社内勉強会</span>
+    <h1>医師紹介基礎知識 補修テスト</h1>
+    <p class="sub">全15問・4択。チェック担当の前で解いてください。</p>
+  </header>
+  <main id="app" class="card"></main>
+</div>
+
+<script>
+const PEOPLE=["和泉","山田","森","日野"];
+const CHECKER={"和泉":"山田さん","山田":"和泉さん","森":"浅見さん","日野":"浅見さん"};
+const Q=[
+ {q:"医学部は全国に何校あるか？",c:["82校","62校","72校","92校"],a:0,e:"国公立51校＋私立31校＝82校。"},
+ {q:"初期臨床研修の期間は何年間か？",c:["1年間","2年間","3年間","4年間"],a:1,e:"初期研修は2年間。その後に専門研修（専攻医）へ進む。"},
+ {q:"医師国家試験の合格率はおおよそ何%か？",c:["約70〜72%","約80〜82%","約95〜97%","約90〜92%"],a:3,e:"毎年おおむね90〜92%程度。"},
+ {q:"医師国家試験はいつ実施されるか？",c:["4年の10月","5年の6月","6年の2月","6年の12月"],a:2,e:"医学部6年生の2月に毎年実施。"},
+ {q:"医師の働き方改革が適用開始されたのはいつか？",c:["2024年4月","2019年4月","2022年4月","2026年4月"],a:0,e:"医師の時間外労働の上限規制は2024年4月から適用。"},
+ {q:"医師のA水準の時間外労働の上限は？",c:["年480時間以下","年960時間以下","年720時間以下","年1860時間以下"],a:1,e:"A水準は年960時間以下。B・C水準は年1860時間以下。"},
+ {q:"新専門医制度の基本領域はいくつあるか？",c:["12領域","15領域","23領域","19領域"],a:3,e:"内科・外科・総合診療など基本19領域。"},
+ {q:"大学病院の主な3つの役割はどれか？",c:["診療・収益・広報","研究・政治・広報","診療・研究・教育","教育・行政・地域支援"],a:2,e:"大学病院の役割は「診療・研究・教育」。"},
+ {q:"「医局人事」とは何か？",c:["教授・医局長が医師の赴任先やポストを決める慣行","医局の給与体系","医師の採用試験","医師免許の管理"],a:0,e:"医局に所属する医師の派遣先・異動を医局側が決める仕組み。"},
+ {q:"医局でいう「ジッツ」とは何か？",c:["医局の給与体系","医局が医師を派遣している関連病院","医局の研究室","医師の専門資格"],a:1,e:"医局の関連病院（医師派遣先のポスト）のこと。"},
+ {q:"新専門医制度を運営している機構はどこか？",c:["日本医師会","厚生労働省医事課","中央社会保険医療協議会","日本専門医機構"],a:3,e:"新専門医制度は日本専門医機構が運営している。"},
+ {q:"専門医を取得するために必要な研修期間は一般的に何年か？",c:["1年","2年","3年以上","5年以上"],a:2,e:"初期研修2年のあと、専門研修は一般的に3年以上。"},
+ {q:"医局の教育・研究・人事を統括する責任者の役職は？",c:["教授","助教","医員","准教授"],a:0,e:"医局のトップは教授。"},
+ {q:"医学部4〜5年への進級時に受ける試験は？",c:["医師国家試験","CBTとOSCE","TOEFL・IELTS","MATとGRE"],a:1,e:"CBT（知識の試験）とOSCE（実技の試験）の2つ。"},
+ {q:"私立医学部6年間の学費の目安は？",c:["約500〜1000万円","約1000〜1500万円","約5000万円以上","約2000〜4500万円"],a:3,e:"私立は約2000〜4500万円。国公立は約350万円。"}
+];
+const L=["A","B","C","D"];
+const app=document.getElementById("app");
+let s={name:null,i:0,score:0,miss:[],answered:false};
+
+function esc(t){return String(t).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]))}
+
+function start(){
+  app.innerHTML=`<p class="q">お名前を選んでください</p>
+  <div class="names">${PEOPLE.map(p=>`<button class="btn" id="p-${p}" data-n="${p}">${p}さん</button>`).join("")}</div>
+  <p class="note">カンニング防止のため、チェック担当（和泉さん⇔山田さん、森さん・日野さんは浅見さん）が横で確認します。</p>`;
+  app.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{s={name:b.dataset.n,i:0,score:0,miss:[],answered:false};render()});
+}
+
+function render(){
+  const q=Q[s.i];
+  app.innerHTML=`<div class="progress"><span>${s.name}さん｜チェック：${CHECKER[s.name]}</span><span>${s.i+1} / ${Q.length}</span></div>
+  <div class="bar"><i style="width:${s.i/Q.length*100}%"></i></div>
+  <p class="q">Q${s.i+1}. ${esc(q.q)}</p>
+  <div class="opts">${q.c.map((c,k)=>`<button class="opt" id="o${k}" data-k="${k}"><b>${L[k]}</b><span>${esc(c)}</span></button>`).join("")}</div>
+  <div id="fb"></div>`;
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>pick(+b.dataset.k));
+}
+
+function pick(k){
+  if(s.answered) return; s.answered=true;
+  const q=Q[s.i], ok=k===q.a;
+  if(ok) s.score++; else s.miss.push(s.i);
+  app.querySelectorAll(".opt").forEach((b,j)=>{b.disabled=true; if(j===q.a) b.classList.add("ok"); else if(j===k) b.classList.add("ng");});
+  const last=s.i===Q.length-1;
+  document.getElementById("fb").innerHTML=`<div class="exp ${ok?"ok":"ng"}"><strong>${ok?"正解！":"残念… 正解は "+L[q.a]}</strong>${esc(q.e)}</div>
+  <button class="primary" id="next" style="margin-top:12px;width:100%">${last?"結果を見る":"次の問題へ"}</button>`;
+  document.getElementById("next").onclick=()=>{s.answered=false; if(last) result(); else {s.i++; render();}};
+  document.getElementById("next").focus();
+}
+
+function result(){
+  app.innerHTML=`<div class="progress"><span>${s.name}さんの結果</span><span>チェック：${CHECKER[s.name]}</span></div>
+  <div class="score">${s.score}<small> / ${Q.length} 問正解</small></div>
+  ${s.miss.length?`<p class="q" style="font-size:16px">間違えた問題（もう一度覚えましょう）</p>
+  <ul class="review">${s.miss.map(i=>`<li>Q${i+1}. ${esc(Q[i].q)}<br><span class="a">→ ${esc(Q[i].c[Q[i].a])}</span></li>`).join("")}</ul>`:`<p>全問正解です。お疲れさまでした！</p>`}
+  <p class="note">この画面のスクショを Slack の #営業チャンネル に送ってください。</p>
+  <button class="btn" id="back">最初に戻る</button>`;
+  document.getElementById("back").onclick=start;
+}
+start();
+</script>
+
+</html>
