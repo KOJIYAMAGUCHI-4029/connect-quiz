@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>【11月勉強会】医師になるまでの流れ</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#1f2937;--sub:#6b7280;--main:#1e5aa8;--ok:#15803d;--ng:#c2410c;--line:#e5e7eb;--sel:#e8f0fb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;line-height:1.6}
+.wrap{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+header{text-align:center;margin-bottom:16px}
+header h1{font-size:20px;margin:0 0 4px;color:var(--main)}
+header p{margin:0;color:var(--sub);font-size:13px}
+.card{background:var(--card);border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.bar i{display:block;height:100%;background:var(--main);transition:width .3s}
+.qno{font-size:13px;color:var(--sub);margin-bottom:6px}
+.qtext{font-size:17px;font-weight:bold;margin-bottom:16px}
+.opt{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;padding:12px 14px;margin-bottom:10px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-size:15px;cursor:pointer;color:var(--ink)}
+.opt b{color:var(--main);min-width:1.2em}
+.opt:hover{border-color:var(--main)}
+.opt.on{border-color:var(--main);background:var(--sel)}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:8px}
+.btn{padding:12px 20px;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;background:var(--main);color:#fff}
+.btn.sub{background:#e5e7eb;color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:default}
+.start{text-align:center}
+.start p{color:var(--sub);font-size:14px}
+.score{text-align:center;margin-bottom:18px}
+.score .big{font-size:44px;font-weight:bold;color:var(--main)}
+.res{border-top:1px solid var(--line);padding:14px 0}
+.res .h{font-weight:bold;margin-bottom:6px}
+.mark{display:inline-block;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;color:#fff;font-size:13px;margin-right:6px}
+.mark.ok{background:var(--ok)}.mark.ng{background:var(--ng)}
+.ans{font-size:14px;margin:4px 0}
+.ans .c{color:var(--ok);font-weight:bold}
+.ans .w{color:var(--ng);font-weight:bold}
+.exp{font-size:13px;color:var(--sub);background:#f9fafb;border-radius:8px;padding:8px 10px;margin-top:6px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>【11月勉強会】医師になるまでの流れ</h1>
+<p>加藤さん 事前確認用（スコアは送信されません）</p>
+</header>
+
+<div id="start" class="card start">
+<p>全30問・4択です。<br>途中で答えは表示されません。最後に採点と全問の解答・解説がまとめて出ます。</p>
+<button class="btn" onclick="begin()">スタート</button>
+</div>
+
+<div id="quiz" class="card hide">
+<div class="bar"><i id="prog"></i></div>
+<div class="qno" id="qno"></div>
+<div class="qtext" id="qtext"></div>
+<div id="opts"></div>
+<div class="nav">
+<button class="btn sub" id="prev" onclick="move(-1)">← 戻る</button>
+<button class="btn" id="next" onclick="move(1)" disabled>次へ →</button>
+</div>
+</div>
+
+<div id="result" class="card hide">
+<div class="score"><div>あなたの得点</div><div class="big" id="pt"></div></div>
+<div id="list"></div>
+<div style="text-align:center;margin-top:16px"><button class="btn sub" onclick="location.reload()">もう一度解く</button></div>
+</div>
+</div>
+
+<script>
+const Q=[
+{q:"全国の医学部（医科大学含む）の数は？",o:["62", "72", "82", "92"],a:2,e:"国立42・公立8・私立31・防衛医大1の計82校。"},
+{q:"医学部の入学定員（全国合計／1学年）は？",o:["約6,400人", "約7,400人", "約8,400人", "約9,400人"],a:3,e:"近年は約9,400人。2008年以降の地域枠などで大きく増えた。"},
+{q:"私立大学医学部の6年間の学費は、多くの大学でおよそいくら？",o:["約300〜500万円", "約800〜1,000万円", "約2,000〜4,000万円", "約6,000〜8,000万円"],a:2,e:"最も安い大学で2,000万円前後、高い大学は4,000万円を超える。"},
+{q:"国立大学医学部の6年間の学費（入学金＋授業料）は約？",o:["約350万円", "約800万円", "約1,500万円", "約2,500万円"],a:0,e:"入学金約28万円＋授業料約54万円×6年で約350万円。私立との差は大きい。"},
+{q:"卒業後9年間、出身都道府県での勤務義務がある大学は？",o:["防衛医科大学校", "産業医科大学", "国際医療福祉大学", "自治医科大学"],a:3,e:"へき地医療を担う医師の養成が目的。義務を果たせば学費の返還が免除される。"},
+{q:"臨床実習前の共用試験（CBT・OSCE）を受けるのは通常何年次？",o:["3年次", "4年次", "5年次", "6年次"],a:1,e:"CBTは知識、OSCEは実技の試験。合格すると5年次からの臨床実習に進める。"},
+{q:"共用試験に合格し、臨床実習で医行為を行う医学生の呼称は？",o:["インターン", "スチューデントドクター", "レジデント", "フェロー"],a:1,e:"2023年から法律上の位置づけが明確化され、指導医のもとで一定の医行為ができる。"},
+{q:"医学部の臨床実習の通称は？",o:["オリエン", "ポリクリ", "ゼミ", "ラボ"],a:1,e:"病院の各診療科を回って実習する。「クリクラ（クリニカル・クラークシップ）」とも呼ぶ。"},
+{q:"医師国家試験の実施時期は？",o:["2月", "3月", "5月", "9月"],a:0,e:"例年2月上旬に2日間で実施。"},
+{q:"国試の合格発表は例年いつ？",o:["2月", "3月", "4月", "5月"],a:1,e:"3月中旬に発表され、4月から初期臨床研修がスタートする。"},
+{q:"国試の受験回数の制限は？",o:["3回まで", "5回まで", "卒後10年まで", "制限なし"],a:3,e:"回数制限はない。ただし既卒者は合格率が大きく下がる。"},
+{q:"国試の近年の合格率は？",o:["約60%", "約70%", "約80%", "約90%"],a:3,e:"全体で約9割。新卒に限ると約95%。"},
+{q:"既卒者（浪人生）の国試合格率は約？",o:["約15%", "約35%", "約55%", "約75%"],a:2,e:"新卒の約95%に比べ、既卒は5割前後と大きく下がる。"},
+{q:"国試の「必修問題」で求められる得点率は？",o:["6割以上", "7割以上", "8割以上", "9割以上"],a:2,e:"必修は8割以上の絶対基準。一般・臨床問題が良くても必修で落ちると不合格。"},
+{q:"医師免許を与えるのは？",o:["厚生労働大臣", "文部科学大臣", "都道府県知事", "日本医師会長"],a:0,e:"合格後に申請し、医籍に登録されて医師免許を受ける。"},
+{q:"日本の医師数はおよそ何人？",o:["約34万人", "約44万人", "約54万人", "約64万人"],a:0,e:"2022年末で約34.3万人。"},
+{q:"初期臨床研修の期間は？",o:["1年", "2年", "3年", "4年"],a:1,e:"卒後2年間。この期間の医師を「研修医」と呼ぶ。"},
+{q:"初期臨床研修が必修化された年は？",o:["1994年", "2004年", "2014年", "2018年"],a:1,e:"必修化で研修先を自由に選べるようになり、大学病院から市中病院へ研修医が流れ、医局離れのきっかけになった。"},
+{q:"研修先を決める「マッチング」の結果発表は例年いつ？",o:["4月", "6月", "8月", "10月"],a:3,e:"6年生の夏に病院見学・採用試験を受け、10月下旬に結果が出る。"},
+{q:"研修医を受け入れ、研修全体を管理する病院の名称は？",o:["基幹型臨床研修病院", "特定機能病院", "地域医療支援病院", "専門研修基幹施設"],a:0,e:"研修プログラムを管理する病院。協力病院と連携して各科を回る。"},
+{q:"研修医のアルバイトは？",o:["週1回まで可", "原則禁止", "当直バイトのみ可", "指導医の許可で可"],a:1,e:"研修に専念する義務があるため禁止。初期研修医は非常勤紹介の対象外。"},
+{q:"初期研修の必修分野で最も長い期間（24週以上）が求められるのは？",o:["内科", "救急", "外科", "地域医療"],a:0,e:"内科24週以上、救急12週以上、地域医療4週以上などが定められている。"},
+{q:"研修医・専攻医に認められている時間外労働の上限（年間）は？",o:["360時間", "960時間", "1,860時間", "2,400時間"],a:2,e:"2024年4月の医師の働き方改革で、研修医・専攻医はC-1水準として年1,860時間まで。一般の勤務医は960時間。"},
+{q:"初期研修を修了していないとできないことは？",o:["保険診療", "処方箋の発行", "病院・診療所の管理者になる", "当直業務"],a:2,e:"院長（管理者）になるには初期研修修了が必要。開業・分院長の紹介で要確認。"},
+{q:"新専門医制度で専門研修を受ける医師の正式な呼称は？",o:["研修医", "認定医", "指導医", "専攻医"],a:3,e:"旧来の「後期研修医」にあたる。"},
+{q:"新専門医制度の「基本領域」はいくつ？",o:["16", "19", "22", "25"],a:1,e:"内科・外科・整形外科・総合診療など19領域。日本専門医機構が認定する。"},
+{q:"新専門医制度で新たに基本領域に加わったのは？",o:["総合診療", "救急科", "内科", "形成外科"],a:0,e:"2018年の新制度開始とともに19番目の基本領域として新設。"},
+{q:"循環器専門医を取るために、先に必要な専門医は？",o:["外科専門医", "総合診療専門医", "救急科専門医", "内科専門医"],a:3,e:"循環器・消化器などは内科の上に乗る「サブスペシャルティ領域」。"},
+{q:"都市部への専攻医集中を防ぐため、採用数に上限を設ける仕組みは？",o:["シーリング", "マッチング", "地域枠", "ローテート"],a:0,e:"東京などの都市部で専攻医の採用数に上限を設けている。"},
+{q:"医学部入学から最短で専門研修（3年）を修了するまで何年？",o:["9年", "10年", "11年", "12年"],a:2,e:"医学部6年＋初期研修2年＋専門研修3年＝11年。順調でも30歳前後になる。"}
+];
+const L=["A","B","C","D"];
+let i=0;const sel=Array(Q.length).fill(null);
+const $=id=>document.getElementById(id);
+function begin(){$("start").classList.add("hide");$("quiz").classList.remove("hide");render();}
+function render(){
+  const it=Q[i];
+  $("prog").style.width=((i)/Q.length*100)+"%";
+  $("qno").textContent=`Q${i+1} / ${Q.length}`;
+  $("qtext").textContent=it.q;
+  $("opts").innerHTML="";
+  it.o.forEach((t,j)=>{
+    const b=document.createElement("button");
+    b.className="opt"+(sel[i]===j?" on":"");
+    b.innerHTML=`<b>${L[j]}</b><span>${t}</span>`;
+    b.onclick=()=>{sel[i]=j;render();};
+    $("opts").appendChild(b);
+  });
+  $("prev").disabled=i===0;
+  $("next").disabled=sel[i]===null;
+  $("next").textContent=i===Q.length-1?"採点する":"次へ →";
+}
+function move(d){
+  if(d>0&&i===Q.length-1){finish();return;}
+  i=Math.min(Math.max(i+d,0),Q.length-1);render();window.scrollTo({top:0});
+}
+function finish(){
+  $("quiz").classList.add("hide");$("result").classList.remove("hide");
+  let s=0;let h="";
+  Q.forEach((it,k)=>{
+    const ok=sel[k]===it.a; if(ok)s++;
+    h+=`<div class="res"><div class="h"><span class="mark ${ok?"ok":"ng"}">${ok?"○":"×"}</span>Q${k+1}. ${it.q}</div>
+    <div class="ans">正解：<span class="c">${L[it.a]}. ${it.o[it.a]}</span></div>
+    ${ok?"":`<div class="ans">あなたの回答：<span class="w">${L[sel[k]]}. ${it.o[sel[k]]}</span></div>`}
+    <div class="exp">${it.e}</div></div>`;
+  });
+  $("pt").textContent=`${s} / ${Q.length}`;
+  $("list").innerHTML=h;window.scrollTo({top:0});
+}
+</script>
+</body>
+</html>
