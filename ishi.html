@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社内勉強会クイズ ／ 医師になるまでの流れ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E1D2B; --ink2:#16293C; --soft:#7D93A3; --pale:#C8D6DE;
+  --line:rgba(255,255,255,.10); --card:#16293C;
+  --A:#E0654A; --B:#3E9C8F; --C:#C9A227; --D:#7B6CD9;
+  --ok:#4FB286; --ng:#D9694F;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Noto Sans JP",system-ui,sans-serif;
+  background:var(--ink); color:#EAF1F5; line-height:1.8;
+  -webkit-font-smoothing:antialiased; padding-bottom:60px;
+}
+.wrap{max-width:680px;margin:0 auto;padding:0 16px}
+.screen{display:none} .screen.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+header{padding:30px 0 24px;border-bottom:1px solid var(--line);margin-bottom:26px}
+.eyebrow{font-size:10.5px;letter-spacing:.24em;font-weight:700;color:var(--soft);margin-bottom:10px}
+h1{font-family:"Zen Kaku Gothic New",sans-serif;font-size:clamp(20px,5vw,27px);font-weight:900;line-height:1.45}
+.sub{margin-top:10px;font-size:12.5px;color:var(--soft)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 18px;margin-bottom:14px}
+.lead{font-size:14px;color:var(--pale);line-height:1.9}
+
+.who{text-align:center;padding:30px 18px}
+.who .nm{font-family:"Zen Kaku Gothic New",sans-serif;font-size:30px;font-weight:900;margin:6px 0 4px}
+.tag{display:inline-block;font-size:12px;font-weight:900;letter-spacing:.06em;padding:5px 16px;border-radius:99px;margin-top:6px}
+.tA{background:rgba(224,101,74,.15);color:var(--A);border:1.5px solid rgba(224,101,74,.4)}
+.tB{background:rgba(62,156,143,.15);color:var(--B);border:1.5px solid rgba(62,156,143,.4)}
+.tC{background:rgba(201,162,39,.15);color:var(--C);border:1.5px solid rgba(201,162,39,.4)}
+.tD{background:rgba(123,108,217,.15);color:var(--D);border:1.5px solid rgba(123,108,217,.4)}
+
+.btn{display:block;width:100%;border:none;cursor:pointer;font-family:inherit;
+  font-size:15px;font-weight:700;background:#EAF1F5;color:var(--ink);
+  padding:15px;border-radius:11px;margin-top:14px;transition:.18s}
+.btn:hover{background:#fff;transform:translateY(-1px)}
+.btn:focus-visible{outline:2px solid var(--B);outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--pale);border:1.5px solid var(--line)}
+.btn.ghost:hover{background:rgba(255,255,255,.05);transform:none}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+.pbar{position:sticky;top:0;z-index:9;background:rgba(14,29,43,.95);backdrop-filter:blur(8px);
+  padding:14px 0 12px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.pmeta{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--soft);margin-bottom:8px}
+.track{height:4px;background:rgba(255,255,255,.10);border-radius:99px;overflow:hidden}
+.fill{height:100%;background:var(--B);border-radius:99px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+.qno{display:inline-block;font-size:10.5px;letter-spacing:.18em;font-weight:900;color:var(--soft);margin-bottom:10px}
+.qtext{font-size:16px;font-weight:700;line-height:1.75;margin-bottom:18px}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;cursor:pointer;
+  border:1.5px solid var(--line);border-radius:10px;padding:13px 14px;
+  background:rgba(255,255,255,.03);color:#EAF1F5;font-family:inherit;font-size:14.5px;
+  line-height:1.65;transition:.15s}
+.opt:hover:not(:disabled){border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.07)}
+.opt:disabled{cursor:default}
+.opt:focus-visible{outline:2px solid var(--B);outline-offset:2px}
+.mk{flex-shrink:0;width:23px;height:23px;border-radius:6px;background:rgba(255,255,255,.10);
+  color:var(--pale);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.opt.correct{border-color:var(--ok);background:rgba(79,178,134,.13)}
+.opt.correct .mk{background:var(--ok);color:#0E1D2B}
+.opt.wrong{border-color:var(--ng);background:rgba(217,105,79,.13)}
+.opt.wrong .mk{background:var(--ng);color:#fff}
+
+.fb{margin-top:15px;padding:14px 15px;border-radius:9px;font-size:13.5px;line-height:1.85;display:none}
+.fb.show{display:block;animation:fade .25s ease}
+.fb.ok{background:rgba(79,178,134,.10);border:1px solid rgba(79,178,134,.35);color:#B6E3CE}
+.fb.ng{background:rgba(217,105,79,.10);border:1px solid rgba(217,105,79,.35);color:#F0C4B8}
+.fb .vd{font-weight:900;font-size:14.5px;display:block;margin-bottom:6px}
+
+.result{text-align:center;padding:34px 20px}
+.big{font-family:"Zen Kaku Gothic New",sans-serif;font-size:62px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-size:21px;color:var(--soft);font-weight:700}
+.rate{margin-top:8px;font-size:13.5px;color:var(--soft);font-weight:700}
+.vbig{display:inline-block;margin-top:18px;padding:8px 22px;border-radius:99px;font-size:14px;font-weight:900}
+.v1{background:rgba(201,162,39,.15);color:var(--C);border:1.5px solid rgba(201,162,39,.4)}
+.v2{background:rgba(62,156,143,.15);color:var(--B);border:1.5px solid rgba(62,156,143,.4)}
+.v3{background:rgba(255,255,255,.06);color:var(--pale);border:1.5px solid var(--line)}
+
+.status{margin-top:20px;padding:14px;border-radius:10px;font-size:13px;line-height:1.8}
+.st-send{background:rgba(255,255,255,.05);color:var(--soft)}
+.st-ok{background:rgba(79,178,134,.10);border:1px solid rgba(79,178,134,.35);color:#B6E3CE}
+.st-ng{background:rgba(217,105,79,.10);border:1px solid rgba(217,105,79,.35);color:#F0C4B8}
+.code{display:block;margin-top:10px;font-family:ui-monospace,monospace;font-size:19px;font-weight:900;
+  letter-spacing:.10em;background:rgba(0,0,0,.30);padding:11px;border-radius:8px;color:#fff}
+
+/* host */
+.hgrid{width:100%;border-collapse:collapse;font-size:13.5px}
+.hgrid th{text-align:left;font-size:10.5px;letter-spacing:.14em;color:var(--soft);
+  padding:8px 6px;border-bottom:1px solid var(--line);font-weight:900}
+.hgrid td{padding:9px 6px;border-bottom:1px solid rgba(255,255,255,.05)}
+.hgrid .nmc{font-weight:700}
+.chip{font-size:10.5px;font-weight:900;padding:2px 9px;border-radius:99px}
+.numc{display:flex;gap:5px;align-items:center;justify-content:flex-end}
+.numc button{width:27px;height:27px;border-radius:6px;border:1px solid var(--line);
+  background:rgba(255,255,255,.05);color:#EAF1F5;cursor:pointer;font-size:14px;font-weight:700}
+.numc button:hover{background:rgba(255,255,255,.12)}
+.numc input{width:48px;text-align:center;padding:5px;border-radius:6px;border:1px solid var(--line);
+  background:rgba(0,0,0,.25);color:#fff;font-family:inherit;font-size:14px;font-weight:700}
+.dotc{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px}
+.d-on{background:var(--ok)} .d-off{background:rgba(255,255,255,.18)}
+.syncline{font-size:12px;color:var(--soft);margin-top:12px;text-align:center}
+
+.tbar{display:flex;gap:7px;background:rgba(255,255,255,.05);padding:5px;border-radius:11px;margin-bottom:18px}
+.tbar button{flex:1;border:none;background:transparent;cursor:pointer;font-family:inherit;
+  font-size:13px;font-weight:700;color:var(--soft);padding:10px 6px;border-radius:8px}
+.tbar button.on{background:var(--card);color:#fff}
+
+.rvcard{border-radius:14px;padding:20px 18px;margin-bottom:12px;opacity:0;transform:translateY(16px);
+  transition:opacity .55s ease,transform .55s cubic-bezier(.34,1.4,.64,1)}
+.rvcard.in{opacity:1;transform:none}
+.rvA{background:linear-gradient(135deg,rgba(224,101,74,.20),rgba(224,101,74,.06));border:1.5px solid rgba(224,101,74,.45)}
+.rvB{background:linear-gradient(135deg,rgba(62,156,143,.20),rgba(62,156,143,.06));border:1.5px solid rgba(62,156,143,.45)}
+.rvC{background:linear-gradient(135deg,rgba(201,162,39,.20),rgba(201,162,39,.06));border:1.5px solid rgba(201,162,39,.45)}
+.rvD{background:linear-gradient(135deg,rgba(123,108,217,.20),rgba(123,108,217,.06));border:1.5px solid rgba(123,108,217,.45)}
+.rvhead{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.rvrank{font-family:"Zen Kaku Gothic New",sans-serif;font-size:30px;font-weight:900;line-height:1}
+.rvname{font-size:19px;font-weight:900}
+.rvavg{text-align:right}
+.rvavg b{font-family:"Zen Kaku Gothic New",sans-serif;font-size:30px;font-weight:900;font-variant-numeric:tabular-nums}
+.rvavg span{font-size:11px;color:var(--soft);display:block;letter-spacing:.1em}
+.rvmem{margin-top:13px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);
+  font-size:13px;color:var(--pale);display:flex;flex-wrap:wrap;gap:6px 14px}
+.rvmem span b{font-weight:900;color:#fff}
+
+.rvcard.win{animation:glow 1.6s ease-in-out infinite alternate}
+@keyframes glow{from{box-shadow:0 0 0 rgba(255,215,90,0)}to{box-shadow:0 0 28px rgba(255,215,90,.55)}}
+.drum{text-align:center;font-family:"Zen Kaku Gothic New",sans-serif;font-size:22px;font-weight:900;color:var(--pale);padding:26px 0;letter-spacing:.1em}
+.drum b{display:inline-block;animation:pulse .5s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.3;transform:scale(.92)}to{opacity:1;transform:scale(1.08)}}
+.stepbtn{font-size:18px;padding:18px;background:linear-gradient(135deg,#F3D27A,#E0654A);color:#0E1D2B}
+.stepbtn:hover{background:linear-gradient(135deg,#F7DD95,#E8775E)}
+.cf{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:99;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
+footer{text-align:center;font-size:11.5px;color:#5C7284;margin-top:32px;padding-top:18px;border-top:1px solid var(--line)}
+.hostlink{text-align:center;margin-top:18px}
+.hostlink a{color:#3F5568;font-size:11px;text-decoration:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">社内勉強会 ／ 2026.11.13</div>
+  <h1>医師になるまでの流れ テスト</h1>
+  <div class="sub">全30問 ／ 4チーム対抗</div>
+</header>
+
+<!-- ===== 参加者：スタート ===== -->
+<div class="screen on" id="s-start">
+  <div class="card who" id="whoBox"></div>
+  <div class="card">
+    <div class="lead">
+      全30問の4択です。1問ごとに正誤と解説が出ます。<br>
+      <b>回答は取り消せません</b>ので、選ぶ前にご確認ください。<br>
+      最後まで解き終えると、点数が自動で集計に送られます。
+    </div>
+  </div>
+  <button class="btn" id="btnStart">テストを始める</button>
+  <div class="hostlink"><a href="#" id="toHost">運営用</a></div>
+</div>
+
+<!-- ===== 参加者：出題 ===== -->
+<div class="screen" id="s-quiz">
+  <div class="pbar">
+    <div class="pmeta"><span id="pnum">第1問 / 30</span><span id="pname"></span></div>
+    <div class="track"><div class="fill" id="fill" style="width:5%"></div></div>
+  </div>
+  <div id="qArea"></div>
+</div>
+
+<!-- ===== 参加者：結果 ===== -->
+<div class="screen" id="s-done"><div class="card result" id="doneBox"></div></div>
+
+<!-- ===== 運営 ===== -->
+<div class="screen" id="s-host">
+  <div class="tbar">
+    <button class="on" id="hb1" onclick="hostTab(1)">集計状況</button>
+    <button id="hb2" onclick="hostTab(2)">結果発表</button>
+  </div>
+
+  <div id="hp1">
+    <div class="card">
+      <table class="hgrid"><thead><tr>
+        <th>参加者</th><th>チーム</th><th style="text-align:right">点数</th>
+      </tr></thead><tbody id="hbody"></tbody></table>
+      <div class="syncline" id="syncline">読み込み中…</div>
+    </div>
+    <button class="btn ghost" onclick="pullNow()">いますぐ最新に更新</button>
+    <button class="btn ghost" onclick="wipe()">スコアを全消去</button>
+    <button class="btn ghost" onclick="show('s-start')">参加者画面にもどる</button>
+  </div>
+
+  <div id="hp2" style="display:none">
+    <div class="card"><div class="lead">
+      1人あたりの平均点で順位を決めます。<br>
+      ボタンを押すと4位から順に発表されます。
+    </div></div>
+    <button class="btn" id="btnReveal">結果を発表する</button>
+    <div id="revealArea" style="margin-top:18px"></div>
+  </div>
+</div>
+
+<footer>医師になるまでの流れ ／ 社内勉強会</footer>
+</div>
+
+<script>
+/* ============ 設定 ============ */
+const BIN_ID    = '6ad6b3fcac6210605a40bf6f';
+const MASTER_KEY= '$2a$10$.NRSGmWyVd9o1MnVoYgwmOJXcor28r1yS5mMGz27dOm1WmPPKJdgC';
+const JB = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
+const STORE = 'ishi20261113';
+
+const MEMBERS = [
+  {id:'kimura',   name:'木村さん',     team:'A', lead:true},
+  {id:'mei',      name:'めいさん',     team:'A'},
+  {id:'kase',     name:'加瀬さん',     team:'A'},
+  {id:'machida',  name:'町田さん',     team:'A'},
+  {id:'mori',     name:'森さん',       team:'B', lead:true},
+  {id:'yamada',   name:'山田さん',     team:'B'},
+  {id:'koguchi',  name:'古口さん',     team:'B'},
+  {id:'sato',     name:'佐藤さん',     team:'B'},
+  {id:'hino',     name:'日野さん',     team:'C', lead:true},
+  {id:'adachi',   name:'安達さん',     team:'C'},
+  {id:'nobe',     name:'野辺さん',     team:'C'},
+  {id:'nakahata', name:'中畑さん',     team:'C'},
+  {id:'takahashi',name:'高橋さん',     team:'D', lead:true},
+  {id:'suzuki',   name:'鈴木さん',     team:'D'},
+  {id:'kotaro',   name:'こうたろうさん', team:'D'},
+  {id:'asami',    name:'浅見さん',     team:'D'}
+];
+const TEAM_NAME = {A:'チームA', B:'チームB', C:'チームC', D:'チームD'};
+
+/* ============ 問題 ============ */
+const Q = [
+{q:"全国の医学部（医科大学含む）の数は？",o:["62", "72", "82", "92"],a:2,e:"国立42・公立8・私立31・防衛医大1の計82校。"},
+{q:"医学部の入学定員（全国合計／1学年）は？",o:["約6,400人", "約7,400人", "約8,400人", "約9,400人"],a:3,e:"近年は約9,400人。2008年以降の地域枠などで大きく増えた。"},
+{q:"私立大学医学部の6年間の学費は、多くの大学でおよそいくら？",o:["約300〜500万円", "約800〜1,000万円", "約2,000〜4,000万円", "約6,000〜8,000万円"],a:2,e:"最も安い大学で2,000万円前後、高い大学は4,000万円を超える。"},
+{q:"国立大学医学部の6年間の学費（入学金＋授業料）は約？",o:["約350万円", "約800万円", "約1,500万円", "約2,500万円"],a:0,e:"入学金約28万円＋授業料約54万円×6年で約350万円。私立との差は大きい。"},
+{q:"卒業後9年間、出身都道府県での勤務義務がある大学は？",o:["防衛医科大学校", "産業医科大学", "国際医療福祉大学", "自治医科大学"],a:3,e:"へき地医療を担う医師の養成が目的。義務を果たせば学費の返還が免除される。"},
+{q:"臨床実習前の共用試験（CBT・OSCE）を受けるのは通常何年次？",o:["3年次", "4年次", "5年次", "6年次"],a:1,e:"CBTは知識、OSCEは実技の試験。合格すると5年次からの臨床実習に進める。"},
+{q:"共用試験に合格し、臨床実習で医行為を行う医学生の呼称は？",o:["インターン", "スチューデントドクター", "レジデント", "フェロー"],a:1,e:"2023年から法律上の位置づけが明確化され、指導医のもとで一定の医行為ができる。"},
+{q:"医学部の臨床実習の通称は？",o:["オリエン", "ポリクリ", "ゼミ", "ラボ"],a:1,e:"病院の各診療科を回って実習する。「クリクラ（クリニカル・クラークシップ）」とも呼ぶ。"},
+{q:"医師国家試験の実施時期は？",o:["2月", "3月", "5月", "9月"],a:0,e:"例年2月上旬に2日間で実施。"},
+{q:"国試の合格発表は例年いつ？",o:["2月", "3月", "4月", "5月"],a:1,e:"3月中旬に発表され、4月から初期臨床研修がスタートする。"},
+{q:"国試の受験回数の制限は？",o:["3回まで", "5回まで", "卒後10年まで", "制限なし"],a:3,e:"回数制限はない。ただし既卒者は合格率が大きく下がる。"},
+{q:"国試の近年の合格率は？",o:["約60%", "約70%", "約80%", "約90%"],a:3,e:"全体で約9割。新卒に限ると約95%。"},
+{q:"既卒者（浪人生）の国試合格率は約？",o:["約15%", "約35%", "約55%", "約75%"],a:2,e:"新卒の約95%に比べ、既卒は5割前後と大きく下がる。"},
+{q:"国試の「必修問題」で求められる得点率は？",o:["6割以上", "7割以上", "8割以上", "9割以上"],a:2,e:"必修は8割以上の絶対基準。一般・臨床問題が良くても必修で落ちると不合格。"},
+{q:"医師免許を与えるのは？",o:["厚生労働大臣", "文部科学大臣", "都道府県知事", "日本医師会長"],a:0,e:"合格後に申請し、医籍に登録されて医師免許を受ける。"},
+{q:"日本の医師数はおよそ何人？",o:["約34万人", "約44万人", "約54万人", "約64万人"],a:0,e:"2022年末で約34.3万人。"},
+{q:"初期臨床研修の期間は？",o:["1年", "2年", "3年", "4年"],a:1,e:"卒後2年間。この期間の医師を「研修医」と呼ぶ。"},
+{q:"初期臨床研修が必修化された年は？",o:["1994年", "2004年", "2014年", "2018年"],a:1,e:"必修化で研修先を自由に選べるようになり、大学病院から市中病院へ研修医が流れ、医局離れのきっかけになった。"},
+{q:"研修先を決める「マッチング」の結果発表は例年いつ？",o:["4月", "6月", "8月", "10月"],a:3,e:"6年生の夏に病院見学・採用試験を受け、10月下旬に結果が出る。"},
+{q:"研修医を受け入れ、研修全体を管理する病院の名称は？",o:["基幹型臨床研修病院", "特定機能病院", "地域医療支援病院", "専門研修基幹施設"],a:0,e:"研修プログラムを管理する病院。協力病院と連携して各科を回る。"},
+{q:"研修医のアルバイトは？",o:["週1回まで可", "原則禁止", "当直バイトのみ可", "指導医の許可で可"],a:1,e:"研修に専念する義務があるため禁止。初期研修医は非常勤紹介の対象外。"},
+{q:"初期研修の必修分野で最も長い期間（24週以上）が求められるのは？",o:["内科", "救急", "外科", "地域医療"],a:0,e:"内科24週以上、救急12週以上、地域医療4週以上などが定められている。"},
+{q:"研修医・専攻医に認められている時間外労働の上限（年間）は？",o:["360時間", "960時間", "1,860時間", "2,400時間"],a:2,e:"2024年4月の医師の働き方改革で、研修医・専攻医はC-1水準として年1,860時間まで。一般の勤務医は960時間。"},
+{q:"初期研修を修了していないとできないことは？",o:["保険診療", "処方箋の発行", "病院・診療所の管理者になる", "当直業務"],a:2,e:"院長（管理者）になるには初期研修修了が必要。開業・分院長の紹介で要確認。"},
+{q:"新専門医制度で専門研修を受ける医師の正式な呼称は？",o:["研修医", "認定医", "指導医", "専攻医"],a:3,e:"旧来の「後期研修医」にあたる。"},
+{q:"新専門医制度の「基本領域」はいくつ？",o:["16", "19", "22", "25"],a:1,e:"内科・外科・整形外科・総合診療など19領域。日本専門医機構が認定する。"},
+{q:"新専門医制度で新たに基本領域に加わったのは？",o:["総合診療", "救急科", "内科", "形成外科"],a:0,e:"2018年の新制度開始とともに19番目の基本領域として新設。"},
+{q:"循環器専門医を取るために、先に必要な専門医は？",o:["外科専門医", "総合診療専門医", "救急科専門医", "内科専門医"],a:3,e:"循環器・消化器などは内科の上に乗る「サブスペシャルティ領域」。"},
+{q:"都市部への専攻医集中を防ぐため、採用数に上限を設ける仕組みは？",o:["シーリング", "マッチング", "地域枠", "ローテート"],a:0,e:"東京などの都市部で専攻医の採用数に上限を設けている。"},
+{q:"医学部入学から最短で専門研修（3年）を修了するまで何年？",o:["9年", "10年", "11年", "12年"],a:2,e:"医学部6年＋初期研修2年＋専門研修3年＝11年。順調でも30歳前後になる。"}
+];
+const L = ["A","B","C","D"];
+
+/* ============ 通信（衝突対策） ============ */
+async function getRemote(){
+  const r = await fetch(JB+'/latest?t='+Date.now(),
+    {headers:{'X-MASTER-KEY':MASTER_KEY,'X-Bin-Meta':'false'},cache:'no-store'});
+  if(!r.ok) throw new Error('GET '+r.status);
+  const d = await r.json();
+  const rec = (d && d.record!==undefined) ? d.record : d;
+  return (rec && typeof rec==='object') ? rec : {};
+}
+async function putRemote(obj){
+  const r = await fetch(JB,{method:'PUT',
+    headers:{'Content-Type':'application/json','X-MASTER-KEY':MASTER_KEY,'X-Bin-Versioning':'false'},
+    body:JSON.stringify(obj)});
+  if(!r.ok) throw new Error('PUT '+r.status);
+  return true;
+}
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+// 読む→自分を足す→書く→読み直して確認。消えていたら再挑戦（最大8回）
+async function pushScore(id,score){
+  let err;
+  for(let i=0;i<8;i++){
+    try{
+      await sleep(Math.floor(Math.random()*500)+i*350);
+      const rem = await getRemote();
+      const bag = (rem[STORE] && typeof rem[STORE]==='object') ? rem[STORE] : {};
+      bag[id] = score;
+      rem[STORE] = bag;
+      rem._init = true;
+      await putRemote(rem);
+      await sleep(450);
+      const chk = await getRemote();
+      if(chk[STORE] && chk[STORE][id] === score) return true;
+      err = new Error('上書きされました');
+    }catch(e){ err = e; }
+  }
+  throw err || new Error('送信できませんでした');
+}
+
+function loadLocal(){ try{ return JSON.parse(localStorage.getItem(STORE)||'{}'); }catch(e){ return {}; } }
+function saveLocal(o){ try{ localStorage.setItem(STORE,JSON.stringify(o)); }catch(e){} }
+
+/* ============ 画面制御 ============ */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============ 参加者 ============ */
+const params = new URLSearchParams(location.search);
+const pid = (params.get('p')||'').toLowerCase();
+let me = MEMBERS.find(m=>m.id===pid) || null;
+let idx=0, correct=0, locked=false;
+
+(function initStart(){
+  const box = document.getElementById('whoBox');
+  if(me){
+    box.innerHTML = `<div style="font-size:11px;letter-spacing:.2em;color:var(--soft)">参加者</div>
+      <div class="nm">${me.name}</div>
+      <div class="tag t${me.team}">${TEAM_NAME[me.team]}${me.lead?' ／ リーダー':''}</div>`;
+    document.getElementById('pname').textContent = me.name;
+  }else{
+    box.innerHTML = `<div class="nm" style="font-size:19px">参加者が指定されていません</div>
+      <div style="font-size:13px;color:var(--soft);margin-top:8px;line-height:1.9">
+      お配りしたご自身専用のURLから開いてください。<br>
+      分からない場合は司会者にお知らせください。</div>`;
+    document.getElementById('btnStart').disabled = true;
+  }
+})();
+
+document.getElementById('btnStart').addEventListener('click',()=>{ show('s-quiz'); renderQ(); });
+document.getElementById('toHost').addEventListener('click',e=>{
+  e.preventDefault();
+  const pw = prompt('運営用パスワードを入力してください');
+  if(pw==='connect') { show('s-host'); startPolling(); }
+  else if(pw!==null) alert('パスワードが違います。');
+});
+
+function renderQ(){
+  const it = Q[idx]; locked=false;
+  document.getElementById('pnum').textContent = `第${idx+1}問 / ${Q.length}`;
+  document.getElementById('fill').style.width = ((idx+1)/Q.length*100)+'%';
+  let h = `<div class="card"><div class="qno">QUESTION ${idx+1}</div>
+    <div class="qtext">${it.q}</div><div class="opts" id="ob">`;
+  it.o.forEach((o,j)=>{ h+=`<button class="opt" data-i="${j}"><span class="mk">${L[j]}</span><span>${o}</span></button>`; });
+  h += `</div><div class="fb" id="fb"></div><div id="nx"></div></div>`;
+  document.getElementById('qArea').innerHTML = h;
+  document.querySelectorAll('#ob .opt').forEach(b=>b.addEventListener('click',()=>pick(+b.dataset.i)));
+}
+
+function pick(j){
+  if(locked) return; locked=true;
+  const it=Q[idx], ok = j===it.a;
+  if(ok) correct++;
+  document.querySelectorAll('#ob .opt').forEach(b=>{
+    const k=+b.dataset.i; b.disabled=true;
+    if(k===it.a) b.classList.add('correct');
+    else if(k===j) b.classList.add('wrong');
+  });
+  const fb=document.getElementById('fb');
+  fb.className='fb show '+(ok?'ok':'ng');
+  fb.innerHTML=`<span class="vd">${ok?'正解':'不正解'}　正解は ${L[it.a]}</span>${it.e}`;
+  const btn=document.createElement('button');
+  btn.className='btn';
+  btn.textContent = (idx===Q.length-1) ? '結果を見る' : '次の問題へ';
+  btn.onclick = ()=>{ if(idx===Q.length-1) finish(); else { idx++; renderQ(); window.scrollTo({top:0,behavior:'smooth'}); } };
+  document.getElementById('nx').appendChild(btn); btn.focus();
+}
+
+function finish(){
+  const total=Q.length, rate=Math.round(correct/total*100);
+  let cls,label;
+  if(rate>=90){cls='v1';label='満点級 ／ 文句なしの理解度';}
+  else if(rate>=70){cls='v2';label='合格ライン ／ 基礎は固まっています';}
+  else {cls='v3';label='復習おすすめ ／ 伸びしろあり';}
+
+  document.getElementById('doneBox').innerHTML=`
+    <div class="big">${correct}<small> / ${total}</small></div>
+    <div class="rate">正答率 ${rate}%</div>
+    <div class="vbig ${cls}">${label}</div>
+    <div style="color:var(--soft);font-size:13px;margin-top:16px;line-height:1.9">
+      おつかれさまでした。<br>チームの順位は後ほどの発表をお楽しみに。</div>
+    <div class="status st-send" id="sendSt">点数を送信しています…</div>`;
+  show('s-done');
+
+  const lo=loadLocal(); lo[me.id]=correct; saveLocal(lo);
+
+  pushScore(me.id, correct)
+    .then(()=>{ const s=document.getElementById('sendSt');
+      s.className='status st-ok'; s.textContent='送信が完了しました。'; })
+    .catch(()=>{ const s=document.getElementById('sendSt');
+      s.className='status st-ng';
+      s.innerHTML='自動送信ができませんでした。<br>下のコードを司会者にお伝えください。'
+        +`<b class="code">${me.id.toUpperCase()}-${correct}</b>`; });
+}
+
+/* ============ 運営 ============ */
+let poll=null, hostScores={};
+
+function hostTab(n){
+  document.getElementById('hb1').classList.toggle('on',n===1);
+  document.getElementById('hb2').classList.toggle('on',n===2);
+  document.getElementById('hp1').style.display = n===1?'block':'none';
+  document.getElementById('hp2').style.display = n===2?'block':'none';
+}
+
+function startPolling(){ pullNow(); if(poll) clearInterval(poll); poll=setInterval(pullNow,5000); }
+
+async function pullNow(){
+  const line=document.getElementById('syncline');
+  try{
+    const rem = await getRemote();
+    const bag = (rem[STORE] && typeof rem[STORE]==='object') ? rem[STORE] : {};
+    hostScores = Object.assign({}, loadLocal(), bag);
+    saveLocal(hostScores);
+    const done = MEMBERS.filter(m=>hostScores[m.id]!==undefined).length;
+    line.textContent = `送信済み ${done} / ${MEMBERS.length} 名　（${new Date().toLocaleTimeString('ja-JP')} 更新）`;
+  }catch(e){
+    hostScores = loadLocal();
+    line.textContent = '接続できません。この端末の記録のみ表示しています。';
+  }
+  drawHost();
+}
+
+function drawHost(){
+  const tb=document.getElementById('hbody'); tb.innerHTML='';
+  MEMBERS.forEach(m=>{
+    const v=hostScores[m.id];
+    const tr=document.createElement('tr');
+
+    const t1=document.createElement('td'); t1.className='nmc';
+    t1.innerHTML=`<i class="dotc ${v===undefined?'d-off':'d-on'}"></i>${m.name}`;
+
+    const t2=document.createElement('td');
+    t2.innerHTML=`<span class="chip t${m.team}">${TEAM_NAME[m.team]}</span>`;
+
+    const t3=document.createElement('td');
+    const w=document.createElement('div'); w.className='numc';
+    const mi=document.createElement('button'); mi.textContent='−';
+    const inp=document.createElement('input'); inp.type='number'; inp.min='0'; inp.max='30';
+    inp.placeholder='—'; inp.value=(v===undefined?'':v);
+    const pl=document.createElement('button'); pl.textContent='＋';
+    const set=val=>{ hostScores[m.id]=val; saveLocal(hostScores); };
+    mi.onclick=()=>{ let x=parseInt(inp.value,10); if(isNaN(x))x=0; x=Math.max(0,x-1); inp.value=x; set(x); };
+    pl.onclick=()=>{ let x=parseInt(inp.value,10); if(isNaN(x))x=-1; x=Math.min(30,x+1); inp.value=x; set(x); };
+    inp.oninput=()=>{ const x=parseInt(inp.value,10); if(!isNaN(x)) set(Math.max(0,Math.min(30,x))); };
+    w.append(mi,inp,pl); t3.appendChild(w);
+
+    tr.append(t1,t2,t3); tb.appendChild(tr);
+  });
+}
+
+async function wipe(){
+  if(!confirm('全員のスコアを消去します。よろしいですか？')) return;
+  try{ localStorage.removeItem(STORE); }catch(e){}
+  hostScores={};
+  try{ await putRemote({_init:true}); }catch(e){ alert('サーバー側の消去に失敗しました。通信をご確認ください。'); }
+  pullNow();
+}
+
+let revealOrder=[], revealStep=0;
+const sleep2 = ms => new Promise(r=>setTimeout(r,ms));
+document.getElementById('btnReveal').addEventListener('click',async()=>{
+  await pullNow();
+  const rows=['A','B','C','D'].map(t=>{
+    const ms=MEMBERS.filter(m=>m.team===t);
+    const got=ms.filter(m=>hostScores[m.id]!==undefined);
+    const sum=got.reduce((a,m)=>a+hostScores[m.id],0);
+    return {team:t, name:TEAM_NAME[t], members:ms, got:got, sum:sum, avg: got.length? sum/got.length : 0};
+  });
+  if(rows.every(r=>r.got.length===0)){ alert('まだスコアが登録されていません。'); return; }
+  rows.sort((a,b)=> b.avg-a.avg || b.sum-a.sum);
+  let rank=0,prev=null;
+  rows.forEach((r,i)=>{ if(r.avg!==prev){ rank=i+1; prev=r.avg; } r.rank=rank; });
+  revealOrder=[...rows].reverse(); revealStep=0;
+  document.getElementById('btnReveal').style.display='none';
+  document.getElementById('revealArea').innerHTML='<div id="revCards"></div><div id="drum"></div><button class="btn stepbtn" id="btnStep"></button>';
+  document.getElementById('btnStep').onclick=revealNext;
+  setStepLabel();
+});
+
+function setStepLabel(){
+  const b=document.getElementById('btnStep');
+  if(revealStep>=revealOrder.length){ b.style.display='none'; return; }
+  b.textContent = `第${revealOrder.length-revealStep}位 を発表！`;
+  b.disabled=false;
+}
+
+async function revealNext(){
+  const b=document.getElementById('btnStep'); b.disabled=true;
+  const r=revealOrder[revealStep], isTop=(revealStep===revealOrder.length-1);
+  const drum=document.getElementById('drum');
+  drum.innerHTML=`<div class="drum">第${revealOrder.length-revealStep}位は… <b>？</b></div>`;
+  drum.scrollIntoView({behavior:'smooth',block:'center'});
+  await sleep2(isTop?3000:1800);
+  drum.innerHTML='';
+  const d=document.createElement('div');
+  d.className='rvcard rv'+r.team+(isTop?' win':'');
+  const mem=r.members.map(m=>{ const v=hostScores[m.id]; return `<span>${m.name} <b>${v===undefined?'—':v}</b></span>`; }).join('');
+  d.innerHTML=`<div class="rvhead">
+      <div><div class="rvrank">${isTop?'🏆 ':''}${r.rank}位</div><div class="rvname">${r.name}</div></div>
+      <div class="rvavg"><b>${r.avg.toFixed(1)}</b><span>平均点</span></div>
+    </div>
+    <div class="rvmem">${mem}
+      <span style="margin-left:auto;color:var(--soft)">合計 <b>${r.sum}</b>点 ／ ${r.got.length}名</span>
+    </div>`;
+  const box=document.getElementById('revCards');
+  box.insertBefore(d, box.firstChild);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>d.classList.add('in')));
+  d.scrollIntoView({behavior:'smooth',block:'center'});
+  if(isTop) confetti();
+  revealStep++; setStepLabel();
+}
+
+function confetti(){
+  const cols=['#E0654A','#3E9C8F','#C9A227','#7B6CD9','#F3D27A','#EAF1F5'];
+  for(let i=0;i<120;i++){
+    const c=document.createElement('i'); c.className='cf';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=cols[i%cols.length];
+    c.style.animationDuration=(2.5+Math.random()*2.5)+'s';
+    c.style.animationDelay=(Math.random()*1.2)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),6000);
+  }
+}
+</script>
+</body>
+</html>
