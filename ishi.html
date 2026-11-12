@@ -344,7 +344,7 @@ const MED15 = [
 {q:"国試の「必修問題」で求められる得点率は？",o:["6割以上", "7割以上", "8割以上", "9割以上"],a:2,e:"必修は8割以上の絶対基準。一般・臨床問題が良くても必修で落ちると不合格。"},
 {q:"医師免許を与えるのは？",o:["厚生労働大臣", "文部科学大臣", "都道府県知事", "日本医師会長"],a:0,e:"合格後に申請し、医籍に登録されて医師免許を受ける。"},
 ];
-const QSETS = { europe: EU15.concat(MED15), soccer: SOC15.concat(MED15), ent: ENT15.concat(MED15) };
+const QSETS = { europe: MED.slice(0,15).concat(EU15), soccer: MED.slice(0,15).concat(SOC15), ent: MED.slice(0,15).concat(ENT15) };
 let Q = MED; // 既定（医療30問）。半々の人は後で差し替え
 
 
