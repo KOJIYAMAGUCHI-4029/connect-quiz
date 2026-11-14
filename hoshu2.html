@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>医師紹介基礎知識 補修テスト</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: 1カラムのカード。1問ずつ出題→即解説→最後に結果と復習 */
+:root{
+  --bg:#f3f6f8; --card:#ffffff; --fg:#14222e; --muted:#5d6d7a; --line:#d9e2e8;
+  --accent:#0f6e8c; --accent-soft:#e2f1f6; --ok:#1f8a4c; --ok-soft:#e5f4ea; --ng:#c0392b; --ng-soft:#fbe9e7;
+  --font:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f171d; --card:#17232b; --fg:#e6eef3; --muted:#9aabb7; --line:#2a3943;
+  --accent:#4cb3d4; --accent-soft:#16323d; --ok:#4cc27e; --ok-soft:#163222; --ng:#ef7a6c; --ng-soft:#3a1d1a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f171d; --card:#17232b; --fg:#e6eef3; --muted:#9aabb7; --line:#2a3943;
+  --accent:#4cb3d4; --accent-soft:#16323d; --ok:#4cc27e; --ok-soft:#163222; --ng:#ef7a6c; --ng-soft:#3a1d1a; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.7}
+.wrap{max-width:640px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-direction:column;gap:2px}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:700}
+h1{font-size:24px;font-weight:900;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:14px;margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.names{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:10px;padding:14px;font-weight:700;font-size:17px}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,.opt:focus-visible,.primary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.primary{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:14px 18px;font-weight:700;font-size:16px}
+.primary:disabled{opacity:.4;cursor:default}
+.progress{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.q{font-size:19px;font-weight:700;margin:0;text-wrap:balance}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:10px;padding:12px 14px;font-size:16px}
+.opt:hover:not(:disabled){border-color:var(--accent);background:var(--accent-soft)}
+.opt b{flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:14px}
+.opt.ok{border-color:var(--ok);background:var(--ok-soft)} .opt.ok b{background:var(--ok);color:#fff}
+.opt.ng{border-color:var(--ng);background:var(--ng-soft)} .opt.ng b{background:var(--ng);color:#fff}
+.opt:disabled{cursor:default}
+.exp{border-radius:10px;padding:12px 14px;font-size:15px}
+.exp.ok{background:var(--ok-soft)} .exp.ng{background:var(--ng-soft)}
+.exp strong{display:block}
+.score{font-size:56px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.score small{font-size:20px;color:var(--muted);font-weight:500}
+.review{display:flex;flex-direction:column;gap:10px;padding:0;margin:0;list-style:none}
+.review li{border-left:3px solid var(--ng);padding:4px 0 4px 12px;font-size:15px}
+.review .a{color:var(--ok);font-weight:700}
+.note{font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">CONNECT 社内勉強会</span>
+    <h1>医師紹介基礎知識 補修テスト</h1>
+    <p class="sub">全20問・4択。15問以上正解でクリア。14問以下は翌日もう一度。</p>
+  </header>
+  <main id="app" class="card"></main>
+</div>
+
+<script>
+const PEOPLE={asami:"浅見",yamada:"山田",takahashi:"高橋"};
+const PASS=15;
+const BASE=[{"q": "医学部は全国に何校あるか？", "c": ["62校", "82校", "72校", "92校"], "a": 1, "e": "国公立51校、私立31校の合計82校。"}, {"q": "医学部4〜5年進級時に受ける試験は？", "c": ["医師国家試験", "TOEFL・IELTS", "CBTとOSCE", "MATとGRE"], "a": 2, "e": "CBT（Computer Based Testing）とOSCE（客観的臨床能力試験）の2つ。"}, {"q": "医師国家試験はいつ実施されるか？", "c": ["4年の10月", "6年の2月", "5年の6月", "6年の12月"], "a": 1, "e": "医学部6年の2月に毎年実施される。"}, {"q": "医師国家試験の合格率はおおよそ何%か？", "c": ["約70〜72%", "約80〜82%", "約90〜92%", "約95〜97%"], "a": 2, "e": "毎年概ね90〜92%程度。"}, {"q": "私立医学部6年間の学費の目安は？", "c": ["約500〜1000万円", "約1000〜1500万円", "約2000〜4500万円", "約5000万円以上"], "a": 2, "e": "国公立は約350万円。私立は約2000〜4500万円と大きな差がある。"}, {"q": "国立大学医学部の6年間の学費の目安はどれか？", "c": ["約300〜400万円", "約500〜600万円", "約1000〜1500万円", "約2000万円以上"], "a": 0, "e": "国立大学の学費は約350万円（授業料約54万×6年＋入学金28万円）。私立医学部の2000〜4000万円と比べて大幅に安い。"}, {"q": "医師臨床研修制度が義務化されたのはいつか？", "c": ["1990年", "1998年", "2004年", "2010年"], "a": 2, "e": "2004年（平成16年）から義務化。それ以前は努力義務だった。"}, {"q": "新専門医制度が本格始動したのはいつか？", "c": ["2010年", "2014年", "2018年", "2022年"], "a": 2, "e": "2018年（平成30年）に本格始動。"}, {"q": "「DPC」とは何か？", "c": ["医師の専門医資格制度", "診断群分類別包括評価", "大学病院の教育プログラム", "地域医療計画"], "a": 1, "e": "Diagnosis Procedure Combination。疾患ごとに1日あたり定額で計算する入院費の仕組み。"}, {"q": "臨床研修制度の必修科目として含まれないものはどれか？", "c": ["内科・外科", "小児科・産婦人科", "精神科・救急科", "眼科・皮膚科"], "a": 3, "e": "必修7科目は内科・外科・小児科・産婦人科・精神科・救急科・地域医療。眼科・皮膚科は含まれない。"}, {"q": "「ウロ」とは何科のことか？", "c": ["脳神経外科", "泌尿器科", "循環器内科", "耳鼻咽喉科"], "a": 1, "e": "Urologyの略。泌尿器科のこと。"}, {"q": "「プシコ」とは何科のことか？", "c": ["形成外科", "整形外科", "精神科", "放射線科"], "a": 2, "e": "Psychoの略。精神科のこと。"}, {"q": "「ラパロ」とは何を意味するか？", "c": ["内視鏡検査", "腹腔鏡手術", "血管造影検査", "開胸手術"], "a": 1, "e": "Laparoscopyの略。腹腔鏡手術のこと。"}, {"q": "「ゾロ薬」とは何か？", "c": ["先発医薬品", "ジェネリック医薬品", "漢方薬", "抗生物質の総称"], "a": 1, "e": "先発品の特許切れ後にゾロゾロ出てくることからジェネリック医薬品の俗称。"}, {"q": "「ジッツ」とは何か？", "c": ["医師免許の更新制度", "大学医局が医師を派遣する関連病院", "救急外来の当直体制", "フリーランス医師の求人サイト"], "a": 1, "e": "ドイツ語のSitz（席）から。医局が医師を派遣する先の関連病院のこと。"}, {"q": "新専門医制度を運営する機構の名前は？", "c": ["日本医師会", "日本専門医機構", "厚生労働省医事課", "中央社会保険医療協議会"], "a": 1, "e": "日本専門医機構が認定・管理を行う。"}, {"q": "新専門医制度の基本領域はいくつあるか？", "c": ["12領域", "15領域", "19領域", "23領域"], "a": 2, "e": "内科・外科・小児科など19の基本領域がある。"}, {"q": "産業医科大学の管轄省庁はどこか？", "c": ["文部科学省", "厚生労働省", "防衛省", "総務省"], "a": 1, "e": "産業医科大学＝厚生労働省、防衛医科大学校＝防衛省、自治医科大学＝総務省。"}, {"q": "医師への働き方改革が適用開始されたのはいつか？", "c": ["2019年4月", "2022年4月", "2024年4月", "2026年4月"], "a": 2, "e": "一般労働者は2019年4月〜。医師は5年間の猶予を経て2024年4月〜適用。"}, {"q": "医師のA水準の時間外労働上限は？", "c": ["年480時間以下", "年720時間以下", "年960時間以下", "年1860時間以下"], "a": 2, "e": "A水準＝年960時間以下。B・C水準は年1860時間以下。"}];
+const L=["A","B","C","D"];
+const app=document.getElementById("app");
+const pid=(new URLSearchParams(location.search).get("p")||"").toLowerCase();
+const NAME=PEOPLE[pid]||null;
+let Q=[],s={i:0,score:0,miss:[],answered:false};
+
+function esc(t){return String(t).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]))}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function build(){
+  return shuffle(BASE).map(q=>{const idx=shuffle([0,1,2,3]);return {q:q.q,e:q.e,c:idx.map(k=>q.c[k]),a:idx.indexOf(q.a)};});
+}
+function today(){const d=new Date();return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;}
+
+function start(){
+  if(!NAME){
+    app.innerHTML=`<p class="q">参加者が指定されていません</p><p class="note">お配りしたご自身専用のURLから開いてください。</p>`;
+    return;
+  }
+  app.innerHTML=`<p class="q">${NAME}さん</p>
+  <p>全20問・4択です。<b>15問以上正解でクリア</b>です。<br>14問以下の場合は、翌日以降もう一度受けてください。<br>問題と選択肢の順番は毎回変わります。</p>
+  <button class="primary" id="go" style="width:100%;margin-top:12px">テストを始める</button>`;
+  document.getElementById("go").onclick=()=>{Q=build();s={i:0,score:0,miss:[],answered:false};render();};
+}
+
+function render(){
+  const q=Q[s.i];
+  app.innerHTML=`<div class="progress"><span>${NAME}さん</span><span>${s.i+1} / ${Q.length}</span></div>
+  <div class="bar"><i style="width:${s.i/Q.length*100}%"></i></div>
+  <p class="q">Q${s.i+1}. ${esc(q.q)}</p>
+  <div class="opts">${q.c.map((c,k)=>`<button class="opt" data-k="${k}"><b>${L[k]}</b><span>${esc(c)}</span></button>`).join("")}</div>
+  <div id="fb"></div>`;
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>pick(+b.dataset.k));
+  window.scrollTo({top:0});
+}
+
+function pick(k){
+  if(s.answered) return; s.answered=true;
+  const q=Q[s.i], ok=k===q.a;
+  if(ok) s.score++; else s.miss.push(s.i);
+  app.querySelectorAll(".opt").forEach((b,j)=>{b.disabled=true; if(j===q.a) b.classList.add("ok"); else if(j===k) b.classList.add("ng");});
+  const last=s.i===Q.length-1;
+  document.getElementById("fb").innerHTML=`<div class="exp ${ok?"ok":"ng"}"><strong>${ok?"正解！":"残念… 正解は "+L[q.a]}</strong>${esc(q.e)}</div>
+  <button class="primary" id="next" style="margin-top:12px;width:100%">${last?"結果を見る":"次の問題へ"}</button>`;
+  document.getElementById("next").onclick=()=>{s.answered=false; if(last) result(); else {s.i++; render();}};
+  document.getElementById("next").focus();
+}
+
+function result(){
+  const clear=s.score>=PASS;
+  app.innerHTML=`<div class="progress"><span>${NAME}さんの結果</span><span>${today()}</span></div>
+  <div class="score">${s.score}<small> / ${Q.length} 問正解</small></div>
+  <p class="q" style="text-align:center;font-size:20px;color:${clear?"#15803d":"#c2410c"}">${clear?"🎉 クリア！お疲れさまでした":"もう一歩！明日もう一度チャレンジ"}</p>
+  ${s.miss.length?`<p class="q" style="font-size:16px">間違えた問題（もう一度覚えましょう）</p>
+  <ul class="review">${s.miss.map(i=>`<li>${esc(Q[i].q)}<br><span class="a">→ ${esc(Q[i].c[Q[i].a])}</span></li>`).join("")}</ul>`:`<p>全問正解です！</p>`}
+  <p class="note">この画面のスクショを Slack の #営業チャンネル に送ってください。</p>`;
+  window.scrollTo({top:0});
+}
+start();
+</script>
+
+</html>
